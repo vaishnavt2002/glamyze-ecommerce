@@ -64,7 +64,11 @@
                                 </div>
 
                                 <button type="submit" class="btn btn-dark btn-block btn-lg mb-4">LOGIN</button>
-
+                                {% if error %}
+                                <div class="alert alert-danger">
+                                    <li>{{ error }}</li> 
+                                </div>
+                                {% endif %}
                                 <div class="text-center mb-4">
                                     <p class="text-muted mb-0">OR SIGN IN WITH</p>
                                 </div>

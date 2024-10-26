@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,HttpResponse
 from . validation import Validation
 from django.core.mail import send_mail
 import random
@@ -6,11 +6,10 @@ from . models import *
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
+from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth.hashers import check_password
 
 
-# Create your views here.
-def user_login(request):
-    return render(request,'auth_app/login.html')
 
 def validate_data(email,phonenumber,password,confirm_password,fname,lname):
     errors=[]
@@ -52,7 +51,7 @@ def user_signup(request):
                     user.last_name = lname
                     user.save()
             else:
-                CustomUser.objects.create_user(username=email,email=email,first_name=fname,last_name=lname,is_active=False)
+                CustomUser.objects.create_user(username=email,email=email,password=password,first_name=fname,last_name=lname,is_active=False)
             try:
                 send_otp(request,email)
             except Exception:
@@ -105,3 +104,18 @@ def send_otp(request,email):
     recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
+def user_login(request):
+    if request.POST:
+        email=request.POST.get('email')
+        password=request.POST.get('password')
+        user=authenticate(request,email=email,password=password)
+        print(user)
+        if user is not None:
+            login(request,user)
+            if request.user.is_superuser:
+                return HttpResponse("admin home")
+            else:
+                return HttpResponse("User home")
+        else:
+            return render(request,'auth_app/login.html',{'error':'invalid username or password'})
+    return render(request,'auth_app/login.html')
