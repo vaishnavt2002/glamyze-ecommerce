@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sign Up</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{% static 'images/icons/favicon.png' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <style>
+        /* Ensure body and html take full height */
+        html, body {
+            height: 100%;
+        }
+        /* Centering with Flexbox */
+        .centered-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full height of the viewport */
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container centered-container">
+        <div class="w-100">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-5">
+                            <!-- Logo -->
+                            <div class="text-center mb-5">
+                                <img src="{% static 'images/icons/logo-01.png' %}" alt="IMG-LOGO" class="img-fluid" style="max-width: 180px;">
+                            </div>
+
+                            <!-- Sign Up Form -->
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                
+                                {% if messages %}
+                                <div class="alert alert-danger">
+                                    {% for message in messages %}
+                                        {{ message }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-group">
+                                    <label for="fname">First name</label>
+                                    <input type="text" class="form-control form-control-lg" id="fname" name="fname" value="{{first_name}}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="lname">Last name</label>
+                                    <input type="text" class="form-control form-control-lg" id="lname" name="lname" value="{{last_name}}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Email address</label>
+                                    <input type="email" class="form-control form-control-lg" id="email" name="email" value="{{email}}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phonenumber">Phone number</label>
+                                    <input type="text" class="form-control form-control-lg" id="phonenumber" name="phonenumber" value="{{phonenumber}}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control form-control-lg" id="password" name="password" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirm_password">Confirm Password</label>
+                                    <input type="password" class="form-control form-control-lg" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                {% if errors %}
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+
+                                <button type="submit" class="btn btn-dark btn-block btn-lg mb-4">SIGN UP</button>
+
+                                <!-- Footer Links -->
+                                <div class="text-center">
+                                    <p class="mb-0">Already have an account? <a href="{% url 'auth_app:login' %}" class="text-dark font-weight-bold">Login</a></p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'vendor/jquery/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+</body>
+</html>

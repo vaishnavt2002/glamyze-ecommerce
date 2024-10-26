@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{% static 'images/icons/favicon.png' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <style>
+        /* Ensure body and html take full height */
+        html, body {
+            height: 100%;
+        }
+        /* Centering with Flexbox */
+        .centered-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full height of the viewport */
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container centered-container">
+        <div class="w-100">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-5">
+                            <!-- Logo -->
+                            <div class="text-center mb-5">
+                                <img src="{% static 'images/icons/logo-01.png' %}" alt="IMG-LOGO" class="img-fluid" style="max-width: 180px;">
+                            </div>
+
+                            <!-- Login Form -->
+                            <form method="POST" action=" ">
+                                {% csrf_token %}
+                                
+                                {% if messages %}
+                                <div class="alert alert-success">
+                                    {% for message in messages %}
+                                        {{ message }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <div class="form-group">
+                                    <label for="email">Email address</label>
+                                    <input type="email" class="form-control form-control-lg" id="email" name="email" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control form-control-lg" id="password" name="password" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="remember" name="remember">
+                                        <label class="custom-control-label" for="remember">Remember me</label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-dark btn-block btn-lg mb-4">LOGIN</button>
+
+                                <div class="text-center mb-4">
+                                    <p class="text-muted mb-0">OR SIGN IN WITH</p>
+                                </div>
+
+                                <button type="button" class="btn btn-outline-secondary btn-block btn-lg mb-4" onclick="signInWithGoogle()">
+                                    <img src="https://www.google.com/favicon.ico" alt="Google" width="18" class="mr-2">
+                                    Sign in with Google
+                                </button>
+
+                                <!-- Footer Links -->
+                                <div class="text-center">
+                                    <a href=" " class="text-dark d-block mb-3">Forgot Password?</a>
+                                    <p class="mb-0">Don't have an account? <a href="{% url 'auth_app:signup' %} " class="text-dark font-weight-bold">Sign up</a></p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'vendor/jquery/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+    
+    <!-- Google Sign-In Script -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+        // Initialize Google Sign-In
+        function initGoogleSignIn() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID' // Replace with your Google Client ID
+                });
+            });
+        }
+
+        // Google Sign-In Function
+        function signInWithGoogle() {
+            const auth2 = gapi.auth2.getAuthInstance();
+            auth2.signIn().then(function(googleUser) {
+                const profile = googleUser.getBasicProfile();
+                // Handle the signed-in user information
+                console.log('ID: ' + profile.getId());
+                console.log('Name: ' + profile.getName());
+                console.log('Email: ' + profile.getEmail());
+                // Add your sign-in logic here
+            });
+        }
+    </script>
+</body>
+</html>
