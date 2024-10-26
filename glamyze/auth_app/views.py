@@ -104,3 +104,4 @@ def send_otp(request,email):
     from_email = 'glamyze2024@gmail.com'
     recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
+
