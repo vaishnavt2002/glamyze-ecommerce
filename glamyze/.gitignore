@@ -1,0 +1,21 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Django specific
+*.log
+*.pot
+*.py[cod]
+db.sqlite3  # Ignore SQLite database if you're using it for local development
+*.sqlite3
+/media/    # Ignore media files if stored locally
+
+# Environment variables
+.env
+
+../env/
+
+
+
