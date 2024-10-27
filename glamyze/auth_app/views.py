@@ -7,8 +7,6 @@ from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
-from django.contrib.auth.hashers import check_password
-
 
 
 def validate_data(email,phonenumber,password,confirm_password,fname,lname):
@@ -29,6 +27,10 @@ def validate_data(email,phonenumber,password,confirm_password,fname,lname):
     return errors
 
 def user_signup(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    elif request.user.is_authenticated:
+        return redirect('auth_app:home')
     if request.POST:
         email = request.POST.get('email')
         phonenumber = request.POST.get('phonenumber')
@@ -62,6 +64,10 @@ def user_signup(request):
     return render(request,'auth_app/signup.html')
 
 def user_otp_verification(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    elif request.user.is_authenticated:
+        return redirect('auth_app:home')
     if request.POST:
         if 'otp' in request.session and 'otp_expiry' in request.session:
             expiry = request.session['otp_expiry']
@@ -86,6 +92,10 @@ def user_otp_verification(request):
 
     
 def user_otp_resend(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    elif request.user.is_authenticated:
+        return redirect('auth_app:home')
     email = request.session['email']
     try:
         send_otp(request,email)
@@ -105,6 +115,10 @@ def send_otp(request,email):
     send_mail(subject, message, from_email, recipient_list)
 
 def user_login(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    elif request.user.is_authenticated:
+        return redirect('auth_app:home')
     if request.POST:
         email=request.POST.get('email')
         password=request.POST.get('password')
@@ -113,9 +127,20 @@ def user_login(request):
         if user is not None:
             login(request,user)
             if request.user.is_superuser:
-                return HttpResponse("admin home")
+                return redirect('admin_app:admin_dashboard')
             else:
-                return HttpResponse("User home")
+                return redirect('auth_app:home')
         else:
             return render(request,'auth_app/login.html',{'error':'invalid username or password'})
     return render(request,'auth_app/login.html')
+
+def home(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    elif request.user.is_authenticated:
+        return render(request,'index.html')
+
+def user_logout(request):
+    if request.user.is_authenticated:
+        logout(request)  # Logs out the user
+    return redirect('auth_app:login')

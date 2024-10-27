@@ -1,0 +1,44 @@
+/* Style for sidebar links to look like buttons */
+/* Style for sidebar links to look like buttons */
+.sidebar-link {
+    display: block; /* Make the link block-level */
+    padding: 10px 15px; /* Add padding for a button-like feel */
+    color: #000 !important; /* Non-active text color is black */
+    background-color: transparent !important; /* Non-active background is transparent */
+    border-radius: 4px; /* Optional: add rounded corners */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+}
+
+/* Change the hover state for sidebar links */
+.sidebar-link:hover {
+    background-color: #f0f0f0 !important; /* Light grey background on hover */
+    color: #000 !important; /* Keep text color black on hover */
+}
+
+/* Style for the active link */
+.sidebar-link.active {
+    background-color: #000 !important; /* Active link background is black */
+    color: #fff !important; /* Active link text color is white */
+}
+
+/* Style for the icons in the sidebar */
+.sidebar-link i {
+    color: #000 !important; /* Non-active icon color is black */
+}
+
+/* Maintain icon color for active links */
+.sidebar-link.active i {
+    color: #fff !important; /* Active icon color is white */
+}
+
+/* Set the primary button color to black */
+.btn-primary {
+    background-color: #000 !important;
+    border-color: #000 !important;
+}
+
+/* Optionally, change the hover state to a dark gray */
+.btn-primary:hover {
+    background-color: #333 !important;
+    border-color: #333 !important;
+}
