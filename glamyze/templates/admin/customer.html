@@ -10,6 +10,10 @@
 
 {% block content %}
 <h2 class="mb-4 px-4">Customers</h2>
+<form class="d-flex px-3">
+    <input class="form-control me-2" type="search" placeholder="Search" name="searchvalue" aria-label="Search" {% if searchvalue %} value="{{searchvalue}}" {% endif %}>
+    <button class="btn btn-primary" type="submit">Search</button>
+  </form>
 <div class="container-fluid">
     <div class="table-responsive">
         <table class="table table-striped table-hover w-100">
@@ -28,7 +32,12 @@
                     <td>{{ customer.last_name }}</td>
                     <td>{{ customer.email }}</td>
                     <td>
-                        <button class="btn btn-danger btn-sm" onclick="toggleBlock({{ customer.id }})">
+                        <button class="{% if customer.is_active %}
+                                            btn btn-primary
+                                        {% else %}
+                                            btn btn-outline-primary
+                                        {% endif %} btn-md" 
+                                        onclick="toggleBlock({{ customer.id }})">
                             {% if customer.is_active %}
                                 Block
                             {% else %}
@@ -40,6 +49,15 @@
                 {% endfor %}
             </tbody>
         </table>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+          
+              {% for i in customer_data.paginator.page_range %}
+              <li class="page-item"><a class="page-link" href="?page={{i}}&searchvalue={{searchvalue}}">{{i}}</a></li>
+              {% endfor %}
+             
+            </ul>
+          </nav>
     </div>
 </div>
 
@@ -59,7 +77,17 @@ function toggleBlock(userId) {
             const isActive = data.is_active; // Get the updated status from the response
             
             // Update button text based on the new status
-            button.textContent = isActive ? "Block" : "Unblock";
+            if (isActive) {
+                button.textContent = "Block";
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-primary');
+            } 
+            else {
+                button.textContent = "Unblock";
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline-primary');
+            }
+            
         } else {
             alert("There was an error updating the user's status.");
         }

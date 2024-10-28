@@ -122,6 +122,12 @@ def user_login(request):
     if request.POST:
         email=request.POST.get('email')
         password=request.POST.get('password')
+        try:
+            user_data = CustomUser.objects.get(email=email)
+        except Exception:
+            return render(request,'auth_app/login.html',{'error':'invalid username or password'})
+        if not user_data.is_active:
+            return render(request,'auth_app/login.html',{'error':'You are blocked by admin.'})
         user=authenticate(request,email=email,password=password)
         print(user)
         if user is not None:
