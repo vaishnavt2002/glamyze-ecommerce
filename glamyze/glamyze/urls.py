@@ -23,5 +23,6 @@ urlpatterns = [
     path('accounts/',include('allauth.urls')),
     path('',include('auth_app.urls')),
     path('admin-panel/',include('admin_app.urls')),
-    path('admin-panel/',include('customer_management.urls'))
+    path('admin-panel/',include('customer_management.urls')),
+    path('admin-panel/',include('category_management.urls'))
 ]

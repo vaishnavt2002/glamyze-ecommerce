@@ -1,0 +1,132 @@
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb" class="px-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'category_management:category_view' %}">Category</a></li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="category-container bg-white rounded-3 shadow-sm p-4">
+        <!-- New Category Input -->
+        <form method="POST">
+            <div class="mb-4 d-flex align-items-center gap-3">
+                {% csrf_token %}
+                    <input type="text" class="form-control" placeholder="New Category Name" id="new-category-name" name="new_category">
+                    <button class="btn btn-primary btn-md" type="submit">+ Add Category</button>
+            </div>
+        </form>
+        
+        <!-- Category List -->
+        <div class="accordion custom-accordion" id="accordionExample">
+            {% for category in category_data %}
+            <div class="accordion-item border-0 mb-3">
+                <h2 class="accordion-header" id="heading{{ category.id }}">
+                    <div class="d-flex justify-content-between align-items-center w-100 bg-light rounded-3">
+                        <button class="accordion-button bg-transparent px-4" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapse{{ category.id }}" 
+                                aria-expanded="true" 
+                                aria-controls="collapse{{ category.id }}"
+                                style="box-shadow: none;">
+                            <span class="fw-bold">{{ category.category_name }}</span>
+                        </button>
+                        <div class="d-flex gap-2 px-3">
+                            <button class="btn btn-outline-dark btn-sm px-3" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editCategoryModal{{ category.id }}">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                            <a class="btn btn-sm px-3 {% if category.is_listed %}btn-dark{% else %}btn-outline-dark{% endif %}" 
+                               href="{% url 'category_management:categories_list_unlist' category.id %}">
+                                {% if category.is_listed %}Unlist{% else %}List{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </h2>
+                <div id="collapse{{ category.id }}" 
+                     class="accordion-collapse collapse show" 
+                     aria-labelledby="heading{{ category.id }}" 
+                     data-bs-parent="#accordionExample">
+                    <div class="accordion-body pt-4">
+                        <!-- Rest of your existing accordion content -->
+                        <!-- Add Subcategory Button -->
+                        <form method="POST" action="{% url 'category_management:subcategory_add' %}" class="mb-3">
+                            {% csrf_token %}
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="hidden" value="{{ category.id }}" name="categoryid">
+                                <input type="text" 
+                                       class="form-control" 
+                                       placeholder="New Subcategory Name" 
+                                       name="subcategory_name" 
+                                       required>
+                                <button type="submit" class="btn btn-outline-dark">
+                                    <i class="fas fa-plus me-1"></i>Add Subcategory
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Subcategories List -->
+                        {% if category.subcategory_set.all %}
+                        <div class="list-group">
+                            {% for subcategory in category.subcategory_set.all %}
+                            <div class="list-group-item border-0 bg-light rounded-3 mb-2 d-flex justify-content-between align-items-center">
+                                <span class="ms-2">{{ subcategory.subcategory_name }}</span>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-dark btn-sm px-3" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editSubcategoryModal{{ subcategory.id }}" 
+                                            data-id="{{ subcategory.id }}" 
+                                            data-name="{{ subcategory.subcategory_name }}">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                    <a class="btn btn-sm px-3 {% if subcategory.is_listed %}btn-dark{% else %}btn-outline-dark{% endif %}" 
+                                       href="{% url 'category_management:subcategories_list_unlist' subcategory.id %}">
+                                        {% if subcategory.is_listed %}Unlist{% else %}List{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Your existing subcategory modal code -->
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-muted">No subcategories to show</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- Your existing category modal code -->
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add custom styles -->
+<style>
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9fa !important;
+        color: #212529 !important;
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none !important;
+    }
+    
+    .custom-accordion .accordion-button::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+
+    .btn-outline-dark:hover {
+        background-color: #212529;
+        color: white;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: none;
+    }
+</style>
+{% endblock %}

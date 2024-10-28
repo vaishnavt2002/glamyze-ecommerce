@@ -2,12 +2,11 @@
 {% block breadcrumbs %}
 <nav aria-label="breadcrumb" class="px-4">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
       <li class="breadcrumb-item"><a href="{% url 'customer_management:customer_details' %}">Customers</a></li>
     </ol>
 </nav>
 {% endblock breadcrumbs %}
-
 {% block content %}
 <h2 class="mb-4 px-4">Customers</h2>
 <form class="d-flex px-3">
