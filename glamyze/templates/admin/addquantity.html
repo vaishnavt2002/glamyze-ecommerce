@@ -1,0 +1,54 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb" class="px-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'product_management:product_details' %}">Products</a></li>
+    <li class="breadcrumb-item active">Size & Quantity</li>
+  </ol>
+</nav>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title fw-semibold mb-0">{{product.product_name}}  Size & Quantity Management</h5>
+    </div>
+    <div class="card-body">
+      <!-- Current Stock Table -->
+      <div class="mb-4">
+        <form method="POST" action="{% url 'product_management:product_add_quantity' product.id %}" >
+            {% csrf_token %}
+            <input type="text" value="{{product.id}}" name="product_id" hidden>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th class="text-center col-4">Size</th>
+                <th class="text-center col-4">Available Quantity</th>
+                <th class="text-center col-4" >Add Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product_size in product_sizes %}
+              <tr>
+                <td class="text-center">{{ product_size.size.size_name }}</td>
+                <td class="text-center">{{ product_size.quantity }}</td>
+                <td>
+                    <input type="number" class="form-control w-50" name="{{product_size.id}}" min="1" placeholder="Enter quantity">
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <button type="submit" class="btn btn-primary">Add stock</button>
+    </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

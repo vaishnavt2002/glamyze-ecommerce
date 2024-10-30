@@ -1,0 +1,82 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb" class="px-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'product_management:product_details' %}">Products</a></li>
+    <li class="breadcrumb-item">Add Product</li>
+  </ol>
+</nav>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title fw-semibold mb-0">Add Size and Quantity</h5>
+    </div>
+    <div class="card-body">
+        <button class="btn btn-primary btn-md m-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop">+ Add Size</button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{% url 'product_management:size_add' %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel">Add New Size</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="col-12">
+                                <label for="size" class="form-label">Select the Size to Add</label>
+                                <select class="form-select" id="size" name="sizeid" required>
+                                    <option value="">Select</option>
+                                    {% for size in sizes %}
+                                    <option value="{{ size.id }}">{{size.size_name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="row g-3">
+            {% csrf_token %}
+            {% if product_varients %}
+            {% for product_varient in product_varients %}
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon3">{{ product_varient.size.size_name }}</span>
+                <input type="text" name="{{product_varient.size.id}}" class="form-control" id="basic-url" aria-describedby="basic-addon3" placeholder="Enter the quantity">
+            </div>
+            {% endfor %}
+            <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="is_listed" name="is_list" checked>
+                  <label class="form-check-label" for="is_listed">
+                    List Product (make visible to customers)
+                  </label>
+                </div>
+              </div>
+            {% else %}
+            <div class="text-muted">No Size to Show. Add Sizes</div>
+            {% endif %}
+
+            <!-- Submit Button -->
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Add Product</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}

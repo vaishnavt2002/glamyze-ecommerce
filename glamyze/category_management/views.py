@@ -6,7 +6,8 @@ def category_view(request):
         #adding new categories
         if request.POST:
             new_category = request.POST['new_category']
-            Category.objects.create(category_name=new_category)
+            if new_category:
+                Category.objects.create(category_name=new_category)
         category_data = Category.objects.prefetch_related('subcategory_set').order_by('id')
         return render(request,'admin/category.html',{'category_data':category_data})
     elif request.user.is_authenticated:

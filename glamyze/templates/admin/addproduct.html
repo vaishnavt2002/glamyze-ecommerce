@@ -1,0 +1,95 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb" class="px-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'product_management:product_details' %}">Products</a></li>
+    <li class="breadcrumb-item">Add Product</li>
+  </ol>
+</nav>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title fw-semibold mb-0">Add New Product</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data" class="row g-3">
+        {% csrf_token %}
+        
+        <!-- Product Name -->
+        <div class="col-md-6">
+          <label for="product_name" class="form-label">Product Name</label>
+          <input type="text" class="form-control" id="product_name" name="product_name" required>
+        </div>
+
+        <!-- Price -->
+        <div class="col-md-6">
+          <label for="price" class="form-label">Price</label>
+          <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+        </div>
+
+
+        <!-- Subcategory Selection -->
+        <div class="col-md-6">
+          <label for="subcategory" class="form-label">Select the Category of Product</label>
+          <select class="form-select" id="subcategory" name="subcategory" required>
+            <option value="">Select</option>
+            {% for subcategory in subcategories %}
+            <option value="{{ subcategory.id }}">{{subcategory.category.category_name}}--{{ subcategory.subcategory_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Material -->
+        <div class="col-md-6">
+          <label for="material" class="form-label">Material</label>
+          <input type="text" class="form-control" id="material" name="material" required>
+        </div>
+
+        <!-- Color -->
+        <div class="col-md-6">
+          <label for="color" class="form-label">Color</label>
+          <input type="text" class="form-control" id="color" name="color" required>
+        </div>
+
+        <!-- Description -->
+        <div class="col-12">
+          <label for="description" class="form-label">Description</label>
+          <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+        </div>
+        <!-- size -->
+
+        <!-- Images -->
+        <div class="col-md-4">
+          <label for="image1" class="form-label">Image 1</label>
+          <input type="file" class="form-control" id="image1" name="image1" accept="image/*" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="image2" class="form-label">Image 2</label>
+          <input type="file" class="form-control" id="image2" name="image2" accept="image/*" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="image3" class="form-label">Image 3</label>
+          <input type="file" class="form-control" id="image3" name="image3" accept="image/*" required>
+        </div>
+
+
+
+    
+
+        <!-- Submit Button -->
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Add and Proceed</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}
