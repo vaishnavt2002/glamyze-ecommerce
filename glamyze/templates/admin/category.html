@@ -70,7 +70,7 @@
                                     {% csrf_token %}
                               <div class="modal-content">
                                 <div class="modal-header">
-                                  <h5 class="modal-title" id="staticBackdropLabel">Change Catagory</h5>
+                                  <h5 class="modal-title" id="staticBackdropLabel">Change SubCatagory</h5>
                                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
@@ -93,6 +93,14 @@
                         {% else %}
                         <div>No subcategories to show</div>
                         {% endif %}
+                        <form method="POST" action="{% url 'category_management:subcategory_add' %}">
+                            <div class="mb-4 d-flex align-items-center gap-3">
+                                {% csrf_token %}
+                                    <input type="text" value="{{ category.id }}" name="categoryid" hidden>
+                                    <input type="text" class="form-control" placeholder="New Subcategory Name" id="new-subcategory-name" name="subcategory_name">
+                                    <button class="btn btn-outline-primary btn-sm" type="submit">+ Add</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -110,7 +118,7 @@
             <input type="hidden" value="{{ category.id }}" name="categoryid">
             <div class="mb-3">
                 <label for="edit-category-name" class="form-label">Category Name</label>
-                <input type="text" class="form-control" id="edit-category-name" name="new_catagory_name" value="{{category.categoty_name}}" required>
+                <input type="text" class="form-control" id="edit-category-name" name="new_catagory_name" value="{{category.category_name}}" required>
             </div>
         </div>
         <div class="modal-footer">
