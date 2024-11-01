@@ -29,6 +29,7 @@ def validate_data(email,phonenumber,password,confirm_password,fname,lname):
         errors.append('password is not matching')
     return errors
 
+@never_cache
 def user_signup(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -66,6 +67,7 @@ def user_signup(request):
             return redirect('auth_app:otp')
     return render(request,'auth_app/signup.html')
 
+@never_cache
 def user_otp_verification(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -92,7 +94,7 @@ def user_otp_verification(request):
 
     return render(request, 'auth_app/otp.html')
 
-    
+@never_cache
 def user_otp_resend(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -116,6 +118,7 @@ def send_otp(request,email):
     recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
+@never_cache
 def user_login(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -142,6 +145,7 @@ def user_login(request):
             return render(request,'auth_app/login.html',{'error':'invalid username or password'})
     return render(request,'auth_app/login.html')
 
+@never_cache
 def forgot_password(request):
     if request.POST:
         email = request.POST['email']
@@ -157,6 +161,7 @@ def forgot_password(request):
 
     return render(request,'auth_app/enter_email.html')
 
+@never_cache
 def user_otp_verification_forgotpassword(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -192,6 +197,7 @@ def user_otp_verification_forgotpassword(request):
                 return render(request, 'auth_app/forgotpassword_otp.html', {"errors": ["Invalid OTP. Please try again."]})
     return render(request,'auth_app/forgotpassword_otp.html')
 
+@never_cache
 def user_otp_resend_forgot(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -204,12 +210,19 @@ def user_otp_resend_forgot(request):
         return render(request,'auth_app/enter_email.html',{"errors":['Email sending failed. Try again later']})
     return redirect('auth_app:forgot_password_otp')
 
+@never_cache
 def home(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    if request.user.is_authenticated:
+        products = Product.objects.all()
+        return render(request,'user/index.html',{'products':products})
+    else:
         products = Product.objects.all()
         return render(request,'user/index.html',{'products':products})
 
 
-
+@never_cache
 def user_logout(request):
     if request.user.is_authenticated:
         logout(request)

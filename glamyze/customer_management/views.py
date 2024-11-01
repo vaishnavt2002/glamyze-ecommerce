@@ -7,6 +7,7 @@ from django.views.decorators.cache import never_cache
 
 # Create your views here.
 
+@never_cache
 def customer_details(request):
     if request.user.is_superuser:
         if request.method == "GET":
@@ -18,9 +19,9 @@ def customer_details(request):
             else:
                 customer_data = CustomUser.objects.exclude(is_superuser=1)
             # Pagination
-            paginator = Paginator(customer_data, 10)  # Show 10 customers per page
-            page_number = request.GET.get('page', 1)  # Get the page number from the request, default to 1
-            page_obj = paginator.get_page(page_number)  # Get the specific page
+            paginator = Paginator(customer_data, 10) 
+            page_number = request.GET.get('page', 1) 
+            page_obj = paginator.get_page(page_number) 
 
         return render(request, 'admin/customer.html', {'customer_data': page_obj, 'searchvalue': search})
     elif request.user.is_authenticated:
@@ -31,11 +32,12 @@ def customer_details(request):
     
     
 #this function will produce Json Response. This is for the AJAX request coming.
+@never_cache
 def block_unblock_user(request, user_id):
     if request.user.is_superuser:
         if request.method == "POST":
             user_data = CustomUser.objects.get(id=user_id)
-            user_data.is_active = not user_data.is_active  # Toggle the active status
+            user_data.is_active = not user_data.is_active 
             user_data.save()
             return JsonResponse({'status': 'success', 'is_active': user_data.is_active})
         elif request.user.is_authenticated:

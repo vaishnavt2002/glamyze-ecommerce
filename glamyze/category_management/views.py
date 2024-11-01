@@ -3,6 +3,7 @@ from product_app.models import *
 from django.views.decorators.cache import never_cache
 
 # Create your views here.
+@never_cache
 def category_view(request):
     if request.user.is_superuser:
         #adding new categories
@@ -17,6 +18,7 @@ def category_view(request):
     else:
         return redirect('auth_app:login')
 
+@never_cache
 def category_update(request):
     if request.user.is_superuser:
         if request.POST:
@@ -30,7 +32,8 @@ def category_update(request):
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
-
+    
+@never_cache
 def subcategory_add(request):
     if request.user.is_superuser:
         if request.POST:
@@ -45,7 +48,7 @@ def subcategory_add(request):
     else:
         return redirect('auth_app:login')
     
-
+@never_cache
 def categories_list_unlist(request,id):
     if request.user.is_superuser:
         print(id)
@@ -58,6 +61,7 @@ def categories_list_unlist(request,id):
     else:
         return redirect('auth_app:login')
 
+@never_cache
 def subcategory_update(request):
     if request.user.is_superuser:
         if request.POST:
@@ -71,7 +75,8 @@ def subcategory_update(request):
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
-    
+
+@never_cache
 def subcategories_list_unlist(request,id):
     if request.user.is_superuser:
         subcategory_obj = SubCategory.objects.get(id=id)

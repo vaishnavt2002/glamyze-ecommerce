@@ -9,7 +9,7 @@ from django.views.decorators.cache import never_cache
 
 
 
-
+@never_cache
 def product_details(request):
     if request.user.is_superuser:
         if request.method == "GET":
@@ -44,6 +44,7 @@ def product_details(request):
     else:
         return redirect('auth_app:login')
 
+@never_cache
 def product_add(request):
     if request.user.is_superuser:
         subcategories = SubCategory.objects.select_related('category')
@@ -91,7 +92,9 @@ def validate_image_format(image,image_name):
                         return f"{image_name} must be a PNG or JPG file."
             except Exception:
                     return f"{image_name} is not a valid image file."
-    
+
+
+@never_cache
 def product_size(request):
     if request.user.is_superuser:
         product_id = request.session.get('product_id')
@@ -126,7 +129,8 @@ def product_size(request):
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
-
+    
+@never_cache
 def size_add(request):
     if request.user.is_superuser:
         if request.POST:
@@ -139,7 +143,8 @@ def size_add(request):
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
-    
+
+@never_cache
 def list_unlist_product(request, product_id):
     if request.user.is_superuser:
         if request.method == "POST":
@@ -153,6 +158,7 @@ def list_unlist_product(request, product_id):
             return redirect('auth_app:login')
     return JsonResponse({'status': 'error'}, status=400)
 
+@never_cache
 def inactive_product(request,product_id):
     if request.user.is_superuser:
         request.session['product_id']=product_id
@@ -162,7 +168,8 @@ def inactive_product(request,product_id):
     else:
             return redirect('auth_app:login')
     
-    
+
+@never_cache  
 def product_edit(request,product_id):
     if request.user.is_superuser:    
         product = Product.objects.get(id=product_id)
@@ -201,7 +208,9 @@ def product_edit(request,product_id):
             return redirect('auth_app:home')
     else:
             return redirect('auth_app:login')
-    
+
+
+@never_cache
 def product_new_size(request,product_id):
     if request.user.is_superuser:
         obj = ProductSize.objects.filter(product_id=product_id)
@@ -221,7 +230,9 @@ def product_new_size(request,product_id):
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
-    
+
+
+@never_cache
 def product_add_quantity(request, product_id):
     if request.user.is_superuser:
         product = get_object_or_404(Product, id=product_id)
