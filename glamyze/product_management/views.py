@@ -4,28 +4,11 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import F
 from django.core.paginator import Paginator
+from PIL import Image
+from django.views.decorators.cache import never_cache
 
-# Create your views here.
-def customer_details(request):
-    if request.user.is_superuser:
-        if request.method == "GET":
-            search = request.GET.get('searchvalue', '')
-            if search:
-                customer_data = CustomUser.objects.filter(
-                    Q(first_name__icontains=search) | Q(email__icontains=search)
-                ).exclude(is_superuser=1)
-            else:
-                customer_data = CustomUser.objects.exclude(is_superuser=1)
-            # Pagination
-            paginator = Paginator(customer_data, 10)  # Show 10 customers per page
-            page_number = request.GET.get('page', 1)  # Get the page number from the request, default to 1
-            page_obj = paginator.get_page(page_number)  # Get the specific page
 
-        return render(request, 'admin/customer.html', {'customer_data': page_obj, 'searchvalue': search})
-    elif request.user.is_authenticated:
-        return redirect('auth_app:home')
-    else:
-        return redirect('auth_app:login')
+
 
 def product_details(request):
     if request.user.is_superuser:
@@ -42,9 +25,9 @@ def product_details(request):
                 products = products.filter(subcategory_id=subcategory_id)
             not_active = Product.objects.filter(is_active=False)
             categories= Category.objects.prefetch_related('subcategory_set')
-            paginator = Paginator(products, 6)  # Show 10 customers per page
-            page_number = request.GET.get('page', 1)  # Get the page number from the request, default to 1
-            page_obj = paginator.get_page(page_number)  # Get the specific page
+            paginator = Paginator(products, 6)
+            page_number = request.GET.get('page', 1) 
+            page_obj = paginator.get_page(page_number)  
 
             context = {'products':page_obj,
                        'not_active':not_active,
@@ -63,6 +46,8 @@ def product_details(request):
 
 def product_add(request):
     if request.user.is_superuser:
+        subcategories = SubCategory.objects.select_related('category')
+        context={'subcategories':subcategories}
         if request.POST:
             product_name = request.POST['product_name']
             price = request.POST['price']
@@ -73,18 +58,39 @@ def product_add(request):
             image1 = request.FILES['image1']
             image2 = request.FILES['image2']
             image3 = request.FILES['image3']
+            errors = []
+            error1 = validate_image_format(image1,'Image1')
+            error2 = validate_image_format(image2,'Image2')
+            error3 = validate_image_format(image3,'Image3')
+            if error1:
+                errors.append(error1)
+            if error2:
+                errors.append(error2)
+            if error3:
+                errors.append(error3)
+            if errors:
+                context.update({'product_name':product_name,'price':price,'subcategory_id':subcategory_id,'material':material,'color':color,'description':description,'errors':errors})
+                return render(request,'admin/addproduct.html',context)
+
             product_obj=Product(product_name=product_name,price=price,subcategory_id=subcategory_id,material=material,color=color,description=description,image1=image1,image2=image2,image3=image3)
             product_obj.save()
             product_obj.refresh_from_db()
             request.session['product_id']=product_obj.id
             return redirect('product_management:product_size')
-        subcategories = SubCategory.objects.select_related('category')
-        context={'subcategories':subcategories}
         return render(request,'admin/addproduct.html',context)
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
+    
+
+def validate_image_format(image,image_name):
+            try:
+                with Image.open(image) as img:
+                    if img.format.lower() not in ['png', 'jpg', 'jpeg']:
+                        return f"{image_name} must be a PNG or JPG file."
+            except Exception:
+                    return f"{image_name} is not a valid image file."
     
 def product_size(request):
     if request.user.is_superuser:

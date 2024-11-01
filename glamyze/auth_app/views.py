@@ -7,6 +7,9 @@ from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
+from product_app.models import *
+from django.views.decorators.cache import never_cache
+
 
 
 def validate_data(email,phonenumber,password,confirm_password,fname,lname):
@@ -46,7 +49,7 @@ def user_signup(request):
             if CustomUser.objects.filter(email=email).exists():
                 user=CustomUser.objects.get(email=email)
                 if user.is_active == True:
-                    return redirect('auth_app:login')
+                    return render(request,'auth_app/signup.html',{"account_exists":True})
                 else:
                     user.set_password(password)
                     user.first_name = fname
@@ -83,8 +86,7 @@ def user_otp_verification(request):
                 user.save()
                 del request.session['otp']
                 del request.session['otp_expiry']
-                messages.success(request, 'Signup successful! You can now log in.')
-                return redirect('auth_app:login')
+                return render(request, 'auth_app/otp.html', {"signup_success": True})
             else:
                 return render(request, 'auth_app/otp.html', {"errors": ["Invalid OTP. Please try again."]})
 
@@ -140,13 +142,75 @@ def user_login(request):
             return render(request,'auth_app/login.html',{'error':'invalid username or password'})
     return render(request,'auth_app/login.html')
 
-def home(request):
+def forgot_password(request):
+    if request.POST:
+        email = request.POST['email']
+        if CustomUser.objects.filter(email=email,is_active=True).exists():
+            try:
+                send_otp(request,email)
+            except Exception:
+                return render(request,'auth_app/enter_email.html',{"error":'Email sending failed. Try again later'})
+            request.session['email']=email
+            return redirect('auth_app:forgot_password_otp')
+        else:
+            return render(request,'auth_app/enter_email.html',{'error':'This is not a registered email id or You are blocked by admin'})
+
+    return render(request,'auth_app/enter_email.html')
+
+def user_otp_verification_forgotpassword(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
     elif request.user.is_authenticated:
-        return render(request,'index.html')
+        return redirect('auth_app:home')
+    if request.POST:
+        if 'otp' in request.session and 'otp_expiry' in request.session:
+            errors = []
+            expiry = request.session['otp_expiry']
+            otp = request.POST['otp']
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+            print(timezone.now().timestamp())
+            if timezone.now().timestamp() > expiry:
+                return render(request, 'auth_app/forgotpassword_otp.html', {"errors": ["OTP has expired. Please request a new one."]})
+
+            if otp == request.session['otp']:
+                email = request.session['email']
+                if password != confirm_password:
+                    errors.append('password is not matching')
+                password_errors = Validation.password_validation(password)
+                if password_errors:
+                    errors.extend(password_errors)
+                if errors:
+                    return render(request, 'auth_app/forgotpassword_otp.html',{'errors':errors})
+                user=CustomUser.objects.get(email=email)
+                user.set_password(password)
+                user.save()
+                del request.session['otp']
+                del request.session['otp_expiry']
+                return redirect('auth_app:login')
+            else:
+                return render(request, 'auth_app/forgotpassword_otp.html', {"errors": ["Invalid OTP. Please try again."]})
+    return render(request,'auth_app/forgotpassword_otp.html')
+
+def user_otp_resend_forgot(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    elif request.user.is_authenticated:
+        return redirect('auth_app:home')
+    email = request.session['email']
+    try:
+        send_otp(request,email)
+    except Exception:
+        return render(request,'auth_app/enter_email.html',{"errors":['Email sending failed. Try again later']})
+    return redirect('auth_app:forgot_password_otp')
+
+def home(request):
+        products = Product.objects.all()
+        return render(request,'user/index.html',{'products':products})
+
+
 
 def user_logout(request):
     if request.user.is_authenticated:
-        logout(request)  # Logs out the user
-    return redirect('auth_app:login')
+        logout(request)
+    return redirect('auth_app:home')

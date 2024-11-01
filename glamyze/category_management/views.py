@@ -1,5 +1,7 @@
 from django.shortcuts import render,redirect
 from product_app.models import *
+from django.views.decorators.cache import never_cache
+
 # Create your views here.
 def category_view(request):
     if request.user.is_superuser:

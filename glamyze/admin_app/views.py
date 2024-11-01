@@ -1,4 +1,6 @@
 from django.shortcuts import render,redirect
+from django.views.decorators.cache import never_cache
+
 
 # Create your views here.
 def admin_home(request):

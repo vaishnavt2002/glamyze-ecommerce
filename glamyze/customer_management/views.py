@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.db.models import Q
 from auth_app.models import *
 from django.core.paginator import Paginator
+from django.views.decorators.cache import never_cache
+
 # Create your views here.
 
 def customer_details(request):

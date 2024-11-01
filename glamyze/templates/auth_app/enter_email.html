@@ -1,8 +1,9 @@
 {% load static %}
+{% load socialaccount %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Enter OTP</title>
+    <title>Login</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="{% static 'images/icons/favicon.png' %}"/>
@@ -34,37 +35,26 @@
                                 <img src="{% static 'images/icons/logo-01.png' %}" alt="IMG-LOGO" class="img-fluid" style="max-width: 180px;">
                             </div>
 
-                            <!-- OTP Form -->
-                            <form method="POST" action="{% url 'auth_app:otp' %}">
+                            <!-- Login Form -->
+                            <form method="POST" action=" ">
                                 {% csrf_token %}
                                 
-                                {% if messages %}
-                                <div class="alert alert-danger">
-                                    {% for message in messages %}
-                                        {{ message }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
+                                
 
                                 <div class="form-group">
-                                    <label for="otp">Enter OTP</label>
-                                    <input type="text" class="form-control form-control-lg text-center" id="otp" name="otp" minlength='6' maxlength="6" required placeholder="Enter 6-digit OTP">
+                                    <label for="email">Email address</label>
+                                    <input type="email" class="form-control form-control-lg" id="email" name="email" required>
                                 </div>
 
-                                <button type="submit" class="btn btn-dark btn-block btn-lg mb-4">VERIFY OTP</button>
-
-                                <!-- Resend OTP Link -->
-                                <div class="text-center">
-                                    <a href="{% url 'auth_app:resend-otp' %}" class="text-dark d-block mb-3">Didn't receive the OTP? Resend</a>
-                                    {% if errors %}
+                                <button type="submit" class="btn btn-dark btn-block btn-lg mb-4">RESET PASSWORD</button>
+                                {% if error %}
                                 <div class="alert alert-danger">
-                                    <ul>
-                                        {% for error in errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
+                                    <li>{{ error }}</li> 
                                 </div>
                                 {% endif %}
+
+                                <div class="text-center">
+                                    <p class="mb-0">Don't have an account? <a href="{% url 'auth_app:signup' %} " class="text-dark font-weight-bold">Sign up</a></p>
                                 </div>
                             </form>
                         </div>
@@ -75,27 +65,11 @@
     </div>
 
     <!-- Scripts -->
-
-    // Check if signup success is passed as context
-   <script>
-    // Check if signup success is passed as context
-    {% if signup_success %}
-    document.addEventListener("DOMContentLoaded", function() {
-        Swal.fire({
-            title: 'Signup Successful!',
-            text: 'You can now log in.',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        }).then(() => {
-            window.location.href = "{% url 'auth_app:login' %}";  // Redirect to login page after confirmation
-        });
-    });
-    {% endif %}
-</script>
-
     <script src="{% static 'vendor/jquery/jquery-3.2.1.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Google Sign-In Script -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 
 </body>
 </html>

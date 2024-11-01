@@ -9,6 +9,9 @@
   <link rel="shortcut icon" type="image/png" href="{% static 'assets/images/logos/favicon.png' %}" />
   <link rel="stylesheet" href="{% static 'assets/css/styles.min.css' %}" />
   <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
 
 
   <!-- Custom CSS to override Bootstrap primary color -->
@@ -143,7 +146,7 @@
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">My Task</p>
                     </a>
-                    <a href="{% url 'auth_app:logout' %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+<a href="{% url 'auth_app:logout' %}" id="logout-link" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                   </div>
                 </div>
               </li>
@@ -169,13 +172,32 @@
 
     </div>
   </div>
+<script>
+document.getElementById('logout-link').addEventListener('click', function(event) {
+    event.preventDefault();
 
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to log out.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, log out',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log("Confirmed logout"); 
+            window.location.href = event.target.href;
+        } 
+    });
+});
+
+</script>
   <!-- JavaScript Files -->
   <script src="{% static 'assets/libs/jquery/dist/jquery.min.js' %}"></script>
   <script src="{% static 'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'assets/js/sidebarmenu.js' %}"></script>
   <script src="{% static 'assets/js/app.min.js' %}"></script>
   <script src="{% static 'assets/libs/simplebar/dist/simplebar.js' %}"></script>
-</body>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></body>
 
 </html>

@@ -2,140 +2,130 @@
 {% block breadcrumbs %}
 <nav aria-label="breadcrumb" class="px-4">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'category_management:category_view' %}">Category</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}" >Admin</a></li>
+      <li class="breadcrumb-item">Category</li>
     </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="container mt-4">
     <div class="category-container">
-        
         <!-- New Category Input -->
         <form method="POST">
             <div class="mb-4 d-flex align-items-center gap-3">
                 {% csrf_token %}
-                    <input type="text" class="form-control" placeholder="New Category Name" id="new-category-name" name="new_category">
-                    <button class="btn btn-primary btn-md" type="submit">+ Add Category</button>
+                <input type="text" class="form-control" placeholder="New Category Name" id="new-category-name" name="new_category">
+                <button class="btn btn-dark btn-md" type="submit">+ Add Category</button>
             </div>
         </form>
         
         <!-- Category List -->
-        <!-- accordion -->
         <div class="accordion" id="accordionExample">
             {% for category in category_data %}
-            <div class="accordion-item">
+            <div class="accordion-item border-dark">
                 <h2 class="accordion-header" id="heading">
                     <div class="d-flex justify-content-between align-items-center w-100">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category.id }}" aria-expanded="true" aria-controls="collapse{{ category.id }}">
+                        <button class="accordion-button bg-light text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category.id }}" aria-expanded="true" aria-controls="collapse{{ category.id }}">
                             {{ category.category_name }}
                         </button>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-dark m-1" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}" >EDIT</button>
-                            <a class="{% if category.is_listed %}
-                            btn btn-primary
-                        {% else %}
-                            btn btn-outline-primary
-                        {% endif %} btn-md m-1" style="font-size: 12px; width: 60px; height: 34px;" href="{% url 'category_management:categories_list_unlist' category.id %}">{% if category.is_listed %}
-                        Unlist
-                        {% else %}
-                        List
-                        {% endif %}</a>
+                        <div class="d-flex gap-2 me-3">
+                            <button class="btn btn-primary" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}">EDIT</button>
+                            <a class="{% if category.is_listed %}btn btn-dark{% else %}btn btn-outline-dark{% endif %} btn-md" 
+                               style="font-size: 12px; width: 60px; height: 34px;" 
+                               href="{% url 'category_management:categories_list_unlist' category.id %}">
+                                {% if category.is_listed %}Unlist{% else %}List{% endif %}
+                            </a>
                         </div>
                     </div>
                 </h2>
                 <div id="collapse{{ category.id }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ category.id }}" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
+                        <!-- Subcategories Header -->
+                        <h6 class="mb-3 text-dark fw-bold">Subcategories</h6>
+                        
                         {% if category.subcategory_set.all %}
                         {% for subcategory in category.subcategory_set.all %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-dark mb-2">
                             {{ subcategory.subcategory_name }}
                             <div class="d-flex gap-2 ms-2">
-                                <button class="btn btn-outline-dark" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal{{ subcategory.id }}" data-id="{{ subcategory.id }}" data-name="{{ subcategory.subcategory_name }}">Edit</button>
-                                <a class="{% if subcategory.is_listed %}
-                                btn btn-primary
-                            {% else %}
-                                btn btn-outline-primary
-                            {% endif %} btn-md" style="font-size: 12px; width: 60px; height: 34px;" href="{% url 'category_management:subcategories_list_unlist' subcategory.id %}">{% if subcategory.is_listed %}
-                                    Unlist
-                                    {% else %}
-                                    List
-                                    {% endif %}</a>
+                                <button class="btn btn-primary" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal{{ subcategory.id }}" data-id="{{ subcategory.id }}" data-name="{{ subcategory.subcategory_name }}">Edit</button>
+                                <a class="{% if subcategory.is_listed %}btn btn-dark{% else %}btn btn-outline-dark{% endif %} btn-md" 
+                                   style="font-size: 12px; width: 60px; height: 34px;" 
+                                   href="{% url 'category_management:subcategories_list_unlist' subcategory.id %}">
+                                    {% if subcategory.is_listed %}Unlist{% else %}List{% endif %}
+                                </a>
                             </div>
                         </div>
+                        
                         <!-- Subcategory modal -->
                         <div class="modal fade" id="editSubcategoryModal{{ subcategory.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form method="POST" action="{% url 'category_management:subcategory_update' %}">
                                     {% csrf_token %}
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" id="staticBackdropLabel">Change SubCatagory</h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <input type="hidden" value="{{ subcategory.id }}" name="subcategoryid">
-                                    <div class="mb-3">
-                                        <label for="edit-category-name" class="form-label">Subcategory Name</label>
-                                        <input type="text" class="form-control" id="edit-category-name" name="new_subcatagory_name" value="{{subcategory.subcategory_name}}" required>
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-light">
+                                            <h5 class="modal-title" id="staticBackdropLabel">Change Subcategory</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" value="{{ subcategory.id }}" name="subcategoryid">
+                                            <div class="mb-3">
+                                                <label for="edit-category-name" class="form-label">Subcategory Name</label>
+                                                <input type="text" class="form-control border-dark" id="edit-category-name" name="new_subcatagory_name" value="{{subcategory.subcategory_name}}" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-dark">Save Changes</button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                  <button type="submit" class="btn btn-primary">Save Changes</button>
-                                </div>
-                              </div>
-                            </form>
+                                </form>
                             </div>
-                          </div>
-                        <!-- Subcategory modal ends -->
+                        </div>
                         {% endfor %}
                         {% else %}
-                        <div>No subcategories to show</div>
+                        <div class="text-muted">No subcategories to show</div>
                         {% endif %}
-                        <form method="POST" action="{% url 'category_management:subcategory_add' %}">
+                        
+                        <form method="POST" action="{% url 'category_management:subcategory_add' %}" class="mt-3">
                             <div class="mb-4 d-flex align-items-center gap-3">
                                 {% csrf_token %}
-                                    <input type="text" value="{{ category.id }}" name="categoryid" hidden>
-                                    <input type="text" class="form-control" placeholder="New Subcategory Name" id="new-subcategory-name" name="subcategory_name">
-                                    <button class="btn btn-outline-primary btn-sm" type="submit">+ Add</button>
+                                <input type="text" value="{{ category.id }}" name="categoryid" hidden>
+                                <input type="text" class="form-control" placeholder="New Subcategory Name" id="new-subcategory-name" name="subcategory_name">
+                                <button class="btn btn-primary btn-sm" type="submit">+ Add</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
+            
             <!-- Category Modal -->
-  <div class="modal fade" id="editCategoryModal{{ category.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" action="{% url 'category_management:category_update' %}">
-            {% csrf_token %}
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">Change Catagory</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <input type="hidden" value="{{ category.id }}" name="categoryid">
-            <div class="mb-3">
-                <label for="edit-category-name" class="form-label">Category Name</label>
-                <input type="text" class="form-control" id="edit-category-name" name="new_catagory_name" value="{{category.category_name}}" required>
+            <div class="modal fade" id="editCategoryModal{{ category.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="POST" action="{% url 'category_management:category_update' %}">
+                        {% csrf_token %}
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title" id="staticBackdropLabel">Change Category</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" value="{{ category.id }}" name="categoryid">
+                                <div class="mb-3">
+                                    <label for="edit-category-name" class="form-label">Category Name</label>
+                                    <input type="text" class="form-control border-dark" id="edit-category-name" name="new_catagory_name" value="{{category.category_name}}" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-dark">Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </div>
-    </form>
-    </div>
-  </div>
-  <!-- category modal ends -->
-
             {% endfor %}
         </div>
-        
-
-            <!-- accordion end -->
-
-  
+    </div>
+</div>
 {% endblock %}

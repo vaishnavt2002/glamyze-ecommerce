@@ -97,15 +97,30 @@
                 {% endfor %}
             </tbody>
         </table>
-        <nav aria-label="Page navigation example">
-            <ul class="pagination">
-          
-              {% for i in products.paginator.page_range %}
-              <li class="page-item"><a class="page-link" href="?page={{i}}{% if searchvalue %}&searchvalue={{searchvalue}} {% endif %}{% if category_id %}&categoryid={{category_id}} {% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}} {% endif %}">{{i}}</a></li>
-              {% endfor %}
-             
-            </ul>
-          </nav>
+       <nav aria-label="Page navigation d-flex justify-content-center">
+    <ul class="pagination">
+        <!-- Previous button -->
+        <li class="page-item {% if products.number == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{% if products.number != 1 %}?page={{ products.number|add:'-1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}{% else %}#{% endif %}" {% if products.number == 1 %}tabindex="-1" aria-disabled="true"{% endif %}>
+                Previous
+            </a>
+        </li>
+
+        <!-- Page numbers -->
+        {% for i in products.paginator.page_range %}
+            <li class="page-item {% if products.number == i %}active{% endif %}" {% if products.number == i %}aria-current="page"{% endif %}>
+                <a class="page-link" href="?page={{i}}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}">{{i}}</a>
+            </li>
+        {% endfor %}
+
+        <!-- Next button -->
+        <li class="page-item {% if products.number == products.paginator.num_pages %}disabled{% endif %}">
+            <a class="page-link" href="{% if products.number != products.paginator.num_pages %}?page={{ products.number|add:'1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}{% else %}#{% endif %}" {% if products.number == products.paginator.num_pages %}tabindex="-1" aria-disabled="true"{% endif %}>
+                Next
+            </a>
+        </li>
+    </ul>
+</nav>          
     </div>
 </div>
 
