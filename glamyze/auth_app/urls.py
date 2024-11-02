@@ -6,7 +6,7 @@ app_name = 'auth_app'
 
 urlpatterns = [
     path('',views.home,name='home'),
-    path('login',views.user_login,name="login"),
+    path('login/',views.user_login,name="login"),
     path('signup/',views.user_signup,name="signup"),
     path('otp-verification/',views.user_otp_verification,name="otp"),
     path('otp-resend/',views.user_otp_resend,name='resend-otp'),

@@ -15,9 +15,9 @@ def customer_details(request):
             if search:
                 customer_data = CustomUser.objects.filter(
                     Q(first_name__icontains=search) | Q(email__icontains=search)
-                ).exclude(is_superuser=1)
+                ).exclude(Q(is_superuser=1)|Q(is_active=0))
             else:
-                customer_data = CustomUser.objects.exclude(is_superuser=1)
+                customer_data = CustomUser.objects.exclude(Q(is_superuser=1)|Q(is_active=0))
             # Pagination
             paginator = Paginator(customer_data, 10) 
             page_number = request.GET.get('page', 1) 
@@ -37,9 +37,9 @@ def block_unblock_user(request, user_id):
     if request.user.is_superuser:
         if request.method == "POST":
             user_data = CustomUser.objects.get(id=user_id)
-            user_data.is_active = not user_data.is_active 
+            user_data.is_block = not user_data.is_block
             user_data.save()
-            return JsonResponse({'status': 'success', 'is_active': user_data.is_active})
+            return JsonResponse({'status': 'success', 'is_block': user_data.is_block})
         elif request.user.is_authenticated:
             return redirect('auth_app:home')
         else:

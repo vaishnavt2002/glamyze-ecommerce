@@ -104,10 +104,9 @@ def product_size(request):
         if request.POST:
             updated =False
 
-            # Loop through the request.POST data to find all quantity fields
             for key, value in request.POST.items():
-                if key.isdigit() and value:  # Only add to quantities if there is a value
-                    size_id = int(key)  # Convert size ID from string to integer
+                if key.isdigit() and value:
+                    size_id = int(key)
                     try:
                         quantity = int(value) if value.strip() else 0
                     except ValueError:

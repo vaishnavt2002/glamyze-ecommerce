@@ -31,16 +31,16 @@
                     <td>{{ customer.last_name }}</td>
                     <td>{{ customer.email }}</td>
                     <td>
-                        <button class="{% if customer.is_active %}
+                        <button class="{% if customer.is_block %}
                                             btn btn-primary
                                         {% else %}
                                             btn btn-outline-primary
                                         {% endif %} btn-md" 
                                         onclick="toggleBlock({{ customer.id }})">
-                            {% if customer.is_active %}
-                                Block
-                            {% else %}
+                            {% if customer.is_block %}
                                 Unblock
+                            {% else %}
+                                Block
                             {% endif %}
                         </button>
                     </td>
@@ -90,16 +90,16 @@ function toggleBlock(userId) {
     .then(data => {
         if (data.status === 'success') {
             const button = document.querySelector(`#customer-row-${userId} button`);
-            const isActive = data.is_active; // Get the updated status from the response
+            const isBlock = data.is_block; // Get the updated status from the response
             
             // Update button text based on the new status
-            if (isActive) {
-                button.textContent = "Block";
+            if (isBlock) {
+                button.textContent = "Unblock";
                 button.classList.remove('btn-outline-primary');
                 button.classList.add('btn-primary');
             } 
             else {
-                button.textContent = "Unblock";
+                button.textContent = "Block";
                 button.classList.remove('btn-primary');
                 button.classList.add('btn-outline-primary');
             }

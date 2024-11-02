@@ -1,14 +1,14 @@
-from django.shortcuts import render,redirect,HttpResponse
+from django.shortcuts import render,redirect
 from . validation import Validation
 from django.core.mail import send_mail
 import random
 from . models import *
 from django.utils import timezone
 from datetime import timedelta
-from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from product_app.models import *
 from django.views.decorators.cache import never_cache
+from allauth.socialaccount.models import SocialAccount
 
 
 
@@ -131,8 +131,12 @@ def user_login(request):
             user_data = CustomUser.objects.get(email=email)
         except Exception:
             return render(request,'auth_app/login.html',{'error':'invalid username or password'})
-        if not user_data.is_active:
+        if  user_data.is_block:
             return render(request,'auth_app/login.html',{'error':'You are blocked by admin.'})
+        if SocialAccount.objects.filter(user=user_data, provider='google').exists():
+            return render(request, 'auth_app/login.html', {'error': 'This account is registered using Google. Please sign in with Google.'})
+        if  not user_data.is_active:
+            return render(request,'auth_app/login.html',{'error':'Your Sign up is incomplete'})
         user=authenticate(request,email=email,password=password)
         print(user)
         if user is not None:
@@ -149,7 +153,10 @@ def user_login(request):
 def forgot_password(request):
     if request.POST:
         email = request.POST['email']
-        if CustomUser.objects.filter(email=email,is_active=True).exists():
+        if CustomUser.objects.filter(email=email,is_block=False).exists():
+            user_data = CustomUser.objects.get(email=email)
+            if SocialAccount.objects.filter(user=user_data, provider='google').exists():
+                return render(request,'auth_app/enter_email.html',{"error":'Email id is used for Google sign in'})
             try:
                 send_otp(request,email)
             except Exception:
@@ -215,10 +222,10 @@ def home(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
     if request.user.is_authenticated:
-        products = Product.objects.all()
+        products = Product.objects.filter(is_listed=True)
         return render(request,'user/index.html',{'products':products})
     else:
-        products = Product.objects.all()
+        products = Product.objects.filter(is_listed=True)
         return render(request,'user/index.html',{'products':products})
 
 
