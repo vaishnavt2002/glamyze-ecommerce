@@ -25,7 +25,7 @@
         <!-- Product Name -->
         <div class="col-md-6">
           <label for="product_name" class="form-label">Product Name</label>
-          <input type="text" class="form-control" id="product_name" value="{{product_name}}" name="product_name" required>
+          <input type="text" class="form-control" id="product_name" value="{{product_name}}" name="product_name" minlength="2" required>
         </div>
 
         <!-- Price -->
@@ -64,7 +64,7 @@
           <label for="description" class="form-label">Description</label>
           <textarea class="form-control" id="description" minlength='10' name="description" value="{{description}}" rows="4" required>{{description}}</textarea>
         </div>
-
+        
         <!-- Image Uploads -->
         <div class="col-md-4">
           <label for="image1" class="form-label">Image 1</label>
@@ -80,6 +80,7 @@
           <label for="image3" class="form-label">Image 3</label>
           <input type="file" class="form-control" id="image3" name="image3" accept="image/*" required onchange="openCropper(this)">
         </div>
+        <div>Only supports png,jpg and jpeg</div>
          {% if errors %}
             <div class="alert alert-danger">
               <ul>
@@ -142,22 +143,20 @@
   document.getElementById('cropModal').addEventListener('shown.bs.modal', function() {
     const image = document.getElementById('imageToCrop');
     cropper = new Cropper(image, {
-      aspectRatio: 0.81, // Adjust aspect ratio if needed
+      aspectRatio: 0.81,
       viewMode: 2,
     });
   });
 
-  // Destroy cropper when modal is closed
   document.getElementById('cropModal').addEventListener('hidden.bs.modal', function() {
     cropper.destroy();
     cropper = null;
   });
 
-  // Crop image and update input
   function cropImage() {
     if (cropper) {
       const canvas = cropper.getCroppedCanvas({
-        width: 300, // Specify cropped image dimensions if needed
+        width: 300, 
         height: 300,
       });
       canvas.toBlob((blob) => {
@@ -169,7 +168,6 @@
         dataTransfer.items.add(file);
         currentImageInput.files = dataTransfer.files;
         
-        // Close modal
         const cropModal = bootstrap.Modal.getInstance(document.getElementById('cropModal'));
         cropModal.hide();
       });

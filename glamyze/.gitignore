@@ -8,9 +8,9 @@ __pycache__/
 *.log
 *.pot
 *.py[cod]
-db.sqlite3  # Ignore SQLite database if you're using it for local development
+db.sqlite3  
 *.sqlite3
-/media/    # Ignore media files if stored locally
+/media/   
 
 # Environment variables
 .env

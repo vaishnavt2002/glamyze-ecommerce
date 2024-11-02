@@ -110,7 +110,7 @@ def product_size(request):
                     try:
                         quantity = int(value) if value.strip() else 0
                     except ValueError:
-                        quantity = 0  # Convert quantity from string to integer
+                        quantity = 0 
                     product_size_obj = ProductSize.objects.get(product_id=product_id,size_id=size_id)
                     product_size_obj.quantity = quantity
                     product_size_obj.save()
@@ -148,7 +148,7 @@ def list_unlist_product(request, product_id):
     if request.user.is_superuser:
         if request.method == "POST":
             product_add = Product.objects.get(id=product_id)
-            product_add.is_listed = not product_add.is_listed  # Toggle the active status
+            product_add.is_listed = not product_add.is_listed
             product_add.save()
             return JsonResponse({'status': 'success', 'is_listed': product_add.is_listed})
         elif request.user.is_authenticated:
@@ -214,10 +214,9 @@ def product_new_size(request,product_id):
     if request.user.is_superuser:
         obj = ProductSize.objects.filter(product_id=product_id)
         if request.POST:
-            # Loop through the request.POST data to find all quantity fields
             for key, value in request.POST.items():
-                if key.isdigit() and value:  # Only add to quantities if there is a value
-                    size_id = int(key)  # Convert size ID from string to integer
+                if key.isdigit() and value:
+                    size_id = int(key) 
                     obj = ProductSize(product_id=product_id,size_id=size_id)
                     obj.save()
             return redirect('product_management:product_details')
@@ -234,7 +233,7 @@ def product_new_size(request,product_id):
 @never_cache
 def product_add_quantity(request, product_id):
     if request.user.is_superuser:
-        product = get_object_or_404(Product, id=product_id)
+        product = Product.objects.get(id=product_id)
         product_sizes = ProductSize.objects.filter(product_id=product_id)
 
         if request.method == 'POST':

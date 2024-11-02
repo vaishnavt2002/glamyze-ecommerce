@@ -88,7 +88,3 @@ def subcategories_list_unlist(request,id):
     else:
         return redirect('auth_app:login')
     
-
-    
-
-
