@@ -10,6 +10,7 @@ urlpatterns = [
     path('products/<int:product_id>/block-unblock/', views.list_unlist_product, name='list_unlist_product'),
     path('products/<int:product_id>/inactive_product/',views.inactive_product,name='inactive_product'),
     path('products/<int:product_id>/edit/',views.product_edit,name='product_edit'),
-    path('products/<int:product_id>/add-new-size',views.product_new_size,name='product_new_size'), 
+    path('products/<int:product_id>/varients',views.product_varient_management,name='product_varient_management'), 
     path('products/<int:product_id>/add-quantity',views.product_add_quantity,name='product_add_quantity'),
+    path('products/varient_management-post',views.product_varient_management_post,name='product_varient_management_post')
 ]

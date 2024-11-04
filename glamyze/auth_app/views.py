@@ -9,6 +9,9 @@ from django.contrib.auth import authenticate,login,logout
 from product_app.models import *
 from django.views.decorators.cache import never_cache
 from allauth.socialaccount.models import SocialAccount
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
 
 
@@ -222,10 +225,10 @@ def home(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
     if request.user.is_authenticated:
-        products = Product.objects.filter(is_listed=True)
+        products = Product.objects.filter(is_listed=True)[0:8]
         return render(request,'user/index.html',{'products':products})
     else:
-        products = Product.objects.filter(is_listed=True)
+        products = Product.objects.filter(is_listed=True)[0:8]
         return render(request,'user/index.html',{'products':products})
 
 

@@ -1,4 +1,4 @@
-{% extends 'admin/base.html' %}
+{% extends 'my_admin/base.html' %}
 {% load static %}
 
 {% block breadcrumbs %}
@@ -57,6 +57,8 @@
             <div class="input-group mb-3">
                 <span class="input-group-text" id="basic-addon3">{{ product_varient.size.size_name }}</span>
                 <input type="number" name="{{product_varient.size.id}}" class="form-control" id="basic-url" aria-describedby="basic-addon3" required placeholder="Enter the quantity">
+                <input type="number" step=".01" name="price{{product_varient.size.id}}" class="form-control" id="basic-url" aria-describedby="basic-addon3" required placeholder="Enter the Price of this Varient">
+
             </div>
             {% endfor %}
             <div class="col-12">

@@ -12,7 +12,7 @@ def category_view(request):
             if new_category:
                 Category.objects.create(category_name=new_category)
         category_data = Category.objects.prefetch_related('subcategory_set').order_by('id')
-        return render(request,'admin/category.html',{'category_data':category_data})
+        return render(request,'my_admin/category.html',{'category_data':category_data})
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     else:

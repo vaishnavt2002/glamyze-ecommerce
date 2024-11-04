@@ -23,7 +23,7 @@ def customer_details(request):
             page_number = request.GET.get('page', 1) 
             page_obj = paginator.get_page(page_number) 
 
-        return render(request, 'admin/customer.html', {'customer_data': page_obj, 'searchvalue': search})
+        return render(request, 'my_admin/customer.html', {'customer_data': page_obj, 'searchvalue': search})
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     else:

@@ -22,7 +22,6 @@ class SubCategory(models.Model):
 class Product(models.Model):
     product_name = models.CharField(max_length=100)
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
     image1 = models.ImageField(upload_to='product_images/')
     image2 = models.ImageField(upload_to='product_images/')
@@ -42,7 +41,17 @@ class Size(models.Model):
     def __str__(self):
         return self.size_name
     
-class ProductSize(models.Model):
-    product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    size = models.ForeignKey(Size,on_delete=models.CASCADE)
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2,null=True)
     quantity = models.IntegerField(default=0)
+    is_listed = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['product', 'size']
+
+    def __str__(self):
+        return f"{self.product.product_name} - {self.size.size_name}"

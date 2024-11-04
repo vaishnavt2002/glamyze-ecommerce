@@ -1,5 +1,5 @@
 
-{% extends 'admin/base.html' %}
+{% extends 'my_admin/base.html' %}
 {% block breadcrumbs %}
 <nav aria-label="breadcrumb" class="px-4">
     <ol class="breadcrumb">
@@ -44,7 +44,7 @@
       {% endfor %}     
     {% for product in not_active %}
     <div class="alert alert-dark m-2" role="alert">
-       Size not added for the product {{ product.product_name }} in category {{product.subcategory.category.category_name}}--{{product.subcategory.subcategory_name}}. Press here to <a href="{% url 'product_management:inactive_product' product.id %}" style="color: aliceblue;">add</a>
+       Varients not added for the product {{ product.product_name }} in category {{product.subcategory.category.category_name}}--{{product.subcategory.subcategory_name}}. Press here to <a href="{% url 'product_management:inactive_product' product.id %}" style="color: aliceblue;">add</a>
       </div>
       {% endfor %}
      
@@ -69,7 +69,7 @@
                     <td>{{product.subcategory.category.category_name}}</td>
                     <td>{{product.subcategory.subcategory_name}}</td>
                     <td><img src="{{ product.image1.url }}" alt="{{ product.product_name }}" style="width: 70px;"></td>
-                    <td>{{product.product_name}}</td>
+                    <td>{{product.material}}</td>
                     <td>{{product.is_listed}}</td>
                     <td>
                         <a class="btn btn-outline-primary" href="{% url 'product_management:product_edit'  product.id  %}">Edit</a>
@@ -82,8 +82,9 @@
                 {% else %}
                     List
                 {% endif %}</button>
-                <a class="btn btn-outline-primary" href="{% url 'product_management:product_new_size'  product.id  %}">New Size+</a>
+                <a class="btn btn-outline-primary" href="{% url 'product_management:product_varient_management'  product.id  %}">Varient Mgmt</a>
                 <a class="btn btn-outline-primary" href="{% url 'product_management:product_add_quantity'  product.id  %}">Quantity+</a>
+               
 
 
                     </td>

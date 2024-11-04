@@ -1,0 +1,84 @@
+{% extends 'my_admin/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb" class="px-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'product_management:product_details' %}">Products</a></li>
+    <li class="breadcrumb-item">Add New Sizes</li>
+  </ol>
+</nav>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<h2 class="m-4">Category Management - {{product.product_name}}</h2>
+<h5 class="m-4">Added Sizes</h5>
+<form method="post" action="{% url 'product_management:product_varient_management_post'%}">
+    {% csrf_token %}
+        <div>Uncheck and save to unlist the varient</div>
+        <input type='hidden' name="product_id" value='{{product.id}}'>
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class='text-center'>
+            <tr>
+                <th scope="col" style="width: 10%">Listed</th>
+                <th scope="col" style="width: 45%">Size</th>
+                <th scope="col" style="width: 45%">Price</th>
+            </tr>
+        </thead>
+        <tbody class='text-center'>
+            {% for size_data in added_sizes %}
+            <tr>
+                <td class="align-middle">
+                    <div class="form-check d-flex justify-content-center">
+                        <input type="checkbox" name="listed{{ size_data.size.id }}"
+                               class="form-check-input" 
+                               id="added_size_{{ size_data.size.id }}"
+                               {% if size_data.is_listed %}checked{% endif %}>
+                    </div>
+                </td>
+                <td class="align-middle">
+                    <label class="form-check-label" for="added_size_{{ size_data.size.id }}">
+                        {{ size_data.size.size_name }}
+                    </label>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input id="price{{ size_data.size.id }}" 
+                               value="{{ size_data.price }}" 
+                               type="number" 
+                               step="0.01"
+                               class="form-control" 
+                               name="price{{ size_data.size.id }}"
+                               required>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<button type="submit" class="btn btn-primary mx-4">Update</button>
+</form>
+
+<h5 class="m-4">Select Sizes to Add</h5>
+<form method="post">
+    {% csrf_token %}
+{% if sizes %}
+{% for size in sizes %}
+        <div class="form-check m-5">
+            <input class="form-check-input" type="checkbox" name="{{ size.id }}" value="{{ size.id }}" id="flexCheckDefault">
+            <label class="form-check-label" for="flexCheckDefault">
+            {{ size.size_name }}
+            </label>
+        </div>
+  {% endfor %}
+  {% else %}
+  <div class="m-4">No sizes to add</div>
+  {% endif %}
+  <button type="submit" class="btn btn-primary mx-4">Add Sizes</button>
+</form>
+
+{% endblock content %}

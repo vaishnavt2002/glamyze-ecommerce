@@ -1,4 +1,4 @@
-{% extends 'admin/base.html' %}
+{% extends 'my_admin/base.html' %}
 {% load static %}
 
 
@@ -28,11 +28,7 @@
           <input type="text" class="form-control" id="product_name" value="{{product_name}}" name="product_name" minlength="2" required>
         </div>
 
-        <!-- Price -->
-        <div class="col-md-6">
-          <label for="price" class="form-label">Price</label>
-          <input type="number" class="form-control" id="price" name="price" value="{{price}}" step="0.01" required>
-        </div>
+      
 
         <!-- Subcategory Selection -->
         <div class="col-md-6">
