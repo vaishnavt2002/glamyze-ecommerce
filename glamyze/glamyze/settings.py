@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'category_management',
     'product_management',
     'product_app',
+    'cart_app',
     'django.contrib.sites',
     'allauth',
     'allauth.account',

@@ -81,21 +81,22 @@
 					<!-- Menu desktop -->
 					<div class="menu-desktop">
 						<ul class="main-menu">
-							<li class="active-menu">
-								<a href="">Home</a>
+							<li {% block active1 %} {% endblock %}>
+								<a href="{% url 'auth_app:home' %}">Home</a>
+								
 								
 							</li>
 
-							<li>
-								<a href="">Shop</a>
+							<li {% block active2 %} {% endblock %}>
+								<a href="{% url 'product_app:shop' %}">Shop</a>
 							</li>
 
 
-							<li>
+							<li {% block active3 %} {% endblock %}>
 								<a href="about.html">About</a>
 							</li>
 
-							<li>
+							<li {% block active4 %} {% endblock %}>
 								<a href="contact.html">Contact</a>
 							</li>
 							
@@ -190,12 +191,12 @@
 
 			<ul class="main-menu-m">
 				<li>
-					<a href="">Home</a>
+					<a href="{% url 'auth_app:home' %}">Home</a>
 					
 				</li>
 
 				<li>
-					<a href="">Shop</a>
+					<a href="{% url 'product_app:shop' %}">Shop</a>
 				</li>
 				<li>
 					<a href="">About</a>
@@ -332,14 +333,12 @@
     {% endblock banner %}
 
 	<!-- Product -->
-	<section class="bg0 p-t-23 p-b-140">
 	
         {% block home %}
 
         {% endblock home%}
 	
-	</section>
-	<section class="bg0 p-t-23 p-b-140">
+	<section class="bg0 p-t-23 p-b-140" style="margin-top: 45px;">
 	
         {% block shop %}
 
@@ -774,6 +773,6 @@ document.getElementById('logout-link').addEventListener('click', function(event)
 </script>
 <!--===============================================================================================-->
 <script src="{% static 'js/main.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></body>
 </body>
 </html>

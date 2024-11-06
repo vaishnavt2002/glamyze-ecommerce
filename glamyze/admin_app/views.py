@@ -6,6 +6,8 @@ from django.views.decorators.cache import never_cache
 def admin_home(request):
     if request.user.is_superuser:
         return render(request,'my_admin/dashboard.html')
+    elif request.user.is_block:
+        return redirect('auth_app:logout')
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     else:

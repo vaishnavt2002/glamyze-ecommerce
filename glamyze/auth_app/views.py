@@ -9,9 +9,7 @@ from django.contrib.auth import authenticate,login,logout
 from product_app.models import *
 from django.views.decorators.cache import never_cache
 from allauth.socialaccount.models import SocialAccount
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from django.template.loader import render_to_string
+
 
 
 
@@ -35,7 +33,9 @@ def validate_data(email,phonenumber,password,confirm_password,fname,lname):
 @never_cache
 def user_signup(request):
     if request.user.is_superuser:
-        return redirect('admin_app:admin_dashboard') 
+        return redirect('admin_app:admin_dashboard')
+    elif request.user.is_block:
+        return redirect('auth_app:logout') 
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     if request.POST:
@@ -73,7 +73,9 @@ def user_signup(request):
 @never_cache
 def user_otp_verification(request):
     if request.user.is_superuser:
-        return redirect('admin_app:admin_dashboard') 
+        return redirect('admin_app:admin_dashboard')
+    elif request.user.is_block:
+        return redirect('auth_app:logout') 
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     if request.POST:
@@ -100,7 +102,9 @@ def user_otp_verification(request):
 @never_cache
 def user_otp_resend(request):
     if request.user.is_superuser:
-        return redirect('admin_app:admin_dashboard') 
+        return redirect('admin_app:admin_dashboard')
+    elif request.user.is_block:
+        return redirect('auth_app:logout')  
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     email = request.session['email']
@@ -124,7 +128,9 @@ def send_otp(request,email):
 @never_cache
 def user_login(request):
     if request.user.is_superuser:
-        return redirect('admin_app:admin_dashboard') 
+        return redirect('admin_app:admin_dashboard')
+    elif request.user.is_block:
+        return redirect('auth_app:logout')  
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     if request.POST:
@@ -174,7 +180,9 @@ def forgot_password(request):
 @never_cache
 def user_otp_verification_forgotpassword(request):
     if request.user.is_superuser:
-        return redirect('admin_app:admin_dashboard') 
+        return redirect('admin_app:admin_dashboard')
+    elif request.user.is_block:
+        return redirect('auth_app:logout')  
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     if request.POST:
@@ -210,7 +218,9 @@ def user_otp_verification_forgotpassword(request):
 @never_cache
 def user_otp_resend_forgot(request):
     if request.user.is_superuser:
-        return redirect('admin_app:admin_dashboard') 
+        return redirect('admin_app:admin_dashboard')
+    elif request.user.is_block:
+        return redirect('auth_app:logout')  
     elif request.user.is_authenticated:
         return redirect('auth_app:home')
     email = request.session['email']
@@ -223,7 +233,9 @@ def user_otp_resend_forgot(request):
 @never_cache
 def home(request):
     if request.user.is_superuser:
-        return redirect('admin_app:admin_dashboard') 
+        return redirect('admin_app:admin_dashboard')
+    elif request.user.is_block:
+        return redirect('auth_app:logout')  
     if request.user.is_authenticated:
         products = Product.objects.filter(is_listed=True)[0:8]
         return render(request,'user/index.html',{'products':products})

@@ -11,6 +11,8 @@ from django.views.decorators.cache import never_cache
 
 @never_cache
 def product_details(request):
+    if request.user.is_block:
+        return redirect('auth_app:logout') 
     if request.user.is_superuser:
         if request.method == "GET":
             search = request.GET.get('searchvalue', '')
@@ -46,6 +48,8 @@ def product_details(request):
 
 @never_cache
 def product_add(request):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         subcategories = SubCategory.objects.select_related('category')
         context={'subcategories':subcategories}
@@ -97,6 +101,8 @@ def validate_image_format(image,image_name):
 
 @never_cache
 def product_size(request):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         product_id = request.session.get('product_id')
         obj = ProductVariant.objects.filter(product_id=product_id)
@@ -118,6 +124,7 @@ def product_size(request):
                     price = request.POST.get(price_key, '0')
                     price = float(price) if price.strip() else 0.0
                     product_size_obj.price = price
+                    product_size_obj.is_listed = True
                     product_size_obj.save()
                     updated = True
             if updated:
@@ -136,11 +143,13 @@ def product_size(request):
     
 @never_cache
 def size_add(request):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         if request.POST:
             sizeid = request.POST['sizeid']
             product_id = request.session['product_id']
-            obj = ProductVariant(size_id=sizeid,product_id=product_id)
+            obj = ProductVariant(size_id=sizeid,product_id=product_id,is_listed=False)
             obj.save()
         return redirect('product_management:product_size')
     elif request.user.is_authenticated:
@@ -150,6 +159,8 @@ def size_add(request):
 
 @never_cache
 def list_unlist_product(request, product_id):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         if request.method == "POST":
             product_add = Product.objects.get(id=product_id)
@@ -164,6 +175,8 @@ def list_unlist_product(request, product_id):
 
 @never_cache
 def inactive_product(request,product_id):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         request.session['product_id']=product_id
         return redirect('product_management:product_size')
@@ -175,6 +188,8 @@ def inactive_product(request,product_id):
 
 @never_cache  
 def product_edit(request,product_id):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:    
         product = Product.objects.get(id=product_id)
         subcategories = SubCategory.objects.select_related('category')
@@ -237,6 +252,8 @@ def product_edit(request,product_id):
 
 @never_cache
 def product_varient_management(request,product_id):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         
         if request.POST:
@@ -268,6 +285,8 @@ def product_varient_management(request,product_id):
         return redirect('auth_app:login')
     
 def product_varient_management_post(request):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         if request.POST:
             product_id = request.POST['product_id']
@@ -289,6 +308,8 @@ def product_varient_management_post(request):
 
 @never_cache
 def product_add_quantity(request, product_id):
+    if request.user.is_block:
+        return redirect('auth_app:logout')
     if request.user.is_superuser:
         product = Product.objects.get(id=product_id)
         product_sizes = ProductVariant.objects.filter(product_id=product_id)
@@ -318,5 +339,3 @@ def product_add_quantity(request, product_id):
     else:
         return redirect('auth_app:login')
     
-
-

@@ -110,7 +110,7 @@
 
         <!-- Next button -->
         <li class="page-item {% if products.number == products.paginator.num_pages %}disabled{% endif %}">
-            <a class="page-link" href="{% if products.number != products.paginator.num_pages %}?page={{ products.number|add:'1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}{% else %}#{% endif %}" {% if products.number == products.paginator.num_pages %}tabindex="-1" aria-disabled="true"{% endif %}>
+            <a class="page-link" href="{% if products.number != products.paginator.num_pages %}?page={{ products.number|add:'1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}{% else %}#{% endif %}" {% if products.number == products.paginator.num_pages %} tabindex="-1" aria-disabled="true"{% endif %}>
                 Next
             </a>
         </li>
