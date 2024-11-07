@@ -40,6 +40,8 @@ def block_unblock_user(request, user_id):
             user_data.is_block = not user_data.is_block
             user_data.save()
             return JsonResponse({'status': 'success', 'is_block': user_data.is_block})
+        elif request.user.is_block:
+            return redirect('auth_app:logout') 
         elif request.user.is_authenticated:
             return redirect('auth_app:home')
         else:

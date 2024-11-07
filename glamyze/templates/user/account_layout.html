@@ -1,0 +1,32 @@
+{% extends 'user/blank_layout.html' %}
+
+
+{% block shop %}
+<style>
+    .list-group-item.active {
+        background-color: black;
+        border-color: black;
+        color: white; /* Ensures the text is readable */
+    }
+</style>
+<div class="container my-5">
+    <div class="row">
+      <div class="col-md-3">
+        <!-- Account Navigation -->
+        <div class="list-group">
+          <a href="#" class="list-group-item list-group-item-action active">Dashboard</a>
+          <a href="#" class="list-group-item list-group-item-action">Orders</a>
+          <a href="#" class="list-group-item list-group-item-action">Addresses</a>
+          <a href="#" class="list-group-item list-group-item-action">Wallet</a>
+          <a href="#" class="list-group-item list-group-item-action">Account Settings</a>
+        </div>
+      </div>
+      <div class="col-md-9">
+        {% block content %}
+            
+        {% endblock content %}
+        
+      </div>
+    </div>
+  </div>
+{% endblock shop %}

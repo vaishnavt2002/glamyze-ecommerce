@@ -29,7 +29,13 @@ def add_to_cart(request):
                 product = Product.objects.get(id=variant.product.id)
                 return render(request,'user/product_view.html',{'product':product,'notsuccess':True})
 
-                
+            if variant.quantity < int(num_product):
+                variant = ProductVariant.objects.get(id=variant_id)
+                product = Product.objects.get(id=variant.product.id)
+                print(variant.size.id)
+                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'noquantity':True})
+
+
                 # At this point, all conditions are satisfied
             product = variant.product  # Retrieve the related product
             try:
@@ -38,8 +44,8 @@ def add_to_cart(request):
                 cart = Cart(user_id=request.user.id)
                 cart.save()
                 cart.refresh_from_db()
-            print(variant_id)
-            print(num_product)
+
+
             try:
                 cart_item = CartItem.objects.get(cart=cart,productvariant_id=variant_id)
                 cart_item.quantity = num_product
@@ -52,4 +58,58 @@ def add_to_cart(request):
         return redirect('auth_app:login')
 
 def cart_view(request):
-    return render(request,'user/cart.html')
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    if request.user.is_block:
+        return redirect('auth_app:logout')
+    if request.user.is_authenticated:
+        context={}
+        if request.POST:
+            num_products = request.POST.get('num_product')
+            item_id = request.POST.get('item_id')
+            print(num_products)
+            print(item_id)
+            cart_item = CartItem.objects.get(id=item_id)
+            variant = ProductVariant.objects.get(id=cart_item.productvariant_id)
+            if int(num_products) < cart_item.quantity:
+                cart_item.quantity=int(num_products)
+                cart_item.save()
+            elif int(num_products) > cart_item.quantity:
+                if int(num_products) > variant.quantity:
+                    context = {'quantity_error' : True}
+                else:
+                    cart_item.quantity=int(num_products)
+                cart_item.save()
+        user_id = request.user.id
+        cart, created = Cart.objects.get_or_create(user_id=user_id)
+        cart_items = CartItem.objects.filter(cart=cart).select_related('cart')
+        total_price = 0
+        for item in cart_items:
+            item.total_price = item.productvariant.price * item.quantity
+            total_price += item.total_price
+            if not item.productvariant.is_listed or not item.productvariant.product.is_active or not item.productvariant.product.is_listed or not item.productvariant.product.subcategory.is_listed or  not item.productvariant.product.subcategory.category.is_listed:
+                item.not_listed = True
+            elif item.productvariant.quantity==0:
+                    item.remove = True
+            elif item.quantity > item.productvariant.quantity:
+                item.warning = True
+        
+            context.update({'cart_items':cart_items,'total_price':total_price})
+        return render(request,'user/cart.html',context)
+
+    else:
+        return redirect('auth_app:login')
+    
+def cart_item_delete(request,id):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    if request.user.is_block:
+        return redirect('auth_app:logout')
+    if request.user.is_authenticated:
+            CartItem.objects.get(id=id).delete()
+            return redirect('cart_app:cart_view')
+    else:
+        return redirect('auth_app:login')
+
+
+

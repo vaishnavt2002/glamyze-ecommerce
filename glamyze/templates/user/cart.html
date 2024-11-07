@@ -103,7 +103,6 @@
     
 
 <!-- Shoping Cart -->
-<form class="bg0 p-t-75 p-b-85">
     <div class="container">
         <div class="row">
             <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
@@ -116,70 +115,76 @@
                                 <th class="column-3">Price</th>
                                 <th class="column-4">Quantity</th>
                                 <th class="column-5">Total</th>
+                                <th class="column-6">Action</th>
                             </tr>
-
+                            {% for item in cart_items %}
                             <tr class="table_row">
                                 <td class="column-1">
                                     <div class="how-itemcart1">
-                                        <img src="images/item-cart-04.jpg" alt="IMG">
+                                        <img src="{{ item.productvariant.product.image1.url }}" alt="IMG">
                                     </div>
                                 </td>
-                                <td class="column-2">Fresh Strawberries</td>
-                                <td class="column-3">$ 36.00</td>
+                                <td class="column-2">{{ item.productvariant.product.product_name }}-{{item.productvariant.size.size_code}}</td>
+                                <td class="column-3">₹{{ item.productvariant.price }}</td>
                                 <td class="column-4">
-                                    <div class="wrap-num-product flex-w m-l-auto m-r-0">
-                                        <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-                                            <i class="fs-16 zmdi zmdi-minus"></i>
-                                        </div>
-
-                                        <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="1">
-
-                                        <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-                                            <i class="fs-16 zmdi zmdi-plus"></i>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="column-5">$ 36.00</td>
-                            </tr>
-
-                            <tr class="table_row">
-                                <td class="column-1">
-                                    <div class="how-itemcart1">
-                                        <img src="images/item-cart-05.jpg" alt="IMG">
-                                    </div>
-                                </td>
-                                <td class="column-2">Lightweight Jacket</td>
-                                <td class="column-3">$ 16.00</td>
-                                <td class="column-4">
-                                    <div class="wrap-num-product flex-w m-l-auto m-r-0">
-                                        <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-                                            <i class="fs-16 zmdi zmdi-minus"></i>
-                                        </div>
-
-                                        <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product2" value="1">
-
-                                        <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-                                            <i class="fs-16 zmdi zmdi-plus"></i>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="column-5">$ 16.00</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
-                        <div class="flex-w flex-m m-r-20 m-tb-5">
-                            <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="coupon" placeholder="Coupon Code">
+                                    <form id="quantityForm-{{ item.id }}" action="{% url 'cart_app:cart_view' %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" value="{{item.id}}" name="item_id">
+                                        <input type="hidden" id="quantityInput-{{ item.id }}" name="num_product" value="{{ item.quantity }}">
                                 
-                            <div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
-                                Apply coupon
-                            </div>
-                        </div>
-
-                        <div class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10">
-                            Update Cart
-                        </div>
+                                        <div class="wrap-num-product flex-w m-l-auto m-r-0">
+                                            <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
+                                                <i class="fs-16 zmdi zmdi-minus"></i>
+                                            </div>
+                                            <input class="mtext-104 cl3 txt-center num-product" 
+                                                   id="quantityDisplay-{{ item.id }}" 
+                                                   type="number" 
+                                                   value="{{ item.quantity }}" 
+                                                   readonly>
+                                            <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
+                                                <i class="fs-16 zmdi zmdi-plus"></i>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="column-5">{{item.quantity}}x₹{{item.productvariant.price}} = ₹{{item.total_price}}</td>
+                                <td class="column-6">
+                                    <form action="{% url 'cart_app:cart_item_delete' item.id %}" >
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger" style="margin-right: 5px;">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% if item.not_listed %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="warning-message" style="color: #ff0000; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
+                                        The product is no longer available to buy. Remove from cart to continue.
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% if item.remove %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="warning-message" style="color: #ff0000; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
+                                        Sorry! This Product is Out of Stock. Remove from cart to continue.
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% if item.warning %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="warning-message" style="color: #ff0000; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
+                                        The stock of this product is less than the selected quantity. Decrease the quantity to place order or remove to continue.
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                          
+                            {% endfor %}
+                        </table>
                     </div>
                 </div>
             </div>
@@ -189,65 +194,6 @@
                     <h4 class="mtext-109 cl2 p-b-30">
                         Cart Totals
                     </h4>
-
-                    <div class="flex-w flex-t bor12 p-b-13">
-                        <div class="size-208">
-                            <span class="stext-110 cl2">
-                                Subtotal:
-                            </span>
-                        </div>
-
-                        <div class="size-209">
-                            <span class="mtext-110 cl2">
-                                $79.65
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="flex-w flex-t bor12 p-t-15 p-b-30">
-                        <div class="size-208 w-full-ssm">
-                            <span class="stext-110 cl2">
-                                Shipping:
-                            </span>
-                        </div>
-
-                        <div class="size-209 p-r-18 p-r-0-sm w-full-ssm">
-                            <p class="stext-111 cl6 p-t-2">
-                                There are no shipping methods available. Please double check your address, or contact us if you need any help.
-                            </p>
-                            
-                            <div class="p-t-15">
-                                <span class="stext-112 cl8">
-                                    Calculate Shipping
-                                </span>
-
-                                <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
-                                    <select class="js-select2" name="time">
-                                        <option>Select a country...</option>
-                                        <option>USA</option>
-                                        <option>UK</option>
-                                    </select>
-                                    <div class="dropDownSelect2"></div>
-                                </div>
-
-                                <div class="bor8 bg0 m-b-12">
-                                    <input class="stext-111 cl8 plh3 size-111 p-lr-15" type="text" name="state" placeholder="State /  country">
-                                </div>
-
-                                <div class="bor8 bg0 m-b-22">
-                                    <input class="stext-111 cl8 plh3 size-111 p-lr-15" type="text" name="postcode" placeholder="Postcode / Zip">
-                                </div>
-                                
-                                <div class="flex-w">
-                                    <div class="flex-c-m stext-101 cl2 size-115 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer">
-                                        Update Totals
-                                    </div>
-                                </div>
-                                    
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="flex-w flex-t p-t-27 p-b-33">
                         <div class="size-208">
                             <span class="mtext-101 cl2">
@@ -257,7 +203,7 @@
 
                         <div class="size-209 p-t-1">
                             <span class="mtext-110 cl2">
-                                $79.65
+                                ₹{{total_price}}
                             </span>
                         </div>
                     </div>
@@ -269,7 +215,60 @@
             </div>
         </div>
     </div>
-</form>
-{% endif %}
 
+<script>
+function updateQuantityForm(itemId, newQuantity) {
+    document.getElementById(`quantityInput-${itemId}`).value = newQuantity;
+    document.getElementById(`quantityForm-${itemId}`).submit();
+}
+
+document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const itemId = btn.closest('td.column-4').querySelector('input.num-product').id.split('-')[1];
+        const currentQuantity = parseInt(document.getElementById(`quantityDisplay-${itemId}`).value);
+        let newQuantity;
+        if (btn.classList.contains('btn-num-product-down')) {
+            newQuantity = currentQuantity - 1;
+            newQuantity = newQuantity < 1 ? 1 : newQuantity; // Prevent quantity from going below 1
+        } else {
+            newQuantity = currentQuantity + 1;
+        }
+
+        // Update the quantity display after a short delay
+        setTimeout(() => {
+            document.getElementById(`quantityDisplay-${itemId}`).value = newQuantity;
+        }, 200);
+
+        updateQuantityForm(itemId, newQuantity);
+    });
+});
+</script>{% if noquantity %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'There is no quantity available to add. Try lesser quantity',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            window.location.href = "{% url 'product_app:product_view' product.id %}?size={{size_id}}";  // Redirect after confirmation
+        });
+    });
+</script>
+{% endif %}
+{% if quantity_error %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'There is no quantity available to add. Try a lesser quantity.',
+            icon: 'error',
+            timer: 3000,  // Display the alert for 3 seconds (3000 milliseconds)
+            showConfirmButton: false  // Hide the confirm button to automatically close
+        });
+    });
+</script>
+
+{% endif %}
+    
 {% endblock %}

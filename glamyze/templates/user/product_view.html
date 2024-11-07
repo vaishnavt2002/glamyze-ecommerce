@@ -110,12 +110,22 @@
                         </form>
                         
 
+                        <form action="{% url 'cart_app:add_to_cart' %}" class="flex-w m-r-20 m-tb-10" >
 
                         <div class="flex-w flex-r-m p-b-10">
                             <div class="size-204 flex-w flex-m respon6-next">
-                                <form action="{% url 'cart_app:add_to_cart' %}" class="flex-w m-r-20 m-tb-10" >
-                                    <input type="hidden" name="variant_id" value="{{selected_size.id}}">
 
+                                    <input type="hidden" name="variant_id" value="{{selected_size.id}}">
+                                    {% if selected_size.quantity == 0 %}
+                                    <div class="warning-message" style="color: #ff0000; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
+                                        Out of Stock
+                                    </div>
+                                
+                               
+        						{% elif selected_size.quantity <= 5 %}
+        							<div class="warning-message" style="color: #ffa500; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
+            						Low Stock. Only {{selected_size.quantity}} left.
+        						</div>
                                 <div class="wrap-num-product flex-w m-r-20 m-tb-10">
                                     <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
                                         <i class="fs-16 zmdi zmdi-minus"></i>
@@ -126,12 +136,32 @@
                                         <i class="fs-16 zmdi zmdi-plus"></i>
                                     </div>
                                 </div>
-
                                 <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
                                     Add to cart
                                 </button>
-                            </form>
+                                {% else %}
+                                <div class="warning-message" style="color: #ffa500; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
+            						Available stock: {{selected_size.quantity}} left.
+        						</div>
+                                <div class="wrap-num-product flex-w m-r-20 m-tb-10">
+                                    <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
+                                        <i class="fs-16 zmdi zmdi-minus"></i>
+                                    </div>
+                                    <input class="mtext-104 cl3 txt-center num-product" type="number" name="num_product" value="1">
+
+                                    <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
+                                        <i class="fs-16 zmdi zmdi-plus"></i>
+                                    </div>
+                                </div>
+                                <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+                                    Add to cart
+                                </button>
+                                
+        						{% endif %}
+                                
                             </div>
+                        </form>
+
                         </div>	
                     </div>
 
@@ -401,6 +431,20 @@
                 confirmButtonText: 'OK'
             }).then(() => {
                 window.location.href = "{% url 'product_app:shop' %}";  // Redirect after confirmation
+            });
+        });
+    </script>
+{% endif %}
+{% if noquantity %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: 'Failed!',
+                text: 'There is no quantity available to add. Try lesser quantity',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = "{% url 'product_app:product_view' product.id %}?size={{size_id}}";  // Redirect after confirmation
             });
         });
     </script>

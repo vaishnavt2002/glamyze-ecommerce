@@ -3,7 +3,7 @@ from django.views.decorators.cache import never_cache
 from product_app.models import *
 from django.core.paginator import Paginator
 from django.db.models import Prefetch,Count
-from django.db.models import Q
+from django.db.models import Q,Sum
 
 
 @never_cache
@@ -24,7 +24,7 @@ def shop(request):
             subcategory__category__is_listed=True,
             subcategory__is_listed=True,
             productvariant__is_listed=True
-        ).distinct().order_by('id')
+        ).annotate(total_stock=Sum('productvariant__quantity')).distinct().order_by('id')
         if search:
             products = products.filter(product_name__icontains=search).exclude(is_active=False)
         if category_id:
@@ -34,7 +34,7 @@ def shop(request):
         
         
 
-        products = products.prefetch_related(Prefetch('productvariant_set',queryset=ProductVariant.objects.filter(is_listed=True)))
+        products = products.prefetch_related(Prefetch('productvariant_set',queryset=ProductVariant.objects.filter(is_listed=True).order_by('price')))
         paginator = Paginator(products, 4)
         page_number = request.GET.get('page', 1) 
         page_obj = paginator.get_page(page_number) 
@@ -83,7 +83,7 @@ def product_view(request, product_id):
             return redirect('product_app:shop')  # Redirect if category or subcategory is unlisted
 
         # Fetch available sizes for the product
-        sizes = ProductVariant.objects.filter(product_id=product_id, is_listed=True)  # Only listed variants
+        sizes = ProductVariant.objects.filter(product_id=product_id, is_listed=True).order_by('price')  # Only listed variants
         if not sizes.exists():
             return redirect('product_app:shop')  # Redirect if no sizes available
 
