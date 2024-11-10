@@ -10,9 +10,9 @@ from django.db.models import Q,Sum
 def shop(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout')  
     if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         search = request.GET.get('searchvalue', '')
         category_id = request.GET.get('categoryid')
         subcategory_id = request.GET.get('subcategoryid')
@@ -66,11 +66,10 @@ def product_view(request, product_id):
     # Check if user is a superuser and redirect to admin dashboard
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    elif request.user.is_block:
-        return redirect('auth_app:logout') 
-
     # Check if the user is authenticated
     if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')  
         # Get the product or return a 404 if not found
         product = get_object_or_404(Product, id=product_id)
 

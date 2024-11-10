@@ -11,8 +11,7 @@ from django.views.decorators.cache import never_cache
 
 @never_cache
 def product_details(request):
-    if request.user.is_block:
-        return redirect('auth_app:logout') 
+    
     if request.user.is_superuser:
         if request.method == "GET":
             search = request.GET.get('searchvalue', '')
@@ -42,14 +41,14 @@ def product_details(request):
                 context['subcategory_id'] = subcategory_id
         return render(request,'my_admin/product.html',context)
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
 
 @never_cache
 def product_add(request):
-    if request.user.is_block:
-        return redirect('auth_app:logout')
     if request.user.is_superuser:
         subcategories = SubCategory.objects.select_related('category')
         context={'subcategories':subcategories}
@@ -83,6 +82,8 @@ def product_add(request):
             return redirect('product_management:product_size')
         return render(request,'my_admin/addproduct.html',context)
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -101,8 +102,6 @@ def validate_image_format(image,image_name):
 
 @never_cache
 def product_size(request):
-    if request.user.is_block:
-        return redirect('auth_app:logout')
     if request.user.is_superuser:
         product_id = request.session.get('product_id')
         obj = ProductVariant.objects.filter(product_id=product_id)
@@ -137,6 +136,8 @@ def product_size(request):
             return redirect('product_management:product_details')
         return render(request,'my_admin/productsize.html',{'product_varients':obj,'sizes':available_sizes})
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -153,6 +154,8 @@ def size_add(request):
             obj.save()
         return redirect('product_management:product_size')
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -168,6 +171,8 @@ def list_unlist_product(request, product_id):
             product_add.save()
             return JsonResponse({'status': 'success', 'is_listed': product_add.is_listed})
         elif request.user.is_authenticated:
+            if request.user.is_block:
+                return redirect('auth_app:logout') 
             return redirect('auth_app:home')
         else:
             return redirect('auth_app:login')
@@ -181,6 +186,8 @@ def inactive_product(request,product_id):
         request.session['product_id']=product_id
         return redirect('product_management:product_size')
     elif request.user.is_authenticated:
+            if request.user.is_block:
+                return redirect('auth_app:logout') 
             return redirect('auth_app:home')
     else:
             return redirect('auth_app:login')
@@ -245,7 +252,9 @@ def product_edit(request,product_id):
        
         return render(request, 'my_admin/editproducts.html', context)
     elif request.user.is_authenticated:
-            return redirect('auth_app:home')
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
+        return redirect('auth_app:home')
     else:
             return redirect('auth_app:login')
 
@@ -280,6 +289,8 @@ def product_varient_management(request,product_id):
         available_sizes = Size.objects.exclude(id__in=excluded_sizes)
         return render(request,'my_admin/varient_mgmt.html',{'product':product, 'added_sizes':added_sizes_with_status,'sizes':available_sizes})
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -300,9 +311,11 @@ def product_varient_management_post(request):
                 variant.save()
             return redirect('product_management:product_details')
     elif request.user.is_authenticated:
-            return redirect('auth_app:home')
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
+        return redirect('auth_app:home')
     else:
-            return redirect('auth_app:login')
+        return redirect('auth_app:login')
 
 
 
@@ -335,6 +348,8 @@ def product_add_quantity(request, product_id):
         return render(request, 'my_admin/addquantity.html', {'product_sizes': product_sizes, 'product': product})
     
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')

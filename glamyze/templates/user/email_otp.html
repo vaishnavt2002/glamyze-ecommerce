@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Enter OTP</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href=""/>
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <style>
+        /* Ensure body and html take full height */
+        html, body {
+            height: 100%;
+        }
+        /* Centering with Flexbox */
+        .centered-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full height of the viewport */
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container centered-container">
+        <div class="w-100">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-5">
+                            
+
+                            <!-- OTP Form -->
+                            <form method="POST" action="{% url 'profile_app:email_otp_verification' %}">
+                                {% csrf_token %}
+                                
+                               
+
+                                <div class="form-group">
+                                    <label for="otp">Enter OTP</label>
+                                    <input type="text" class="form-control form-control-lg text-center" id="otp" name="otp" minlength='6' maxlength="6" required placeholder="Enter 6-digit OTP">
+                                </div>
+
+                                <button type="submit" class="btn btn-dark btn-block btn-lg mb-4">VERIFY OTP</button>
+                                <a href="{% url 'profile_app:profile_view' %}">Cancel</a>
+
+                                <!-- Resend OTP Link -->
+                                <div class="text-center">
+                                    <a href="{% url 'profile_app:user_otp_resend' %}" class="text-dark d-block mb-3">Didn't receive the OTP? Resend</a>
+                                    {% if errors %}
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+
+   <script>
+    // Check if signup success is passed as context
+    {% if change_success %}
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Successful!',
+            text: 'Your email changed successfully.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            window.location.href = "{% url 'profile_app:profile_view' %}";  // Redirect to login page after confirmation
+        });
+    });
+    {% endif %}
+</script>
+
+    <script src="{% static 'vendor/jquery/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+</html>

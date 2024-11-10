@@ -1,0 +1,77 @@
+{% extends 'user/account_layout.html' %}
+{% block address_active2 %}active{% endblock %}
+{% block content %}
+
+<style>
+  .profile-card {
+    max-width: 700px;
+    margin: auto;
+    text-align: center;
+  }
+  .profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+</style>
+
+<div class="card profile-card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h4>Profile</h4>
+    <a href="{% url 'profile_app:edit_profile' %}" class="btn btn-dark">Edit</a>
+  </div>
+  
+  <div class="card-body">
+   
+
+    <!-- Profile Information -->
+    <div class="mb-3">
+    <strong>Name:</strong>
+    <p>{{ user.first_name }} {{ user.last_name }}</p>
+  </div>
+    
+    <div class="mb-3">
+      <strong>Email:</strong>
+      <p>{{ user.email }}</p>
+    </div>
+    <div class="mb-3">
+      <strong>Phone:</strong>
+      <p>{{ user.phone_number }}</p>
+    </div>
+    {% if address %}
+    <div class="mb-3">
+      <strong>Address:</strong>
+      <p>{{ address.address }}, {{ address.locality }}, {{ address.state }}, {{ address.pincode }}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if email_change %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Attention!',
+            text: 'There is a change in email. You must confirm the email using otp to apply the change.',
+            icon: 'warning',
+            showCancelButton: true,  // Show cancel button
+            confirmButtonText: 'Continue to Confirm',
+            cancelButtonText: 'Cancel'  // Text for cancel button
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect if 'OK' is clicked
+                window.location.href = "{% url 'profile_app:email_otp'%}";
+            }
+            else {
+              window.location.href = "{% url 'profile_app:profile_view' %}"
+            }
+            // No action needed if 'Cancel' is clicked
+        });
+    });
+</script>
+{% endif %}
+
+
+
+{% endblock content %}

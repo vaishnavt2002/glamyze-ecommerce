@@ -1,0 +1,149 @@
+
+
+  {% extends 'user/account_layout.html' %}
+  {% block address_active5 %}active{% endblock %}
+{% block content %}
+<style>
+  .form-check {
+    margin-right: 20px; /* Adjust spacing between radio buttons */
+}
+</style>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4>Address Management</h4>
+      
+    </div>
+    
+    <!-- Add Address Form -->
+    <div class="card">
+        <div class="card-header">
+          <h4>Add Address</h4>
+        </div>
+        
+        <!-- Add Address Form -->
+        <div class="card-body">
+          <form method="post" action="">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="name" placeholder="Name" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="phone" placeholder="Phone Number" required>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="pincode" placeholder="Pincode" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="locality" placeholder="Locality" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <textarea class="form-control" name="address" rows="3" placeholder="Address (Area/Street)" required></textarea>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="city" placeholder="City/District/Town" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="state" placeholder="State" required>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="landmark" placeholder="Landmark (Optional)">
+              </div>
+              <div class="col-md-6 mb-3">
+                <input type="text" class="form-control" name="alternate_phone" placeholder="Alternate Phone (Optional)">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12">
+                  <div class="form-group d-flex align-items-center">
+                      <label class="me-3 mb-0">Address Type:</label>
+                      <div class="d-flex">
+                          <div class="form-check me-4">
+                              <input type="radio" class="form-check-input" id="homeAddress" name="addressType" value="home" required>
+                              <label class="form-check-label" for="homeAddress">Home Address</label>
+                          </div>
+                          <div class="form-check">
+                              <input type="radio" class="form-check-input" id="officeAddress" name="addressType" value="office">
+                              <label class="form-check-label" for="officeAddress">Office Address</label>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+              
+              
+            
+            <div class="d-flex">
+              <button type="submit" class="btn btn-dark mr-3">SAVE</button>
+              <button type="button" class="btn btn-outline-secondary">CANCEL</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Saved Addresses List -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h4>Saved Addresses</h4>
+        </div>
+        <div class="card-body">
+          {% for address in addresses %}
+          <div class="address-item {% if not forloop.last %}border-bottom{% endif %} py-4">
+            <div class="row">
+              <div class="col-md-8">
+                <h6 class="mb-2">{{ address.name }}</h6>
+                <p class="mb-1">{{ address.address }}</p>
+                <p class="mb-1">{{ address.city }}, {{ address.state }} - {{ address.pincode }}</p>
+                <p class="mb-1">Phone: {{ address.phone }}</p>
+                {% if address.landmark %}
+                <p class="mb-1">Landmark: {{ address.landmark }}</p>
+                {% endif %}
+              </div>
+              <div class="col-md-4 text-right">
+                <a href="{% url 'address_app:update_address' address.id %}" class="btn btn-dark btn-block mb-2">EDIT</a>
+                <button type="button" class="btn btn-outline-dark btn-block delete-btn" data-url="{% url 'address_app:delete_address' address.id %}">DELETE</button>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-4">
+            <p>No saved addresses found.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+<script>
+  document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+      event.preventDefault();
+      const url = this.getAttribute('data-url');  // Get the URL from data attribute
+      
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "This address will be permanently deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Redirect to the delete URL if confirmed
+          window.location.href = url;
+        }
+      });
+    });
+  });
+</script>
+
+
+{% endblock content %}

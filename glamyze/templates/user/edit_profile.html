@@ -1,0 +1,77 @@
+{% extends 'user/account_layout.html' %}
+{% block content %}
+
+<style>
+  .edit-profile-card {
+    max-width: 700px;
+    margin: auto;
+  }
+</style>
+
+<div class="card edit-profile-card">
+  <div class="card-header">
+    <h4>Edit Profile</h4>
+  </div>
+  <div class="card-body">
+    <form method="post" action="{% url 'profile_app:edit_profile' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user_data.first_name }}" required>
+      </div>
+      <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user_data.last_name }}" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ user_data.email }}" required>
+      </div>
+      <div class="form-group">
+        <label for="phone_number">Phone</label>
+        <input type="text" class="form-control" id="phone_number" name="phone" value="{{ user_data.phone_number }}">
+      </div>
+      <button type="submit" class="btn btn-dark mt-3">Save Changes</button>
+    </form>
+  </div>
+</div>
+{% if email_change %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Attention!',
+            text: 'There is a change in email. You must confirm the email using otp to apply the change. Other changes applied',
+            icon: 'warning',
+            showCancelButton: true,  // Show cancel button
+            confirmButtonText: 'Continue to Confirm',
+            cancelButtonText: 'Cancel'  // Text for cancel button
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect if 'OK' is clicked
+                window.location.href = "{% url 'profile_app:email_otp'%}";
+            }
+            // No action needed if 'Cancel' is clicked
+        });
+    });
+</script>
+{% endif %}
+{% if exist %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'A account with this email id already exists. Try another email id. Other changes applied.',
+            icon: 'error',
+            timer: 4000,  // Display the alert for 3 seconds (3000 milliseconds)
+            showConfirmButton: false  // Hide the confirm button to automatically close
+        });
+
+        // Redirect after 3 seconds
+        setTimeout(function() {
+            window.location.href = "{% url 'profile_app:profile_view' %}";  // Replace 'desired_redirect_url' with your target URL
+        }, 3000);  // Redirect after 3 seconds
+    });
+</script>
+{% endif %}
+
+{% endblock %}

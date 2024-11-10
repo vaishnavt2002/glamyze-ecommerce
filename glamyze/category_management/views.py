@@ -14,6 +14,8 @@ def category_view(request):
         category_data = Category.objects.prefetch_related('subcategory_set').order_by('id')
         return render(request,'my_admin/category.html',{'category_data':category_data})
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -29,6 +31,8 @@ def category_update(request):
             category_obj.save()
         return redirect('category_management:category_view')
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -43,9 +47,9 @@ def subcategory_add(request):
                 obj = SubCategory(category_id=category_id,subcategory_name=subcategory_name)
                 obj.save()
         return redirect('category_management:category_view')
-    elif request.user.is_block:
-        return redirect('auth_app:logout') 
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -58,9 +62,9 @@ def categories_list_unlist(request,id):
         category_obj.is_listed = not category_obj.is_listed
         category_obj.save()
         return redirect('category_management:category_view')
-    elif request.user.is_block:
-        return redirect('auth_app:logout') 
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -75,9 +79,10 @@ def subcategory_update(request):
             subcategory_obj.subcategory_name = new_subcatagory
             subcategory_obj.save()
         return redirect('category_management:category_view')
-    elif request.user.is_block:
-        return redirect('auth_app:logout') 
+    
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -89,9 +94,9 @@ def subcategories_list_unlist(request,id):
         subcategory_obj.is_listed = not subcategory_obj.is_listed
         subcategory_obj.save()
         return redirect('category_management:category_view')
-    elif request.user.is_block:
-        return redirect('auth_app:logout') 
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')

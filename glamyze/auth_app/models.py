@@ -6,6 +6,7 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
+    phone_number = models.CharField(null=True,max_length=13)
     is_block = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

@@ -34,9 +34,10 @@ def validate_data(email,phonenumber,password,confirm_password,fname,lname):
 def user_signup(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout') 
+ 
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     if request.POST:
         email = request.POST.get('email')
@@ -60,7 +61,7 @@ def user_signup(request):
                     user.last_name = lname
                     user.save()
             else:
-                CustomUser.objects.create_user(username=email,email=email,password=password,first_name=fname,last_name=lname,is_active=False)
+                CustomUser.objects.create_user(username=email,email=email,phone_number=phonenumber,password=password,first_name=fname,last_name=lname,is_active=False)
             try:
                 send_otp(request,email)
             except Exception:
@@ -74,9 +75,10 @@ def user_signup(request):
 def user_otp_verification(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout') 
+
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     if request.POST:
         if 'otp' in request.session and 'otp_expiry' in request.session:
@@ -103,9 +105,10 @@ def user_otp_verification(request):
 def user_otp_resend(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout')  
+
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     email = request.session['email']
     try:
@@ -129,9 +132,10 @@ def send_otp(request,email):
 def user_login(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout')  
+ 
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     if request.POST:
         email=request.POST.get('email')
@@ -181,9 +185,10 @@ def forgot_password(request):
 def user_otp_verification_forgotpassword(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout')  
+    
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     if request.POST:
         if 'otp' in request.session and 'otp_expiry' in request.session:
@@ -219,9 +224,10 @@ def user_otp_verification_forgotpassword(request):
 def user_otp_resend_forgot(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout')  
+     
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         return redirect('auth_app:home')
     email = request.session['email']
     try:
@@ -234,9 +240,10 @@ def user_otp_resend_forgot(request):
 def home(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
-    elif request.user.is_block:
-        return redirect('auth_app:logout')  
+     
     if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout') 
         products = Product.objects.filter(is_listed=True)[0:8]
         return render(request,'user/index.html',{'products':products})
     else:

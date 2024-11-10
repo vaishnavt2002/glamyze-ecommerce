@@ -25,6 +25,8 @@ def customer_details(request):
 
         return render(request, 'my_admin/customer.html', {'customer_data': page_obj, 'searchvalue': search})
     elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         return redirect('auth_app:home')
     else:
         return redirect('auth_app:login')
@@ -40,9 +42,9 @@ def block_unblock_user(request, user_id):
             user_data.is_block = not user_data.is_block
             user_data.save()
             return JsonResponse({'status': 'success', 'is_block': user_data.is_block})
-        elif request.user.is_block:
-            return redirect('auth_app:logout') 
         elif request.user.is_authenticated:
+            if request.user.is_block:
+                return redirect('auth_app:logout')
             return redirect('auth_app:home')
         else:
             return redirect('auth_app:login')

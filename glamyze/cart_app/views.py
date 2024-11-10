@@ -9,9 +9,9 @@ from . models import *
 def add_to_cart(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    if request.user.is_block:
-        return redirect('auth_app:logout')
     if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         if request.GET:
             variant_id = request.GET['variant_id']
             num_product = request.GET['num_product']
@@ -60,9 +60,10 @@ def add_to_cart(request):
 def cart_view(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    if request.user.is_block:
-        return redirect('auth_app:logout')
+    
     if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
         context={}
         if request.POST:
             num_products = request.POST.get('num_product')
@@ -103,9 +104,9 @@ def cart_view(request):
 def cart_item_delete(request,id):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    if request.user.is_block:
-        return redirect('auth_app:logout')
     if request.user.is_authenticated:
+            if request.user.is_block:
+                return redirect('auth_app:logout')
             CartItem.objects.get(id=id).delete()
             return redirect('cart_app:cart_view')
     else:

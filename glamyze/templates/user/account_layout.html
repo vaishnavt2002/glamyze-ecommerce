@@ -8,17 +8,21 @@
         border-color: black;
         color: white; /* Ensures the text is readable */
     }
+    .btn-dark{
+      background-color: black;
+    }
 </style>
 <div class="container my-5">
     <div class="row">
       <div class="col-md-3">
         <!-- Account Navigation -->
         <div class="list-group">
-          <a href="#" class="list-group-item list-group-item-action active">Dashboard</a>
-          <a href="#" class="list-group-item list-group-item-action">Orders</a>
-          <a href="#" class="list-group-item list-group-item-action">Addresses</a>
-          <a href="#" class="list-group-item list-group-item-action">Wallet</a>
-          <a href="#" class="list-group-item list-group-item-action">Account Settings</a>
+          <a href="{% url 'address_app:account_management' %}" class="list-group-item list-group-item-action {% block address_active1 %}{% endblock %}">Dashboard</a>
+          <a href="{% url 'profile_app:profile_view' %}" class="list-group-item list-group-item-action {% block address_active2 %}{% endblock %}">Profile</a>
+          <a href="{% url 'profile_app:change_password' %}" class="list-group-item list-group-item-action {% block address_active3 %}{% endblock %}">Change Password</a>
+          <a href="#" class="list-group-item list-group-item-action {% block address_active4 %}{% endblock %}">Orders</a>
+          <a href="{% url 'address_app:address_view' %}" class="list-group-item list-group-item-action {% block address_active5 %}{% endblock %}">Addresses</a>
+          <a href="#" class="list-group-item list-group-item-action {% block address_active6 %}{% endblock %}">Wallet</a>
         </div>
       </div>
       <div class="col-md-9">
