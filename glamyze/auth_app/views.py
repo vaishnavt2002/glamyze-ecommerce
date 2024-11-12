@@ -9,6 +9,10 @@ from django.contrib.auth import authenticate,login,logout
 from product_app.models import *
 from django.views.decorators.cache import never_cache
 from allauth.socialaccount.models import SocialAccount
+from django.core.paginator import Paginator
+from django.db.models import Prefetch,Count
+from django.db.models import Q,Sum,Min
+from banner_management.models import *
 
 
 
@@ -244,11 +248,49 @@ def home(request):
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout') 
+        current_date = timezone.now().date()
+        slider = Banner.objects.filter(
+                    is_active=True,
+                    start_date__lte=current_date,
+                    end_date__gte=current_date
+                )
         products = Product.objects.filter(is_listed=True)[0:8]
-        return render(request,'user/index.html',{'products':products})
+        products = Product.objects.filter(
+            is_active=True,
+            is_listed=True,
+            subcategory__category__is_listed=True,
+            subcategory__is_listed=True,
+            productvariant__is_listed=True
+        ).annotate(total_stock=Sum('productvariant__quantity')).distinct().order_by('id')[0:8]
+        products = list(products)
+        for product in products:
+            variant = product.productvariant_set.first() if product.productvariant_set.exists() else None
+            if variant:
+                product.variant_price = variant.price
+                # Calculate offer price if product has an active offer
+                if product.offer and product.offer.is_active:
+                    discount = product.offer.discount_percentage
+                    product.offer_price = round(variant.price * (1 - discount / 100), 2)
+                else:
+                    product.offer_price = None
+        return render(request,'user/index.html',{'products':products,'slider':slider})
     else:
+        slider = Banner.objects.filter(
+                    is_active=True,
+                    start_date__lte=current_date,
+                    end_date__gte=current_date
+                )
         products = Product.objects.filter(is_listed=True)[0:8]
-        return render(request,'user/index.html',{'products':products})
+        products = Product.objects.filter(
+            is_active=True,
+            is_listed=True,
+            subcategory__category__is_listed=True,
+            subcategory__is_listed=True,
+            productvariant__is_listed=True
+        ).annotate(total_stock=Sum('productvariant__quantity'),variant_price=Min('productvariant__price')).distinct().order_by('id')[0:8]
+        for product in products:
+            print(product.variant_price)
+        return render(request,'user/index.html',{'products':products,'slider':slider})
 
 
 @never_cache

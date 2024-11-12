@@ -30,6 +30,8 @@ urlpatterns = [
     path('user/',include('product_app.urls')),
     path('user/',include('cart_app.urls')),
     path('user/',include('address_app.urls')),
-    path('user/',include('profile_app.urls'))
+    path('user/',include('profile_app.urls')),
+    path('admin-panel/',include('banner_management.urls')),
+    path('admin-panel/',include('promotion_management.urls'))
 ]
 urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

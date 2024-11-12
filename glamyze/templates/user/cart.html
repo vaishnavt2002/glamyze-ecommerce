@@ -125,7 +125,17 @@
                                     </div>
                                 </td>
                                 <td class="column-2">{{ item.productvariant.product.product_name }}-{{item.productvariant.size.size_code}}</td>
-                                <td class="column-3">₹{{ item.productvariant.price }}</td>
+                                <td class="column-3">
+                                    {% if item.productvariant.product.offer %}
+                                        <div>
+                                            <span style="text-decoration: line-through; color: #999;">₹{{ item.productvariant.price }}</span>
+                                            <br>
+                                            <span style="color: #ff0000;">₹{{ item.offer_price }}</span>
+                                        </div>
+                                    {% else %}
+                                        ₹{{ item.productvariant.price }}
+                                    {% endif %}
+                                </td>
                                 <td class="column-4">
                                     <form id="quantityForm-{{ item.id }}" action="{% url 'cart_app:cart_view' %}" method="post">
                                         {% csrf_token %}
@@ -147,7 +157,21 @@
                                         </div>
                                     </form>
                                 </td>
-                                <td class="column-5">{{item.quantity}}x₹{{item.productvariant.price}} = ₹{{item.total_price}}</td>
+                                <td class="column-5">
+                                    {% if item.productvariant.product.offer %}
+                                        <div>
+                                            <span style="text-decoration: line-through; color: #999;">
+                                                {{item.quantity}}x₹{{item.productvariant.price}}
+                                            </span>
+                                            <br>
+                                            <span style="color: #ff0000;">
+                                                {{item.quantity}}x₹{{item.offer_price}} = ₹{{item.total_price}}
+                                            </span>
+                                        </div>
+                                    {% else %}
+                                        {{item.quantity}}x₹{{item.productvariant.price}} = ₹{{item.total_price}}
+                                    {% endif %}
+                                </td>                                
                                 <td class="column-6">
                                     <form action="{% url 'cart_app:cart_item_delete' item.id %}" >
                                         {% csrf_token %}

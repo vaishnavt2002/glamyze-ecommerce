@@ -40,6 +40,21 @@
           </select>
           
         </div>
+        <!-- offer selection -->
+        <div class="col-md-6">
+          <label for="subcategory" class="form-label">Select an offer for product if any</label>
+          <select class="form-select" id="offer" name="offer_id">
+              <option value="null">-- Remove Selection --</option>
+              {% if product.offer %}
+              <option value="{{ product.offer.id }}" selected>{{product.offer.offer_name}}</option>
+              {% endif %}
+              {% for offer in offers %}
+              <option value="{{ offer.id }}">
+                  {{ offer.offer_name }}
+              </option>
+              {% endfor %}
+          </select>
+      </div>
 
         <!-- Material -->
         <div class="col-md-6">

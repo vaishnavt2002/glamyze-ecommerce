@@ -3,7 +3,10 @@ from django.views.decorators.cache import never_cache
 from product_app.models import *
 from django.core.paginator import Paginator
 from django.db.models import Prefetch,Count
-from django.db.models import Q,Sum
+from django.db.models import Q,Sum,Min
+from datetime import datetime
+from django.utils import timezone
+
 
 
 @never_cache
@@ -32,16 +35,21 @@ def shop(request):
         elif subcategory_id:
             products = products.filter(subcategory_id=subcategory_id)
         
-        
-
         products = products.prefetch_related(Prefetch('productvariant_set',queryset=ProductVariant.objects.filter(is_listed=True).order_by('price')))
         paginator = Paginator(products, 4)
         page_number = request.GET.get('page', 1) 
         page_obj = paginator.get_page(page_number) 
         
         for product in page_obj:
-            variant_price = product.productvariant_set.first().price if product.productvariant_set.exists() else None
-            product.variant_price = variant_price
+            variant = product.productvariant_set.first() if product.productvariant_set.exists() else None
+            if variant:
+                product.variant_price = variant.price
+                # Calculate offer price if product has an active offer
+                if product.offer and product.offer.is_active:
+                    discount = product.offer.discount_percentage
+                    product.offer_price = round(variant.price * (1 - discount / 100), 2)
+                else:
+                    product.offer_price = None
 
         context = {
             'products': page_obj,
@@ -63,54 +71,70 @@ def shop(request):
     
 @never_cache
 def product_view(request, product_id):
-    # Check if user is a superuser and redirect to admin dashboard
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    # Check if the user is authenticated
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')  
-        # Get the product or return a 404 if not found
+        
         product = get_object_or_404(Product, id=product_id)
 
-        # Check if the product is active and listed
         if not product.is_active or not product.is_listed:
-            return redirect('product_app:shop')  # Redirect to the shop page
+            return redirect('product_app:shop')
 
-        # Check if the associated category and subcategory are active and listed
         if not product.subcategory.is_listed or not product.subcategory.category.is_listed:
-            return redirect('product_app:shop')  # Redirect if category or subcategory is unlisted
+            return redirect('product_app:shop')
 
-        # Fetch available sizes for the product
-        sizes = ProductVariant.objects.filter(product_id=product_id, is_listed=True).order_by('price')  # Only listed variants
+        sizes = ProductVariant.objects.filter(product_id=product_id, is_listed=True).order_by('price')
         if not sizes.exists():
-            return redirect('product_app:shop')  # Redirect if no sizes available
+            return redirect('product_app:shop')
 
-        # Default to the first available size
         selected_size = sizes.first()
 
-        # If a size is selected via GET request, update the selected size
         if request.GET:
             size = request.GET.get('size')
             try:
                 selected_size = sizes.get(size_id=size)
             except ProductVariant.DoesNotExist:
-                return redirect('product_app:shop')  # Redirect if size does not exist
+                return redirect('product_app:shop')
         
+        # Check if product has an active offer within valid dates
+        current_date = timezone.now().date()
+        if (product.offer and product.offer.is_active and 
+            product.offer.start_date <= current_date <= product.offer.end_date):
+            # Calculate offer price for selected size
+            discount = product.offer.discount_percentage
+            selected_size.offer_price = round(selected_size.price * (1 - discount / 100), 2)
+            selected_size.has_offer = True
+        else:
+            selected_size.offer_price = None
+            selected_size.has_offer = False
 
-        #related products creation
         related_products = Product.objects.filter(
             is_active=True,
             is_listed=True,
             subcategory__category__is_listed=True,
             subcategory__is_listed=True,
             productvariant__is_listed=True,
-            subcategory_id = product.subcategory.id
+            subcategory_id=product.subcategory.id
         ).distinct().exclude(id=product_id).order_by('id')[0:8]
-        related_products = related_products.prefetch_related(Prefetch('productvariant_set',queryset=ProductVariant.objects.filter(is_listed=True)))
+        
+        related_products = related_products.prefetch_related(
+            Prefetch('productvariant_set', 
+                    queryset=ProductVariant.objects.filter(is_listed=True)))
+        
+        # Calculate offer prices for related products
         for item in related_products:
-            variant_price = item.productvariant_set.first().price if item.productvariant_set.exists() else None
-            item.variant_price = variant_price
+            variant = item.productvariant_set.first() if item.productvariant_set.exists() else None
+            if variant:
+                item.variant_price = variant.price
+                if (item.offer and item.offer.is_active and 
+                    item.offer.start_date <= current_date <= item.offer.end_date):
+                    item.offer_price = round(variant.price * (1 - item.offer.discount_percentage / 100), 2)
+                    item.has_offer = True
+                else:
+                    item.offer_price = None
+                    item.has_offer = False
 
         return render(request, 'user/product_view.html', {
             'product': product,
@@ -118,8 +142,6 @@ def product_view(request, product_id):
             'selected_size': selected_size,
             'related_products': related_products
         })
-    
     else:
         return redirect('auth_app:login')
-    
 

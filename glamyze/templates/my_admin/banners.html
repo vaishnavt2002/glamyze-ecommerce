@@ -1,0 +1,95 @@
+
+{% extends 'my_admin/base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb" class="px-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
+      <li class="breadcrumb-item">Banners</li>
+    </ol>
+</nav>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<h2 class="mb-4 px-4">Banners</h2>
+
+ 
+<div class="container-fluid">
+    
+    <a class="btn btn-primary btn-md m-2" href="{% url 'banner_management:add_banner' %}" >+ Add Banner</a>            
+    <div class="table-responsive">
+        <table class="table table-striped table-hover w-100">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Banner Name</th>
+                    <th scope="col">Banner Type</th>
+                    <th scope="col">Banner Description</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Start date</th>
+                    <th scope="col">End date</th>
+                    <th scope="col">Action</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for banner in banners %}
+                <tr id="product-row-{{product.id}}">
+                    <td>{{banner.name}}</td>
+                    <td>{{ banner.banner_type }} </td>
+                    <td>{{banner.description}}</td>
+                    <td><img src="{{ banner.image.url }}" alt="{{ banner.name }}" style="width: 70px;"></td>
+                    <td>{{banner.start_date}}</td>
+                    <td>{{banner.end_date}}</td>
+                    <td>
+                        <a class="btn btn-outline-primary" href="{% url 'banner_management:edit_banner' banner.id %}">Edit</a>
+                        <button id="banner-row-{{banner.id}}" class="{% if banner.is_active %}
+                        btn btn-primary
+                    {% else %}
+                        btn btn-outline-primary
+                    {% endif %} btn-md" onclick="toggleBlock({{ banner.id }})" >{% if banner.is_active %}
+                    Unlist
+                {% else %}
+                    List
+                {% endif %}</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>        
+    </div>
+</div>
+
+<script>
+function toggleBlock(bannerId) {
+    fetch(`{% url 'banner_management:activate_banner' 0 %}`.replace("0", bannerId), {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const button = document.querySelector(`#banner-row-${bannerId}`);
+            const isListed = data.is_listed; // Get the updated status from the response
+            
+            // Update button text based on the new status
+            if (isListed) {
+                button.textContent = "Unlist";
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-primary');
+            } 
+            else {
+                button.textContent = "List";
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline-primary');
+            }
+            
+        } else {
+            alert("There was an error updating the user's status.");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+</script>
+{% endblock content %}

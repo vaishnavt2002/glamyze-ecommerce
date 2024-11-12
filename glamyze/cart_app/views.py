@@ -68,8 +68,6 @@ def cart_view(request):
         if request.POST:
             num_products = request.POST.get('num_product')
             item_id = request.POST.get('item_id')
-            print(num_products)
-            print(item_id)
             cart_item = CartItem.objects.get(id=item_id)
             variant = ProductVariant.objects.get(id=cart_item.productvariant_id)
             if int(num_products) < cart_item.quantity:
@@ -81,23 +79,38 @@ def cart_view(request):
                 else:
                     cart_item.quantity=int(num_products)
                 cart_item.save()
+        
         user_id = request.user.id
         cart, created = Cart.objects.get_or_create(user_id=user_id)
         cart_items = CartItem.objects.filter(cart=cart).select_related('cart')
         total_price = 0
+        
         for item in cart_items:
-            item.total_price = item.productvariant.price * item.quantity
+            original_price = float(item.productvariant.price)
+            # Calculate offer price if offer exists
+            if item.productvariant.product.offer:
+                discount = float(item.productvariant.product.offer.discount_percentage)
+                offer_price = original_price - (original_price * (discount / 100))
+                item.offer_price = round(offer_price, 2)
+                item.total_price = item.offer_price * item.quantity
+            else:
+                item.offer_price = None
+                item.total_price = original_price * item.quantity
+            
             total_price += item.total_price
-            if not item.productvariant.is_listed or not item.productvariant.product.is_active or not item.productvariant.product.is_listed or not item.productvariant.product.subcategory.is_listed or  not item.productvariant.product.subcategory.category.is_listed:
+            
+            if not item.productvariant.is_listed or not item.productvariant.product.is_active or not item.productvariant.product.is_listed or not item.productvariant.product.subcategory.is_listed or not item.productvariant.product.subcategory.category.is_listed:
                 item.not_listed = True
-            elif item.productvariant.quantity==0:
-                    item.remove = True
+            elif item.productvariant.quantity == 0:
+                item.remove = True
             elif item.quantity > item.productvariant.quantity:
                 item.warning = True
         
-            context.update({'cart_items':cart_items,'total_price':total_price})
-        return render(request,'user/cart.html',context)
-
+        context.update({
+            'cart_items': cart_items,
+            'total_price': round(total_price, 2)
+        })
+        return render(request, 'user/cart.html', context)
     else:
         return redirect('auth_app:login')
     

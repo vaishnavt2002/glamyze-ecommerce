@@ -6,6 +6,11 @@ from django.db.models import F
 from django.core.paginator import Paginator
 from PIL import Image
 from django.views.decorators.cache import never_cache
+from promotion_management.models import *
+from django.utils import timezone
+from datetime import timedelta
+from django.utils import timezone
+from datetime import timedelta
 
 
 
@@ -51,7 +56,9 @@ def product_details(request):
 def product_add(request):
     if request.user.is_superuser:
         subcategories = SubCategory.objects.select_related('category')
-        context={'subcategories':subcategories}
+        current_date = timezone.now().date()
+        offers = Offer.objects.filter(is_active=True,end_date__gte = current_date)
+        context={'subcategories':subcategories,'offers':offers}
         if request.POST:
             product_name = request.POST['product_name']
             subcategory_id = request.POST['subcategory']
@@ -76,6 +83,9 @@ def product_add(request):
                 return render(request,'admin/addproduct.html',context)
 
             product_obj=Product(product_name=product_name,subcategory_id=subcategory_id,material=material,color=color,description=description,image1=image1,image2=image2,image3=image3)
+            offer_id = request.POST.get('offer_id')
+            if offer_id:
+                product_obj.offer_id = offer_id
             product_obj.save()
             product_obj.refresh_from_db()
             request.session['product_id']=product_obj.id
@@ -199,10 +209,13 @@ def product_edit(request,product_id):
         return redirect('auth_app:logout')
     if request.user.is_superuser:    
         product = Product.objects.get(id=product_id)
+        current_date = timezone.now().date()
+        offers = Offer.objects.filter(is_active=True,end_date__gte = current_date)
         subcategories = SubCategory.objects.select_related('category')
         context = {
             'product': product,
-            'subcategories' : subcategories
+            'subcategories' : subcategories,
+            'offers':offers
 
         }
         if request.POST:
@@ -241,6 +254,11 @@ def product_edit(request,product_id):
                 print(errors)
                 context['errors'] = errors
                 return render(request, 'my_admin/editproducts.html',context)
+            offer_id = request.POST.get('offer_id')
+            if offer_id=='null':
+                product.offer_id = None
+            else:
+                product.offer_id = offer_id
             product.product_name = request.POST.get('product_name')
             product.subcategory_id = request.POST.get('subcategory')
             product.material = request.POST.get('material')

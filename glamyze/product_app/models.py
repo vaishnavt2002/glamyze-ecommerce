@@ -1,4 +1,6 @@
 from django.db import models
+from promotion_management.models import *
+
 
 # Create your models here.
 class Category(models.Model):
@@ -26,6 +28,7 @@ class Product(models.Model):
     image1 = models.ImageField(upload_to='product_images/')
     image2 = models.ImageField(upload_to='product_images/')
     image3 = models.ImageField(upload_to='product_images/')
+    offer = models.ForeignKey(Offer,on_delete=models.CASCADE,null=True)
     is_listed = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     material = models.CharField(max_length=50)
