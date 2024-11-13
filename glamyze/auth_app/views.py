@@ -275,6 +275,8 @@ def home(request):
                     product.offer_price = None
         return render(request,'user/index.html',{'products':products,'slider':slider})
     else:
+        current_date = timezone.now().date()
+
         slider = Banner.objects.filter(
                     is_active=True,
                     start_date__lte=current_date,

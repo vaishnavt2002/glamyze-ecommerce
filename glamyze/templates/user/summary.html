@@ -1,0 +1,123 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block shop %}
+<!-- breadcrumb -->
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a href="{% url 'auth_app:home' %}" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <a href="{% url 'cart_app:cart_view' %}" class="stext-109 cl8 hov-cl1 trans-04">
+            Cart
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <a href="{% url 'order_app:checkout_view' %}" class="stext-109 cl8 hov-cl1 trans-04">
+            Checkout
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <span class="stext-109 cl4">
+            Order Summary
+        </span>
+    </div>
+</div>
+
+<!-- Order Summary Content -->
+<div class="container p-t-50 p-b-50">
+    <div class="row">
+        <!-- Left Column - Order Details -->
+        <div class="col-lg-8 m-b-50">
+            <div class="bor10 p-lr-40 p-t-30 p-b-40 m-r-40 m-lr-0-xl">
+                <h4 class="mtext-109 cl2 p-b-30">
+                    Order Summary
+                </h4>
+
+                <!-- Items in Order -->
+                <div class="order-items m-b-30">
+                    {% for item in cart_items %}
+                    <div class="flex-w flex-t p-b-15 align-items-center">
+                        <div class="size-208">
+                            <span class="stext-110 cl2">
+                                {{ item.productvariant.product.product_name }} - {{ item.productvariant.size.size_code }}
+                                (x{{ item.quantity }})
+                            </span>
+                        </div>
+                        <div class="size-209 text-right">
+                            <span class="mtext-110 cl2">
+                                ₹{{ item.total_price }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Total Price -->
+                <div class="flex-w flex-t p-t-27 p-b-33">
+                    <div class="size-208">
+                        <span class="mtext-101 cl2">
+                            Total:
+                        </span>
+                    </div>
+                    <div class="size-209 p-t-1">
+                        <span class="mtext-110 cl2">
+                            ₹{{ total_price }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Delivery and Payment Information -->
+        <div class="col-lg-4 m-b-50">
+            <div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl">
+                <!-- Selected Address -->
+                <h4 class="mtext-109 cl2 p-b-30">
+                    Delivery Address
+                </h4>
+                <div class="selected-address m-b-30">
+                    <p class="stext-102">
+                        <strong>{{ selected_address.name }}</strong><br>
+                        {{ selected_address.address }}<br>
+                        {{ selected_address.locality }}, {{ selected_address.city }}<br>
+                        {{ selected_address.state }} - {{ selected_address.pincode }}<br>
+                        Phone: {{ selected_address.phone }}
+                        {% if selected_address.alternate_phone %}
+                        , {{ selected_address.alternate_phone }}
+                        {% endif %}
+                        {{ selected_address.office_home }}
+                    </p>
+                </div>
+
+                <!-- Payment Method -->
+                <h4 class="mtext-109 cl2 p-b-30">
+                    Payment Method
+                </h4>
+                <div class="payment-method-summary m-b-30">
+                    <p class="stext-102">
+                        {% if payment_method == "cod" %}
+                            Cash on Delivery
+                        {% elif payment_method == "razorpay" %}
+                            Razorpay
+                        {% elif payment_method == "wallet" %}
+                            Wallet
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- Confirm Order Button -->
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <!-- Hidden fields to submit selected address and payment method -->
+                    <input type="hidden" name="selected_address" value="{{ selected_address.id }}">
+                    <input type="hidden" name="payment_method" value="{{ payment_method }}">
+                    <button type="submit" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                        Confirm Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

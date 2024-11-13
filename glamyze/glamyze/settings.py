@@ -32,7 +32,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://4312-103-175-136-73.ngrok-free.app'
+]
 
 # Application definition
 SITE_ID=2
@@ -55,6 +57,7 @@ INSTALLED_APPS = [
     'profile_app',
     'banner_management',
     'promotion_management',
+    'order_app',
     'django.contrib.sites',
     'allauth',
     'allauth.account',

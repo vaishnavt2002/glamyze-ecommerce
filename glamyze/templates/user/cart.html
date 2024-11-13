@@ -232,9 +232,9 @@
                         </div>
                     </div>
 
-                    <button class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                    <a href="{% url 'order_app:proceed_to_checkout' %}" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
                         Proceed to Checkout
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -294,5 +294,24 @@ document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(
 </script>
 
 {% endif %}
+{% if change %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'There is some issues in cart. Remove the item or change the qunatity to proceed.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000, // Display message for 3 seconds
+            showConfirmButton: false // Remove confirmation button
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'cart_app:cart_view' %}";  // Redirect after 3 seconds
+        }, 3000); // Redirect delay of 3 seconds (3000 ms)
+    });
+</script>
+{% endif %}
     
 {% endblock %}
+

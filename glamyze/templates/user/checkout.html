@@ -1,0 +1,172 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block shop %}
+<!-- breadcrumb -->
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a href="" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <a href="{% url 'cart_app:cart_view' %}" class="stext-109 cl8 hov-cl1 trans-04">
+            Cart
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <span class="stext-109 cl4">
+            Checkout
+        </span>
+    </div>
+</div>
+
+<!-- Checkout Content -->
+ <form method="post">
+    {% csrf_token %}
+<div class="container p-t-50">
+    <div class="row">
+        <!-- Left Column - Address Selection -->
+        <div class="col-lg-7 m-b-50">
+            <div class="bor10 p-lr-40 p-t-30 p-b-40 m-r-40 m-lr-0-xl">
+                <h4 class="mtext-109 cl2 p-b-30">
+                    Delivery Address
+                </h4>
+
+                <!-- Add New Address Button -->
+                <div class="m-b-30">
+                    <button class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04" 
+                            data-toggle="modal" 
+                            data-target="#addAddressModal">
+                        + Add New Address
+                    </button>
+                </div>
+
+                <!-- Address List -->
+                <div class="address-list">
+                    {% for address in addresses %}
+                    <div class="address-item bor12 p-4 m-b-20">
+                        <div class="flex-w flex-sb">
+                            <div class="address-details" style="display: flex; justify-content: space-between;">
+                                <input type="radio" 
+                                       name="selected_address" 
+                                       value="{{ address.id }}" 
+                                       {% if forloop.first %}checked{% endif %} style="margin-right: 20px;">
+                                
+                                <p class="stext-102 p-t-10">
+                                    <span class="mtext-101">{{ address.name }}</span><br>
+                                    {{ address.address }}<br>
+                                    {{ address.locality }}, {{ address.city }}<br>
+                                    {{ address.state }} - {{ address.pincode }}<br>
+                                    Phone: {{ address.phone }}
+                                    {% if address.alternate_phone %}
+                                    , {{ address.alternate_phone }}
+                                    {% endif %}
+                                    {{ address.office_home }}
+                                </p>
+                            </div>
+                            <div class="address-actions">
+                                <button class="btn-edit-address" 
+                                        data-address-id="{{ address.id }}"
+                                        data-toggle="modal" 
+                                        data-target="#editAddressModal">
+                                    Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Order Summary -->
+        <div class="col-lg-5 m-b-50">
+            <div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl">
+                <h4 class="mtext-109 cl2 p-b-30">
+                    Order Summary
+                </h4>
+
+                <!-- Cart Items Summary -->
+                <div class="order-items m-b-30">
+                    {% for item in cart_items %}
+                    <div class="flex-w flex-t p-b-15 align-items-center">
+                        <div class="size-208">
+                            <span class="stext-110 cl2">
+                                {{ item.productvariant.product.product_name }} - {{ item.productvariant.size.size_code }}
+                                (x{{ item.quantity }})
+                            </span>
+                        </div>
+                        <div class="size-209 text-right">
+                            <span class="mtext-110 cl2">
+                                ₹{{ item.total_price }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Total -->
+                <div class="flex-w flex-t p-t-27 p-b-33">
+                    <div class="size-208">
+                        <span class="mtext-101 cl2">
+                            Total:
+                        </span>
+                    </div>
+                    <div class="size-209 p-t-1">
+                        <span class="mtext-110 cl2">
+                            ₹{{ total_price }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="payment-methods m-b-30">
+                    <h4 class="mtext-109 cl2 p-b-20">Payment Method</h4>
+                    <div class="payment-options">
+                        <div class="payment-option m-b-10" style="display: flex;">
+                            <input type="radio" name="payment_method" value="cod" style="margin-right: 10px;" checked>
+                            <label for="cod" class="stext-102" style="padding-top: 10px;">Cash on Delivery</label>
+                        </div>
+                        <div class="payment-option m-b-10" style="display: flex;">
+                            <input type="radio" name="payment_method" value="razorpay" style="margin-right: 10px;">
+                            <label for="razorpay" class="stext-102" style="padding-top: 10px;">Razorpay</label>
+                        </div>
+                        <div class="payment-option" style="display: flex;">
+                            <input type="radio" name="payment_method" value="wallet" style="margin-right: 10px;">
+                            <label for="wallet" class="stext-102" style="padding-top: 10px;">Wallet</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proceed to Pay Button -->
+                <button type="submit" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer" 
+                        id="proceedToPayBtn">
+                    Proceed to Pay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+
+{% if change %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'There is some changes in the availability of product. Please update the cart',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000,
+            showConfirmButton: false
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'cart_app:cart_view' %}?size={{size_id}}";
+        }, 3000);
+    });
+</script>
+{% endif %}
+
+{% endblock %}
+
+

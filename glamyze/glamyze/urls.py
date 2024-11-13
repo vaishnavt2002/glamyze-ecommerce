@@ -32,6 +32,7 @@ urlpatterns = [
     path('user/',include('address_app.urls')),
     path('user/',include('profile_app.urls')),
     path('admin-panel/',include('banner_management.urls')),
-    path('admin-panel/',include('promotion_management.urls'))
+    path('admin-panel/',include('promotion_management.urls')),
+    path('user/',include('order_app.urls'))
 ]
 urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

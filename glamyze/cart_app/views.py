@@ -82,7 +82,7 @@ def cart_view(request):
         
         user_id = request.user.id
         cart, created = Cart.objects.get_or_create(user_id=user_id)
-        cart_items = CartItem.objects.filter(cart=cart).select_related('cart')
+        cart_items = CartItem.objects.filter(cart=cart).order_by('id')
         total_price = 0
         
         for item in cart_items:

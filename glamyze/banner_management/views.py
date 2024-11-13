@@ -24,12 +24,9 @@ def validate_image_format(image,image_name):
             
 @never_cache
 def add_banner(request):
-    if request.user.is_superuser:
-        #adding new categories
-    
+    if request.user.is_superuser:    
         if request.method == 'POST':
             errors = []
-            # Retrieve the values from request.POST
             name = request.POST.get('name')
             description = request.POST.get('description')
             start_date = request.POST.get('start_date')
@@ -112,8 +109,7 @@ def edit_banner(request,banner_id):
             except ValueError:
                 return redirect('banner_management:add_banner')
             
-            if start_date and start_date.date() < datetime.today().date():
-                errors.append('Start date must be today or a future date.')
+            
 
         # Validate that the end date is greater than or equal to the start date
             if end_date and start_date and end_date < start_date:
