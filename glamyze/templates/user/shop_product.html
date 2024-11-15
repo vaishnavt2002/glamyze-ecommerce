@@ -8,7 +8,7 @@
 					<a>
 					{% for category in categories %}
 
-					<a class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 {% if category_id|stringformat:'s' == category.id|stringformat:'s' %}how-active1{% endif %}" href="{% url 'product_app:shop' %}?categoryid={{ category.id }}{% if searchvalue %}&searchvalue={{searchvalue}} {% endif %} ">
+					<a class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 {% if category_id|stringformat:'s' == category.id|stringformat:'s' %}how-active1{% endif %}" href="{% url 'product_app:shop' %}?category_id={{ category.id }}{% if searchvalue %}&searchvalue={{searchvalue}} {% endif %} ">
 						{{ category.category_name }}
 					</a>
 					{% endfor %}
@@ -29,16 +29,16 @@
 						
 					</div>
 				</div>
-				
+
 				<!-- Search product -->
 				
 				<div class="dis-none panel-search w-full p-t-10 p-b-15">
 					<form class="d-flex px-3">
 						{% if category_id %}
-						<input type="hidden" value="{{category_id}}" name="categoryid" >
+						<input type="hidden" value="{{category_id}}" name="category_id" >
 						{% endif %}
 						{% if subcategory_id %}
-						<input type="hidden" value="{{subcategory_id}}" name="subcategoryid">
+						<input type="hidden" value="{{subcategory_id}}" name="subcategory_id">
 						{% endif %}
 					<div class="bor8 dis-flex p-l-15">
 						<button type="submit" class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
@@ -62,38 +62,48 @@
 
 							<ul>
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="?sort=id{% if searchvalue %}&searchvalue={{searchvalue}} {% endif %}{% if category_id %}&category_id={{category_id}} {% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04 {% if sort == 'id' %}filter-link-active{% endif %}">
 										Default
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="?sort=popularity{% if searchvalue %}&searchvalue={{searchvalue}} {% endif %}{% if category_id %}&category_id={{category_id}} {% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04">
 										Popularity
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="?sort=rating{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04 {% if sort == 'rating' %}filter-link-active{% endif %}">
 										Average rating
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
+									<a href="?sort=newness{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04 {% if sort == 'newness' %}filter-link-active{% endif %}">
 										Newness
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="?sort=low{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04 {% if sort == 'low' %}filter-link-active{% endif %}">
 										Price: Low to High
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="?sort=high{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04 {% if sort == 'high' %}filter-link-active{% endif %}">
 										Price: High to Low
+									</a>
+								</li>
+								<li class="p-b-6">
+									<a href="?sort=az{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04 {% if sort == 'az' %}filter-link-active{% endif %}">
+										aA-zZ
+									</a>
+								</li>
+								<li class="p-b-6">
+									<a href="?sort=za{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}" class="filter-link stext-106 trans-04 {% if sort == 'za' %}filter-link-active{% endif %}">
+										zZ-aA
 									</a>
 								</li>
 							</ul>
@@ -106,142 +116,91 @@
 
 							<ul>
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
+									<a href="?price_range=all{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if sort %}&sort={{ sort }}{% endif %}" class="filter-link stext-106 trans-04 {% if price_range == 'all' or price_range == '' %}filter-link-active{% endif %}">
 										All
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$0.00 - $50.00
+									<a href="?price_range=0-100{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if sort %}&sort={{ sort }}{% endif %}" class="filter-link stext-106 trans-04 {% if price_range == '0-100' %}filter-link-active{% endif %}">
+										₹0.00 - ₹100.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$50.00 - $100.00
+									<a href="?price_range=100-250{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if sort %}&sort={{ sort }}{% endif %}" class="filter-link stext-106 trans-04 {% if price_range == '100-250' %}filter-link-active{% endif %}">
+										₹100.00 - ₹250.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$100.00 - $150.00
+									<a href="?price_range=250-500{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if sort %}&sort={{ sort }}{% endif %}" class="filter-link stext-106 trans-04 {% if price_range == '250-500' %}filter-link-active{% endif %}">
+										₹250.00 - ₹500.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$150.00 - $200.00
+									<a href="?price_range=500-1000{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if sort %}&sort={{ sort }}{% endif %}" class="filter-link stext-106 trans-04 {% if price_range == '500-1000' %}filter-link-active{% endif %}">
+										₹500.00 - ₹1000.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$200.00+
+									<a href="?price_range=1000-{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{%  if sort %}&sort={{ sort }}{% endif %}" class="filter-link stext-106 trans-04 {% if price_range == '1000+' %}filter-link-active{% endif %}">
+										₹1000.00+
 									</a>
 								</li>
 							</ul>
 						</div>
 
-						<div class="filter-col3 p-r-15 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Color
-							</div>
-
-							<ul>
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #222;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Black
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #4272d7;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										Blue
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #b3b3b3;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Grey
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #00ad5f;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Green
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #fa4251;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Red
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #aaa;">
-										<i class="zmdi zmdi-circle-o"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										White
-									</a>
-								</li>
-							</ul>
-						</div>
-
-						<div class="filter-col4 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Tags
-							</div>
-
-							<div class="flex-w p-t-4 m-r--5">
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Fashion
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Lifestyle
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Denim
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Streetstyle
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Crafts
-								</a>
-							</div>
-						</div>
+						
 					</div>
 				</div>
 			</div>
-
+			<div class="applied-filters">
+				{% if searchvalue %}
+				<p>Showing results for: <strong>"{{ searchvalue }}"</strong></p>
+				{% endif %}
+				
+				{% if price_range %}
+				<p>Price Range: 
+					{% if price_range == "all" %}
+					<strong>All</strong>
+					{% elif price_range == "0-100" %}
+					<strong>₹0.00 - ₹100.00</strong>
+					{% elif price_range == "100-250" %}
+					<strong>₹100.00 - ₹250.00</strong>
+					{% elif price_range == "250-500" %}
+					<strong>₹250.00 - ₹500.00</strong>
+					{% elif price_range == "500-1000" %}
+					<strong>₹500.00 - ₹1000.00</strong>
+					{% elif price_range == "1000-" %}
+					<strong>₹1000.00+</strong>
+					{% endif %}
+				</p>
+				{% endif %}
+				{% if sort %}
+				<p>Sort Applied: 
+					{% if sort == "id" %}
+					<strong>Default</strong>
+					{% elif sort == "popularity" %}
+					<strong>Popularity</strong>
+					{% elif sort == "newness" %}
+					<strong>Newness</strong>
+					{% elif sort == "rating" %}
+					<strong>Rating</strong>
+					{% elif sort == "low" %}
+					<strong>Low to High</strong>
+					{% elif sort == "high" %}
+					<strong>High to Low</strong>
+					{% elif sort == "az" %}
+					<strong>aA-zZ</strong>
+					{% elif sort == "za" %}
+					<strong>zZ-aA</strong>
+					{% endif %}
+				</p>
+				{% endif %}
+			</div>
 			<div class="row isotope-grid">
 				
         {% include 'user/shop_product_list.html' %}
@@ -251,7 +210,7 @@
 				<ul class="pagination justify-content-center">
 					<!-- Previous button -->
 					<li class="page-item {% if products.number == 1 %}disabled{% endif %}">
-						<a class="page-link" href="{% if page_obj.number != 1 %}?page={{ page_obj.number|add:'-1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}{% else %}#{% endif %}" {% if page_obj.number == 1 %}tabindex="-1" aria-disabled="true"{% endif %}>
+						<a class="page-link" href="{% if page_obj.number != 1 %}?page={{ page_obj.number|add:'-1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}{% else %}{%  if sort %}&sort={{ sort }}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}#{% endif %}" {% if page_obj.number == 1 %}tabindex="-1" aria-disabled="true"{% endif %}>
 							Previous
 						</a>
 					</li>
@@ -259,19 +218,20 @@
 					<!-- Page numbers -->
 					{% for i in products.paginator.page_range %}
 						<li class="page-item {% if page_obj.number == i %}active{% endif %}" {% if page_obj.number == i %}aria-current="page"{% endif %}>
-							<a class="page-link" href="?page={{i}}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}">{{i}}</a>
+							<a class="page-link" href="?page={{i}}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{% if subcategory_id %}&subcategory_id={{subcategory_id}}{% endif %}{%  if sort %}&sort={{ sort }}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}">{{i}}</a>
 						</li>
 					{% endfor %}
 			
 					<!-- Next button -->
 					<li class="page-item {% if products.number == products.paginator.num_pages %}disabled{% endif %}">
-						<a class="page-link" href="{% if page_obj.number != page_obj.paginator.num_pages %}?page={{ page_obj.number|add:'1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&categoryid={{category_id}}{% endif %}{% if subcategory_id %}&subcategoryid={{subcategory_id}}{% endif %}{% else %}#{% endif %}" {% if page_obj.number == page_obj.paginator.num_pages %} tabindex="-1" aria-disabled="true"{% endif %}>
+						<a class="page-link" href="{% if page_obj.number != page_obj.paginator.num_pages %}?page={{ page_obj.number|add:'1' }}{% if searchvalue %}&searchvalue={{searchvalue}}{% endif %}{% if category_id %}&category_id={{category_id}}{% endif %}{% if subcategory_id %}&subcategory_id={{subcategory_id}}{% endif %}{% else %}{%  if sort %}&sort={{ sort }}{% endif %}{%  if price_range %}&price_range={{ price_range }}{% endif %}#{% endif %}" {% if page_obj.number == page_obj.paginator.num_pages %} tabindex="-1" aria-disabled="true"{% endif %}>
 							Next
 						</a>
 					</li>
 				</ul>
 			</nav>          
 			</div>
+			<div>{{category_id}}</div>
         </div>
 	</div>
 		

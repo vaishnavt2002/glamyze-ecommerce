@@ -268,7 +268,7 @@ def home(request):
             if variant:
                 product.variant_price = variant.price
                 # Calculate offer price if product has an active offer
-                if product.offer and product.offer.is_active:
+                if product.offer and product.offer.is_active and product.offer.start_date<=current_date and product.offer.end_date>=current_date:
                     discount = product.offer.discount_percentage
                     product.offer_price = round(variant.price * (1 - discount / 100), 2)
                 else:
@@ -291,7 +291,15 @@ def home(request):
             productvariant__is_listed=True
         ).annotate(total_stock=Sum('productvariant__quantity'),variant_price=Min('productvariant__price')).distinct().order_by('id')[0:8]
         for product in products:
-            print(product.variant_price)
+            variant = product.productvariant_set.first() if product.productvariant_set.exists() else None
+            if variant:
+                product.variant_price = variant.price
+                # Calculate offer price if product has an active offer
+                if product.offer and product.offer.is_active and product.offer.start_date<=current_date and product.offer.end_date>=current_date:
+                    discount = product.offer.discount_percentage
+                    product.offer_price = round(variant.price * (1 - discount / 100), 2)
+                else:
+                    product.offer_price = None
         return render(request,'user/index.html',{'products':products,'slider':slider})
 
 

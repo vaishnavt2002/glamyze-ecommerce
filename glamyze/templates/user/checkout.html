@@ -20,7 +20,7 @@
 </div>
 
 <!-- Checkout Content -->
- <form method="post">
+ <form method="post" action="{% url 'order_app:order_summary' %}">
     {% csrf_token %}
 <div class="container p-t-50">
     <div class="row">
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                 </div>
-
+                <input type="hidden" name="summary_total" value="{{ total_price }}" id="">
                 <!-- Proceed to Pay Button -->
                 <button type="submit" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer" 
                         id="proceedToPayBtn">
@@ -161,11 +161,12 @@
         });
 
         setTimeout(() => {
-            window.location.href = "{% url 'cart_app:cart_view' %}?size={{size_id}}";
+            window.location.href = "{% url 'cart_app:cart_view' %}";
         }, 3000);
     });
 </script>
 {% endif %}
+
 
 {% endblock %}
 

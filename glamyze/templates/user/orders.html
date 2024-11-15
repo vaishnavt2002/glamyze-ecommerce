@@ -1,0 +1,83 @@
+{% extends 'user/account_layout.html' %}
+{% block orders_active4 %}active{% endblock %}
+{% block content %}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>My Orders</h4>
+    </div>
+    
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Payment Status</th>
+                        <th>Items</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.created_at|date:"d M Y" }}</td>
+                        <td>₹{{ order.total_amount }}</td>
+                        <td>
+                            {% if order.order_status == 'DELIVERED' %}
+                                <span class="badge badge-success">{{ order.get_order_status_display }}</span>
+                            {% elif order.order_status == 'PROCESSING' %}
+                                <span class="badge badge-warning">{{ order.get_order_status_display }}</span>
+                            {% elif order.order_status == 'CANCELLED' %}
+                                <span class="badge badge-danger">{{ order.get_order_status_display }}</span>
+                            {% else %}
+                                <span class="badge badge-info">{{ order.get_order_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if order.payment_status == 'PAID' %}
+                                <span class="badge badge-success">{{ order.get_payment_status_display }}</span>
+                            {% elif order.payment_status == 'FAILED' %}
+                                <span class="badge badge-warning">{{ order.get_payment_status_display }}</span>
+                            {% else %}
+                                <span class="badge badge-info">{{ order.get_payment_status_display}}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.total_items }} items</td>
+                        <td>
+                            <a href="{% url 'order_app:order_details' order.id %}" class="btn btn-dark btn-sm">View Details</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="empty-state">
+                                <p class="mb-1">No orders found</p>
+                                <a href="" class="btn btn-dark btn-sm mt-2">Start Shopping</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        
+        
+         
+    </div>
+</div>
+
+<style>
+    .badge {
+        padding: 8px 12px;
+        font-weight: 500;
+    }
+ 
+</style>
+
+{% endblock content %}

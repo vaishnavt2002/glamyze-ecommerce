@@ -1,0 +1,149 @@
+{% extends 'user/account_layout.html' %}
+{% block orders_active %}active{% endblock %}
+{% block content %}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>Order Details</h4>
+        <a href="{% url 'order_app:order_view' %}" class="btn btn-outline-dark btn-sm">Back to Orders</a>
+    </div>
+    
+    <div class="card-body">
+        <!-- Order Summary Section -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="order-info">
+                    <h5 class="mb-3">Order Information</h5>
+                    <p><strong>Order ID:</strong> #{{ order.id }}</p>
+                    <p><strong>Order Date:</strong> {{ order.created_at|date:"d M Y, h:i A" }}</p>
+                    <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+                    <p>
+                        <strong>Order Status:</strong>
+                        {% if order.order_status == 'DELIVERED' %}
+                        <span class="badge badge-success">{{ order.get_order_status_display }}</span>
+                    {% elif order.order_status == 'PROCESSING' %}
+                        <span class="badge badge-warning">{{ order.get_order_status_display }}</span>
+                    {% elif order.order_status == 'CANCELLED' %}
+                        <span class="badge badge-danger">{{ order.get_order_status_display }}</span>
+                    {% else %}
+                        <span class="badge badge-info">{{ order.get_order_status_display }}</span>
+                    {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="shipping-info">
+                    <h5 class="mb-3">Shipping Address</h5>
+                    <p><strong>{{ order.orderaddress.name }}</strong></p>
+                    <p>{{ order.orderaddress.address_data }}</p>
+                    <p>{{ order.orderaddress.city }}, {{ order.orderaddress.state }} - {{ order.orderaddress.pincode }}</p>
+                    <p>Phone: {{ order.orderaddress.phone }}</p>
+                    {% if order.orderaddress.landmark %}
+                    <p>Landmark: {{ order.orderaddress.landmark }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items Section -->
+        <h5 class="mb-3">Order Items</h5>
+        <div class="table-responsive">
+            <table class="table table-hover border">
+                <thead class="thead-light">
+                    <tr>
+                        <th style="width: 100px">Product</th>
+                        <th>Details</th>
+                        <th class="text-center">Price</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.orderitem_set.all %}
+                    <tr>
+                        <td>
+                            <img src="{{ item.product_variant.product.image1.url }}" alt="{{ item.product_variant.product.name }}" 
+                                 class="img-fluid" style="max-width: 80px; height: auto;">
+                        </td>
+                        <td>
+                            <h6 class="mb-1">{{ item.product_variant.product.product_name }}</h6>
+                            
+                            <p class="text-muted">Variant: {{ item.product_variant.size.size_code }}</p>
+                            
+                        </td>
+                        <td class="text-center">
+                            <p>₹{{ item.price }}</p>
+                            {% if item.offer_applied %}
+                            <p>{{ item.offer_applied.offer_name }} Discount {{ item.offer_applied.discount_percentage }}%</p>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-right">₹{{ item.total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="border-top">
+                   
+                   
+                    <tr>
+                        <td colspan="4" class="text-right"><strong>Total:</strong></td>
+                        <td class="text-right"><strong>₹{{ order.total_amount }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+       
+
+        <!-- Action Buttons -->
+        <div class="mt-4">
+            {% if order.order_status == 'DELIVERED' %}
+            <a href="#" class="btn btn-dark">Download Invoice</a>
+            {% endif %}
+            
+            {% if order.order_status == 'PROCESSING' or order.order_status == 'SHIPPED' %}
+            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelOrderModal">
+                Cancel Order
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Order Modal -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Order</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form method="post" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this order?</p>
+                    <div class="form-group">
+                        <label>Reason for cancellation:</label>
+                        <select class="form-control" name="cancel_reason" required>
+                            <option value="">Select a reason</option>
+                            <option value="Changed my mind">Changed my mind</option>
+                            <option value="Ordered by mistake">Ordered by mistake</option>
+                            <option value="Found better price elsewhere">Found better price elsewhere</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Cancel Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock content %}

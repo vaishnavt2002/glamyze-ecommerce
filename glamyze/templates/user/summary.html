@@ -106,11 +106,12 @@
                 </div>
 
                 <!-- Confirm Order Button -->
-                <form method="post" action="">
+                <form method="post" action="{% url 'order_app:confirm_order' %}">
                     {% csrf_token %}
                     <!-- Hidden fields to submit selected address and payment method -->
                     <input type="hidden" name="selected_address" value="{{ selected_address.id }}">
                     <input type="hidden" name="payment_method" value="{{ payment_method }}">
+                    <input type="hidden" name="summary_total" value="{{ total_price }}">
                     <button type="submit" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
                         Confirm Order
                     </button>
@@ -119,5 +120,57 @@
         </div>
     </div>
 </div>
+{% if change %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'There is some changes in the availability of product. Please update the cart',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000,
+            showConfirmButton: false
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'cart_app:cart_view' %}";
+        }, 3000);
+    });
+</script>
+{% endif %}
+{% if success %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Successfull',
+            text: 'Order Placed Successfully.',
+            icon: 'success',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:home' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+{% if offer_change %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'There is some changes in the offer or price of the product. Please review it',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000,
+            showConfirmButton: false
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'cart_app:cart_view' %}";
+        }, 3000);
+    });
+</script>
+{% endif %}
 
 {% endblock %}

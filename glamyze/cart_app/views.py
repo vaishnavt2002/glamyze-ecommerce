@@ -2,6 +2,8 @@ from django.shortcuts import render,redirect,get_object_or_404
 from product_app.models import *
 from django.views.decorators.cache import never_cache
 from . models import *
+from django.utils import timezone
+
 
 
 # Create your views here.
@@ -88,7 +90,8 @@ def cart_view(request):
         for item in cart_items:
             original_price = float(item.productvariant.price)
             # Calculate offer price if offer exists
-            if item.productvariant.product.offer:
+            current_date = timezone.now().date()
+            if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
                 discount = float(item.productvariant.product.offer.discount_percentage)
                 offer_price = original_price - (original_price * (discount / 100))
                 item.offer_price = round(offer_price, 2)

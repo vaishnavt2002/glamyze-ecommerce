@@ -9,7 +9,7 @@ class Order(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('PAID', 'Paid'),
-        ('FAILED', 'Failed')
+        ('FAILED', 'Failed'),
     ]
     
     ORDER_STATUS_CHOICES = [
