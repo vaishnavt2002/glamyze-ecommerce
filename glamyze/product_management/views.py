@@ -9,8 +9,9 @@ from django.views.decorators.cache import never_cache
 from promotion_management.models import *
 from django.utils import timezone
 from datetime import timedelta
-from django.utils import timezone
-from datetime import timedelta
+import re
+from django.views.decorators.cache import never_cache
+
 
 
 
@@ -72,6 +73,16 @@ def product_add(request):
             error1 = validate_image_format(image1,'Image1')
             error2 = validate_image_format(image2,'Image2')
             error3 = validate_image_format(image3,'Image3')
+            if not re.match(r'^[A-Za-z\s]+$', product_name):
+                errors.append("Product Name must contain only letters and spaces.")
+            if len(product_name)<3:
+                errors.append("Product name should be atleast 3 characters")
+            if len(color)<2 or not re.match(r'^[A-Za-z\s]+$', color):
+                errors.append("Color name should be at least 2 characters and only contain letters.")
+            if len(material)<2 or not re.match(r'^[A-Za-z\s]+$', material):
+                errors.append("Material name should be at least 2 characters and only contain letters.")
+            if len(description)<10:
+                errors.append("Description should be at least 10 characters.")
             if error1:
                 errors.append(error1)
             if error2:
@@ -80,7 +91,7 @@ def product_add(request):
                 errors.append(error3)
             if errors:
                 context.update({'product_name':product_name,'subcategory_id':subcategory_id,'material':material,'color':color,'description':description,'errors':errors})
-                return render(request,'admin/addproduct.html',context)
+                return render(request,'my_admin/addproduct.html',context)
 
             product_obj=Product(product_name=product_name,subcategory_id=subcategory_id,material=material,color=color,description=description,image1=image1,image2=image2,image3=image3)
             offer_id = request.POST.get('offer_id')
@@ -250,6 +261,22 @@ def product_edit(request,product_id):
                     if product.image3:
                         product.image3.delete()
                     product.image3 = request.FILES['image3']
+            product_name = request.POST.get('product_name')
+            subcategory_id = request.POST.get('subcategory')
+            material = request.POST.get('material')
+            color = request.POST.get('color')
+            description = request.POST.get('description')
+            if not re.match(r'^[A-Za-z\s]+$', product_name):
+                errors.append("Product Name must contain only letters and spaces.")
+            if len(product_name)<3:
+                errors.append("Product name should be atleast 3 characters")
+            if len(color)<2 or not re.match(r'^[A-Za-z\s]+$', color):
+                errors.append("Color name should be at least 2 characters and only contain letters.")
+            if len(material)<2 or not re.match(r'^[A-Za-z\s]+$', material):
+                errors.append("Material name should be at least 2 characters and only contain letters.")
+            if len(description)<10:
+                errors.append("Description should be at least 10 characters.")
+            
             if errors:
                 print(errors)
                 context['errors'] = errors
@@ -259,13 +286,13 @@ def product_edit(request,product_id):
                 product.offer_id = None
             else:
                 product.offer_id = offer_id
-            product.product_name = request.POST.get('product_name')
-            product.subcategory_id = request.POST.get('subcategory')
-            product.material = request.POST.get('material')
-            product.color = request.POST.get('color')
-            product.description = request.POST.get('description')
+            
+            product.product_name = product_name
+            product.subcategory_id = subcategory_id
+            product.material = material
+            product.color = color
+            product.description = description
             product.save()
-            messages.success(request, 'Product updated successfully!')
             return redirect('product_management:product_details')
        
         return render(request, 'my_admin/editproducts.html', context)

@@ -8,7 +8,7 @@
 <!-- breadcrumb -->
 <div class="container">
     <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-        <a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+        <a href="{% url 'auth_app:home' %}" class="stext-109 cl8 hov-cl1 trans-04">
             Home
             <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
         </a>
@@ -42,7 +42,7 @@
                                         <img src="{{ item.productvariant.product.image1.url }}" alt="IMG">
                                     </div>
                                 </td>
-                                <td class="column-2">{{ item.productvariant.product.product_name }}-{{item.productvariant.size.size_code}}</td>
+                                <td class="column-2"><a style="color: black;" href="{% url 'product_app:product_view' item.productvariant.product.id %}?size={{item.productvariant.size.id}}">{{ item.productvariant.product.product_name }}-{{item.productvariant.size.size_code}}</a></td>
                                 <td class="column-3">
                                     {% if item.offer_price %}
                                         <div>
@@ -85,10 +85,14 @@
                                             <span style="color: #ff0000;">
                                                 {{item.quantity}}x₹{{item.offer_price}} = ₹{{item.total_price}}
                                             </span>
+                                            <div class="total-savings" style="font-size: 12px; color: #28a745;">
+                                                {{ item.productvariant.product.offer.offer_name }}
+                                            </div>
                                         </div>
                                     {% else %}
                                         {{item.quantity}}x₹{{item.productvariant.price}} = ₹{{item.total_price}}
                                     {% endif %}
+                                    
                                 </td>                                
                                 <td class="column-6">
                                     <form action="{% url 'cart_app:cart_item_delete' item.id %}" >
@@ -220,13 +224,13 @@ document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(
             text: 'There is some issues in cart. Remove the item or change the qunatity to proceed.',
             icon: 'error',
             confirmButtonText: 'OK',
-            timer: 3000, // Display message for 3 seconds
-            showConfirmButton: false // Remove confirmation button
+            timer: 3000, 
+            showConfirmButton: false 
         });
 
         setTimeout(() => {
-            window.location.href = "{% url 'cart_app:cart_view' %}";  // Redirect after 3 seconds
-        }, 3000); // Redirect delay of 3 seconds (3000 ms)
+            window.location.href = "{% url 'cart_app:cart_view' %}"; 
+        }, 3000);
     });
 </script>
 {% endif %}

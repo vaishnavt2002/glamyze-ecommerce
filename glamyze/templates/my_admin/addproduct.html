@@ -45,8 +45,8 @@
         <!-- offer selection -->
         <div class="col-md-6">
           <label for="subcategory" class="form-label">Select an offer for product if any</label>
-          <select class="form-select" id="offer" name="offer_id" required>
-              <option value="" selected>-- Select an Offer --</option>
+          <select class="form-select" id="offer" name="offer_id">
+              <option value="" selected>-- No Offer --</option>
               {% for offer in offers %}
               <option value="{{ offer.id }}">
                   {{ offer.offer_name }}

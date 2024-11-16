@@ -5,9 +5,12 @@ from django.urls import reverse
 from . models import *
 from django.utils import timezone
 from django.db.models import Count
+from django.views.decorators.cache import never_cache
+
 
 
 # Create your views here.
+@never_cache
 def proceed_to_checkout(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -55,7 +58,7 @@ def proceed_to_checkout(request):
     else:
         return redirect('auth_app:login')
 
-
+@never_cache
 def checkout_view(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -95,7 +98,7 @@ def checkout_view(request):
     else:
         return redirect('auth_app:login')
     
-
+@never_cache
 def order_summary(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -153,6 +156,8 @@ def order_summary(request):
         return render(request, 'user/summary.html',context)
     else:
         return redirect('auth_app:login')
+    
+@never_cache
 def confirm_order(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -250,14 +255,16 @@ def confirm_order(request):
     else:
         return redirect('auth_app:login')
     
-
+@never_cache
 def order_view(request):
     orders = Order.objects.filter(user=request.user).annotate(total_items=Count('orderitem')).order_by('-id')
-
     return render(request,'user/orders.html',{'orders':orders})
 
+@never_cache
 def order_details(request,order_id):
     order = Order.objects.get(id=order_id)
+    if request.user != order.user:
+        return redirect('auth_app:logout')
     address = OrderAddress.objects.filter(order_id=order_id)
     return render(request,'user/order_details.html',{'order':order,'address':address})
     

@@ -5,7 +5,7 @@
 <!-- breadcrumb -->
 <div class="container">
     <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-        <a href="" class="stext-109 cl8 hov-cl1 trans-04">
+        <a href="{% url 'auth_app:home' %}" class="stext-109 cl8 hov-cl1 trans-04">
             Home
             <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
         </a>
@@ -33,11 +33,9 @@
 
                 <!-- Add New Address Button -->
                 <div class="m-b-30">
-                    <button class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04" 
-                            data-toggle="modal" 
-                            data-target="#addAddressModal">
+                    <a href="{% url 'address_app:address_view' %}" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04" style="width: 200px;">
                         + Add New Address
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Address List -->
@@ -64,12 +62,10 @@
                                 </p>
                             </div>
                             <div class="address-actions">
-                                <button class="btn-edit-address" 
-                                        data-address-id="{{ address.id }}"
-                                        data-toggle="modal" 
-                                        data-target="#editAddressModal">
+                                <a href="{% url 'address_app:update_address' address.id %}" class="btn-edit-address" 
+                                        >
                                     Edit
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -127,11 +123,11 @@
                             <label for="cod" class="stext-102" style="padding-top: 10px;">Cash on Delivery</label>
                         </div>
                         <div class="payment-option m-b-10" style="display: flex;">
-                            <input type="radio" name="payment_method" value="razorpay" style="margin-right: 10px;">
+                            <input type="radio" name="payment_method" value="razorpay" style="margin-right: 10px;" disabled>
                             <label for="razorpay" class="stext-102" style="padding-top: 10px;">Razorpay</label>
                         </div>
                         <div class="payment-option" style="display: flex;">
-                            <input type="radio" name="payment_method" value="wallet" style="margin-right: 10px;">
+                            <input type="radio" name="payment_method" value="wallet" style="margin-right: 10px;" disabled>
                             <label for="wallet" class="stext-102" style="padding-top: 10px;">Wallet</label>
                         </div>
                     </div>

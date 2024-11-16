@@ -121,36 +121,49 @@
 
 <script>
 function toggleBlock(productId) {
-    fetch(`{% url 'product_management:list_unlist_product' 0 %}`.replace("0", productId), {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const button = document.querySelector(`#product-row-${productId} button`);
-            const isListed = data.is_listed; // Get the updated status from the response
-            
-            // Update button text based on the new status
-            if (isListed) {
-                button.textContent = "Unlist";
-                button.classList.remove('btn-outline-primary');
-                button.classList.add('btn-primary');
-            } 
-            else {
-                button.textContent = "List";
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-outline-primary');
+    const button = document.querySelector(`#product-row-${productId} button`);
+    const action = button.textContent.trim() === "Unlist" ? "unlist" : "list";
+    Swal.fire({
+        title: `Are you sure you want to ${action} this product?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+        fetch(`{% url 'product_management:list_unlist_product' 0 %}`.replace("0", productId), {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
             }
-            
-        } else {
-            alert("There was an error updating the user's status.");
-        }
-    })
-    .catch(error => console.error("Error:", error));
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                
+                const isListed = data.is_listed; 
+                
+                if (isListed) {
+                    button.textContent = "Unlist";
+                    button.classList.remove('btn-outline-primary');
+                    button.classList.add('btn-primary');
+                } 
+                else {
+                    button.textContent = "List";
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-outline-primary');
+                }
+                
+            } else {
+                alert("There was an error updating the user's status.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+});
 }
 </script>
 {% endblock content %}

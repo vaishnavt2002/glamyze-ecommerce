@@ -13,8 +13,4 @@ class CustomUser(AbstractUser):
 
 
 
-@receiver(user_logged_in)
-def check_if_user_is_blocked(sender, request, user, **kwargs):
-    if user.is_block:
-        logout(request)
-        return redirect('auth_app:login')
+

@@ -17,6 +17,24 @@
 
 		</div>
 </section>
+{% if blocked %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Blocked!',
+            text: 'You are blocked by admin.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000, 
+            showConfirmButton: false 
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:logout' %}"; 
+        }, 3000);
+    });
+</script>
+{% endif %}
 
 
 		

@@ -32,7 +32,13 @@
 </style>
 <!-- Product Detail -->
 <section class="sec-product-detail bg0 p-t-65 p-b-60">
+  
     <div class="container">
+        <div style="margin-bottom: 20px;">
+            <button onclick="history.back()" class="size-btn" style="padding: 10px 20px; border: none; background-color: #f0f0f0; color: #333; cursor: pointer; border-radius: 5px; font-size: 16px;">
+                ← Back
+            </button>
+        </div>
         <div class="row">
             <div class="col-md-6 col-lg-7 p-b-30">
                 <div class="p-l-25 p-r-30 p-lr-0-lg">
@@ -102,8 +108,6 @@
                         {{ product.description|slice:":150" }}{% if product.description|length > 150 %}...{% endif %}
                     </p>
                     
-                    
-                    <!--  -->
                     <div class="p-t-33">
                         <form method="GET" action="{% url 'product_app:product_view' product.id %}">
                             <div class="flex-w flex-r-m p-b-10">
@@ -139,6 +143,11 @@
         							<div class="warning-message" style="color: #ffa500; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
             						Low Stock. Only {{selected_size.quantity}} left.
         						</div>
+                                {% if added %}
+                                <a href="{% url 'cart_app:cart_view' %}" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+                                    Go to cart
+                                </a>
+                                {% else %}
                                 <div class="wrap-num-product flex-w m-r-20 m-tb-10">
                                     <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
                                         <i class="fs-16 zmdi zmdi-minus"></i>
@@ -152,10 +161,16 @@
                                 <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
                                     Add to cart
                                 </button>
+                                {% endif %}
                                 {% else %}
                                 <div class="warning-message" style="color: #ffa500; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
             						Available stock: {{selected_size.quantity}} left.
         						</div>
+                                {% if added %}
+                                <a href="{% url 'cart_app:cart_view' %}" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+                                    Go to cart
+                                </a>
+                                {% else %}
                                 <div class="wrap-num-product flex-w m-r-20 m-tb-10">
                                     <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
                                         <i class="fs-16 zmdi zmdi-minus"></i>
@@ -169,6 +184,7 @@
                                 <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
                                     Add to cart
                                 </button>
+                                {% endif %}
                                 
         						{% endif %}
                                 
@@ -178,7 +194,6 @@
                         </div>	
                     </div>
 
-                    <!--  -->
                     <div class="flex-w flex-m p-l-100 p-t-40 respon7">
                         <div class="flex-m bor9 p-r-10 m-r-11">
                             <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist">
@@ -388,8 +403,8 @@
                         <div class="block2-pic hov-img0">
                             <img src="{{ item.image1.url }}" alt="IMG-PRODUCT">
 
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
+                            <a href="{% url 'product_app:product_view' item.id %}" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
+                                View
                             </a>
                         </div>
                         <div class="block2-txt flex-w flex-t p-t-14">
@@ -413,7 +428,7 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <!-- Wishlist section remains the same -->
+                          
                         </div>
                     </div>
                 </div>

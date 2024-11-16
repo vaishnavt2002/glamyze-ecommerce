@@ -9,16 +9,29 @@
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
     <style>
-        /* Ensure body and html take full height */
         html, body {
             height: 100%;
         }
-        /* Centering with Flexbox */
         .centered-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh; /* Full height of the viewport */
+            height: 100vh;
+        }
+        .timer {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: bold;
+        }
+        .resend-link {
+            color: #212529;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+        .resend-link.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: default;
         }
     </style>
 </head>
@@ -38,8 +51,6 @@
                             <form method="POST" action="{% url 'auth_app:otp' %}">
                                 {% csrf_token %}
                                 
-                               
-
                                 <div class="form-group">
                                     <label for="otp">Enter OTP</label>
                                     <input type="text" class="form-control form-control-lg text-center" id="otp" name="otp" minlength='6' maxlength="6" required placeholder="Enter 6-digit OTP">
@@ -47,18 +58,21 @@
 
                                 <button type="submit" class="btn btn-dark btn-block btn-lg mb-4">VERIFY OTP</button>
 
-                                <!-- Resend OTP Link -->
+                                <!-- Resend OTP Link with Timer -->
                                 <div class="text-center">
-                                    <a href="{% url 'auth_app:resend-otp' %}" class="text-dark d-block mb-3">Didn't receive the OTP? Resend</a>
+                                    <div class="timer mb-2" id="timer"></div>
+                                    <a href="{% url 'auth_app:resend-otp' %}" id="resendLink" class="resend-link disabled">
+                                        Didn't receive the OTP? Resend
+                                    </a>
                                     {% if errors %}
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        {% for error in errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% endif %}
+                                    <div class="alert alert-danger mt-3">
+                                        <ul class="mb-0">
+                                            {% for error in errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </form>
                         </div>
@@ -69,27 +83,65 @@
     </div>
 
     <!-- Scripts -->
-
-    // Check if signup success is passed as context
-   <script>
-    // Check if signup success is passed as context
-    {% if signup_success %}
-    document.addEventListener("DOMContentLoaded", function() {
-        Swal.fire({
-            title: 'Signup Successful!',
-            text: 'You can now log in.',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        }).then(() => {
-            window.location.href = "{% url 'auth_app:login' %}";  // Redirect to login page after confirmation
-        });
-    });
-    {% endif %}
-</script>
-
     <script src="{% static 'vendor/jquery/jquery-3.2.1.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Function to format time as MM:SS
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Function to start the timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer');
+            const resendLink = document.getElementById('resendLink');
+            let timeLeft = 60; // 60 seconds = 1 minute
+
+            // Initially display the timer
+            timerDisplay.textContent = `Resend OTP available in ${formatTime(timeLeft)}`;
+
+            // Store the timer ID so we can clear it later if needed
+            const timerId = setInterval(() => {
+                timeLeft -= 1;
+
+                if (timeLeft <= 0) {
+                    // Timer has finished
+                    clearInterval(timerId);
+                    timerDisplay.style.display = 'none';
+                    resendLink.classList.remove('disabled');
+                } else {
+                    // Update the timer display
+                    timerDisplay.textContent = `Resend OTP available in ${formatTime(timeLeft)}`;
+                }
+            }, 1000);
+
+            // Store the timer ID in case we need to clear it
+            return timerId;
+        }
+
+        // Start the timer when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            startTimer();
+        });
+
+        // Handle signup success message if present
+        {% if signup_success %}
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: 'Signup Successful!',
+                text: 'You can now log in.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = "{% url 'auth_app:login' %}";
+            });
+        });
+        {% endif %}
+    </script>
 
 </body>
 </html>

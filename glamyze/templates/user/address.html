@@ -26,61 +26,78 @@
             {% csrf_token %}
             <div class="row">
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="name" placeholder="Name" required>
+                <input type="text" class="form-control" name="name" value="{{ name }}" placeholder="Name" required>
               </div>
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="phone" placeholder="Phone Number" required>
+                <input type="text" class="form-control" name="phone" value="{{ phone }}" placeholder="Phone Number" required>
               </div>
             </div>
             
             <div class="row">
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="pincode" placeholder="Pincode" required>
+                <input type="text" class="form-control" name="pincode" value="{{ pincode }}" placeholder="Pincode" required>
               </div>
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="locality" placeholder="Locality" required>
+                <input type="text" class="form-control" name="locality" value="{{ locality }}" placeholder="Locality" required>
               </div>
             </div>
             
             <div class="mb-3">
-              <textarea class="form-control" name="address" rows="3" placeholder="Address (Area/Street)" required></textarea>
+              <textarea class="form-control" name="address" rows="3" placeholder="Address (Area/Street)" required>{{ address }}</textarea>
             </div>
             
             <div class="row">
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="city" placeholder="City/District/Town" required>
+                <input type="text" class="form-control" name="city" value="{{city}}" placeholder="City/District/Town" required>
               </div>
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="state" placeholder="State" required>
+                <input type="text" class="form-control" name="state" value="{{state}}" placeholder="State" required>
               </div>
             </div>
             
             <div class="row">
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="landmark" placeholder="Landmark (Optional)">
+                <input type="text" class="form-control" name="landmark" value="{{landmark}}" placeholder="Landmark (Optional)">
               </div>
               <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" name="alternate_phone" placeholder="Alternate Phone (Optional)">
+                <input type="text" class="form-control" name="alternate_phone" value="{{ alternate_phone }}" placeholder="Alternate Phone (Optional)">
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-12">
+                <div class="col-12">
                   <div class="form-group d-flex align-items-center">
-                      <label class="me-3 mb-0">Address Type:</label>
-                      <div class="d-flex">
-                          <div class="form-check me-4">
-                              <input type="radio" class="form-check-input" id="homeAddress" name="addressType" value="home" required>
-                              <label class="form-check-label" for="homeAddress">Home Address</label>
+                      <label  style="margin-right: 25px;">Address Type:</label>
+                      <div class="d-flex" >
+                          <div class="form-check " style="margin-right: 50px;">
+                              <input type="radio" class="form-check-input" id="homeAddressEdit" name="addressType"
+                                     value="home"
+                                     {% if address_type == 'home' %}checked{% endif %} required>
+                              <label class="form-check-label" style="margin-left: -23px;" for="homeAddressEdit">Home Address</label>
                           </div>
                           <div class="form-check">
-                              <input type="radio" class="form-check-input" id="officeAddress" name="addressType" value="office">
-                              <label class="form-check-label" for="officeAddress">Office Address</label>
+                              <input type="radio" class="form-check-input" id="officeAddressEdit"
+                                     name="addressType"
+                                     value="office"
+                                     {% if address_type == 'office' %}checked{% endif %}>
+                              <label class="form-check-label" style="margin-left: -23px;" for="officeAddressEdit">Office Address</label>
                           </div>
                       </div>
                   </div>
-              </div>
-          </div>
               
+            
+          </div>
+          {% if errors %}
+          <div style="display: flex; align-items: center; justify-content: center;">
+          <div class="alert alert-danger align-center" >
+              <ul>
+                  {% for error in errors %}
+                      <li>{{ error }}</li>
+                  {% endfor %}
+              </ul>
+          </div>
+        </div>
+          {% endif %}
               
             
             <div class="d-flex">

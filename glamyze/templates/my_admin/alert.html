@@ -1,0 +1,43 @@
+{% extends 'my_admin/base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+{% if subcategory %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'Subcategory with this name already exist.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000, 
+            showConfirmButton: false 
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'category_management:category_view' %}"; 
+        }, 3000);
+    });
+</script>
+{% endif %}
+{% if category %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'Category with this name already exist.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000, 
+            showConfirmButton: false 
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'category_management:category_view' %}"; 
+        }, 3000);
+    });
+</script>
+{% endif %}
+{% endblock content %}

@@ -1,4 +1,6 @@
 {% extends 'user/account_layout.html' %}
+{% block address_active2 %}active{% endblock %}
+
 {% block content %}
 
 <style>
@@ -42,9 +44,9 @@
             title: 'Attention!',
             text: 'There is a change in email. You must confirm the email using otp to apply the change. Other changes applied',
             icon: 'warning',
-            showCancelButton: true,  // Show cancel button
+            showCancelButton: true,
             confirmButtonText: 'Continue to Confirm',
-            cancelButtonText: 'Cancel'  // Text for cancel button
+            cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
                 // Redirect if 'OK' is clicked

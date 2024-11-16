@@ -13,10 +13,15 @@ class Validation:
     
     #phone validation
     @staticmethod
-    def phone_validation(phone_number):
-        if not re.match(r'^\d{10}$',phone_number):
+    def phone_validation(phone):
+        if not phone.isdigit():
             return True
-        return False
+        elif len(phone) != 10:
+            return True
+        elif not phone.startswith(('4','5','6', '7', '8', '9')):
+            return True
+        else:
+            return False
 
     #password validation
     @staticmethod

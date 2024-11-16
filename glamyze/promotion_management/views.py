@@ -116,7 +116,7 @@ def delete_offer(request,offer_id):
 
 
 
-@never_cache
+
 def activate_offer(request, offer_id):
     if request.user.is_superuser:
         if request.method == "POST":

@@ -8,8 +8,11 @@ from django.core.mail import send_mail
 from django.contrib.auth.hashers import check_password
 from auth_app.validation import *
 from django.contrib.auth import update_session_auth_hash
+from django.views.decorators.cache import never_cache
+
 
 # Create your views here.
+@never_cache
 def profile_view(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -70,7 +73,7 @@ def user_otp_resend(request):
     else:
         return redirect('auth_app:login')
 
-
+@never_cache
 def email_otp_verification(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -105,7 +108,7 @@ def email_otp_verification(request):
         return redirect('auth_app:login')
     
 
-
+@never_cache
 def edit_profile(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
@@ -138,7 +141,7 @@ def edit_profile(request):
     else:
         return redirect('auth_app:login')
     
-
+@never_cache
 def change_password(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')

@@ -246,6 +246,8 @@ def home(request):
         return redirect('admin_app:admin_dashboard')
      
     if request.user.is_authenticated:
+        if SocialAccount.objects.filter(user=request.user, provider='google').exists() and request.user.is_block:
+            return render(request,'user/index.html',{'blocked':True})
         if request.user.is_block:
             return redirect('auth_app:logout') 
         current_date = timezone.now().date()
@@ -301,6 +303,9 @@ def home(request):
                 else:
                     product.offer_price = None
         return render(request,'user/index.html',{'products':products,'slider':slider})
+    
+def google_home(request):
+    return redirect('auth_app:home')
 
 
 @never_cache

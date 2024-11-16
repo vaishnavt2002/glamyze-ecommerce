@@ -3,6 +3,8 @@ from product_app.models import *
 from django.views.decorators.cache import never_cache
 from . models import *
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
+
 
 
 
@@ -58,7 +60,8 @@ def add_to_cart(request):
         return render(request,'user/product_view.html',{'product':product,'success':True})
     else:
         return redirect('auth_app:login')
-
+    
+@never_cache
 def cart_view(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 

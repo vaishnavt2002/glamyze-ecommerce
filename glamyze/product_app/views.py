@@ -6,6 +6,7 @@ from django.db.models import Prefetch,Count
 from django.db.models import Q,Sum,Min
 from datetime import datetime
 from django.utils import timezone
+from cart_app.models import *
 
 
 
@@ -39,11 +40,21 @@ def shop(request):
         
         products = products.prefetch_related(Prefetch('productvariant_set',queryset=ProductVariant.objects.filter(is_listed=True).order_by('price')))
         products = products.annotate(lowest_price = Min('productvariant__price'))
+        
+        if price_range:
+            if price_range != 'all':
+                min,max = price_range.split('-')
+                if max == "":
+                   products = products.filter(lowest_price__gte=min)
+                else:
+                   products = products.filter(lowest_price__gte=min,lowest_price__lte=max)
+
         if sort:
             if sort == 'id':
                 products.order_by('id')
             elif sort == 'newness':
-                products.order_by('-id')
+                print('worked')
+                products = products.order_by('-id')
             elif sort == 'rating':
                 pass
             elif sort == 'popularity':
@@ -56,17 +67,8 @@ def shop(request):
                 products = products.order_by('product_name')
             elif sort == 'za':
                 products = products.order_by('-product_name')
-        if price_range:
-            if price_range != 'all':
-                min,max = price_range.split('-')
-                if max == "":
-                   products = products.filter(lowest_price__gte=min)
-                else:
-                   products = products.filter(lowest_price__gte=min,lowest_price__lte=max)
-
                 
-                
-        paginator = Paginator(products, 4)
+        paginator = Paginator(products, 12)
         page_number = request.GET.get('page', 1) 
         page_obj = paginator.get_page(page_number) 
         
@@ -130,7 +132,6 @@ def product_view(request, product_id):
             return redirect('product_app:shop')
 
         selected_size = sizes.first()
-
         if request.GET:
             size = request.GET.get('size')
             try:
@@ -175,12 +176,18 @@ def product_view(request, product_id):
                 else:
                     item.offer_price = None
                     item.has_offer = False
+        cart = Cart.objects.filter(user=request.user).first()
+        added = False
+        if cart:
+            added = CartItem.objects.filter(cart=cart, productvariant=selected_size).exists()
+
 
         return render(request, 'user/product_view.html', {
             'product': product,
             'sizes': sizes,
             'selected_size': selected_size,
             'related_products': related_products,
+            'added' : added
         })
     else:
         return redirect('auth_app:login')

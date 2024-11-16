@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect
 from product_app.models import *
 from django.views.decorators.cache import never_cache
+from django.db.models import Prefetch
+
 
 # Create your views here.
 @never_cache
@@ -10,8 +12,11 @@ def category_view(request):
         if request.POST:
             new_category = request.POST['new_category']
             if new_category:
+                if Category.objects.filter(category_name__iexact = new_category):
+                    return render(request,'my_admin/alert.html',{'category':True})
                 Category.objects.create(category_name=new_category)
-        category_data = Category.objects.prefetch_related('subcategory_set').order_by('id')
+        subcategory_queryset = SubCategory.objects.order_by('id')
+        category_data = Category.objects.prefetch_related(Prefetch('subcategory_set', queryset=subcategory_queryset)).order_by('id')
         return render(request,'my_admin/category.html',{'category_data':category_data})
     elif request.user.is_authenticated:
         if request.user.is_block:
@@ -44,6 +49,8 @@ def subcategory_add(request):
             category_id = request.POST['categoryid']
             subcategory_name = request.POST.get('subcategory_name')
             if subcategory_name:
+                if SubCategory.objects.filter(subcategory_name__iexact=subcategory_name,category_id=category_id):
+                    return render(request,'my_admin/alert.html',{'subcategory':True})
                 obj = SubCategory(category_id=category_id,subcategory_name=subcategory_name)
                 obj.save()
         return redirect('category_management:category_view')

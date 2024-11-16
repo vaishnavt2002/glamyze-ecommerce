@@ -6,6 +6,7 @@ app_name = 'auth_app'
 
 urlpatterns = [
     path('',views.home,name='home'),
+    path('home/',views.google_home,name='google_home'),
     path('login/',views.user_login,name="login"),
     path('signup/',views.user_signup,name="signup"),
     path('otp-verification/',views.user_otp_verification,name="otp"),
