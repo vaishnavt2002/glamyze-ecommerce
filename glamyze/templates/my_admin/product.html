@@ -70,7 +70,7 @@
                     <td>{{product.subcategory.subcategory_name}}</td>
                     <td><img src="{{ product.image1.url }}" alt="{{ product.product_name }}" style="width: 70px;"></td>
                     <td>{{product.material}}</td>
-                    <td>{{product.is_listed}}</td>
+                    <td>{% if product.is_listed %}<span class="badge bg-success">Listed</span>{% else %}%}<span class="badge bg-danger">Unlisted</span>{% endif %} </td>
                     <td>
                         <a class="btn btn-outline-primary" href="{% url 'product_management:product_edit'  product.id  %}">Edit</a>
                         <button class="{% if product.is_listed %}
@@ -122,6 +122,7 @@
 <script>
 function toggleBlock(productId) {
     const button = document.querySelector(`#product-row-${productId} button`);
+    const badge = document.querySelector(`#product-row-${productId} span`)
     const action = button.textContent.trim() === "Unlist" ? "unlist" : "list";
     Swal.fire({
         title: `Are you sure you want to ${action} this product?`,
@@ -150,11 +151,17 @@ function toggleBlock(productId) {
                     button.textContent = "Unlist";
                     button.classList.remove('btn-outline-primary');
                     button.classList.add('btn-primary');
+                    badge.textContent = "Listed";
+                    badge.classList.remove('bg-danger');
+                    badge.classList.add('bg-success');
                 } 
                 else {
                     button.textContent = "List";
                     button.classList.remove('btn-primary');
                     button.classList.add('btn-outline-primary');
+                    badge.textContent = "Unlisted"
+                    badge.classList.remove('bg-success')
+                    badge.classList.add('bg-danger')
                 }
                 
             } else {

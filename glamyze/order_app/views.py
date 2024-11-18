@@ -138,14 +138,19 @@ def order_summary(request):
             selected_address = request.POST.get('selected_address')
             payment_method = request.POST.get('payment_method')
             summary_total = request.POST.get('summary_total')
+            
             if summary_total != str(total_price):
                 context['offer_change'] = True
                 return render(request,'user/summary.html',context)
-            address = Address.objects.get(id=selected_address)
+            try:
+                address = Address.objects.get(id=selected_address)
+            except:
+                address = None
+                context['address'] = True
             if not change:
                 pass
             else:
-                context['change']=True
+                context['change'] = True
         context.update({
             'cart_items': cart_items,
             'total_price': round(total_price, 2),
@@ -171,27 +176,29 @@ def confirm_order(request):
         cart = Cart.objects.get(user_id=user_id)
         cart_items = CartItem.objects.filter(cart=cart).select_related('cart')
         total_price = 0
-        
-        for item in cart_items:
-            original_price = float(item.productvariant.price)
-            # Calculate offer price if offer exists
-            current_date = timezone.now().date()
-            if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
-                discount = float(item.productvariant.product.offer.discount_percentage)
-                offer_price = original_price - (original_price * (discount / 100))
-                item.offer_price = round(offer_price, 2)
-                item.total_price = item.offer_price * item.quantity
-            else:
-                item.offer_price = None
-                item.total_price = original_price * item.quantity
-            
-            total_price += item.total_price
-            if not item.productvariant.is_listed or not item.productvariant.product.is_active or not item.productvariant.product.is_listed or not item.productvariant.product.subcategory.is_listed or not item.productvariant.product.subcategory.category.is_listed:
-                change = True
-            elif item.productvariant.quantity == 0:
-                change = True
-            elif item.quantity > item.productvariant.quantity:
-                change = True
+        if cart_items:
+            for item in cart_items:
+                original_price = float(item.productvariant.price)
+                # Calculate offer price if offer exists
+                current_date = timezone.now().date()
+                if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
+                    discount = float(item.productvariant.product.offer.discount_percentage)
+                    offer_price = original_price - (original_price * (discount / 100))
+                    item.offer_price = round(offer_price, 2)
+                    item.total_price = item.offer_price * item.quantity
+                else:
+                    item.offer_price = None
+                    item.total_price = original_price * item.quantity
+                
+                total_price += item.total_price
+                if not item.productvariant.is_listed or not item.productvariant.product.is_active or not item.productvariant.product.is_listed or not item.productvariant.product.subcategory.is_listed or not item.productvariant.product.subcategory.category.is_listed:
+                    change = True
+                elif item.productvariant.quantity == 0:
+                    change = True
+                elif item.quantity > item.productvariant.quantity:
+                    change = True
+        else:
+            return redirect('product_app:shop')
 
         if change:
             context['change']=True
@@ -238,14 +245,17 @@ def confirm_order(request):
                     else:
                         item_price = original_price
                     
-                    OrderItem.objects.create(
+                    order_item=OrderItem(
                         order=order,
                         product_variant=product_variant,
                         quantity=item.quantity,
                         price=round(item_price, 2),
                         total_price=round(item_price * item.quantity, 2),
-                        offer_applied=product_variant.product.offer
                     )
+                    if item.offer_price:
+                        order_item.offer_applied = product_variant.product.offer
+                    order_item.save()
+                    
                     product_variant.quantity -= item.quantity
                     product_variant.save()
             cart_items.delete()

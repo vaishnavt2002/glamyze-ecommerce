@@ -4,6 +4,7 @@ from .models import *
 from PIL import Image
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse
+import re
 
 
 # Create your views here.
@@ -36,19 +37,28 @@ def add_banner(request):
             error = validate_image_format(image,'Banner image')
             if error:
                  errors.append(error)
-            is_active = True if request.POST.get('is_active') else False  # Check if the checkbox was selected
+            is_active = True if request.POST.get('is_active') else False  
 
-            # Convert start_date and end_date to datetime objects if necessary
             try:
                 start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
                 end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
             except ValueError:
                 return redirect('banner_management:add_banner')
             
+            if  not re.match(r'^[A-Za-z\s]+$',name):
+                errors.append('Name must contain only letters and spaces')
+            if len(name)<3:
+                errors.append('Name should atleast contain 2 letters')
+            if len(name)>25:
+                errors.append('Name should atmost contain 25 letters')
+            if  not re.match(r'^[A-Za-z\s.]+$',description):
+                errors.append('Description must contain only letters and spaces')
+            if len(description)<5 and len(description)>30:
+                errors.append('Description should atleast contain 5 and atmost 30 letters')
+            
             if start_date and start_date.date() < datetime.today().date():
                 errors.append('Start date must be today or a future date.')
 
-        # Validate that the end date is greater than or equal to the start date
             if end_date and start_date and end_date < start_date:
                 errors.append('End date must be greater than or equal to the start date.')
             if errors:
@@ -62,8 +72,8 @@ def add_banner(request):
                  return render(request,'my_admin/add_banner.html',context)
 
             banner = Banner(
-                name=name,
-                description=description,
+                name=name.strip(),
+                description=description.strip(),
                 start_date=start_date,
                 end_date=end_date,
                 image=image,
@@ -85,12 +95,10 @@ def add_banner(request):
 @never_cache
 def edit_banner(request,banner_id):
     if request.user.is_superuser:
-        #adding new categories
         banner = Banner.objects.get(id=banner_id)
 
         if request.method == 'POST':
             errors = []
-            # Retrieve the values from request.POST
             name = request.POST.get('name')
             description = request.POST.get('description')
             start_date = request.POST.get('start_date')
@@ -102,16 +110,23 @@ def edit_banner(request,banner_id):
                 if error:
                     errors.append(error)
 
-            # Convert start_date and end_date to datetime objects if necessary
             try:
                 start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
                 end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
             except ValueError:
                 return redirect('banner_management:add_banner')
             
-            
+            if  not re.match(r'^[A-Za-z\s]+$',name):
+                errors.append('Name must contain only letters and spaces')
+            if len(name)<3:
+                errors.append('Name should atleast contain 2 letters')
+            if len(name)>25:
+                errors.append('Name should atmost contain 25 letters')
+            if  not re.match(r'^[A-Za-z\s.]+$',description):
+                errors.append('Description must contain only letters and spaces')
+            if len(description)<5:
+                errors.append('Description should atleast contain 5 letters')
 
-        # Validate that the end date is greater than or equal to the start date
             if end_date and start_date and end_date < start_date:
                 errors.append('End date must be greater than or equal to the start date.')
             if errors:
@@ -122,8 +137,8 @@ def edit_banner(request,banner_id):
                  }
                  
                  return render(request,'my_admin/edit_banner.html',context)
-            banner.name = name
-            banner.description = description
+            banner.name = name.strip()
+            banner.description = description.strip()
             banner.start_date = start_date
             banner.end_date = end_date
             if image:

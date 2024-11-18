@@ -6,7 +6,7 @@
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'admin_app:admin_dashboard' %}">Admin</a></li>
     <li class="breadcrumb-item"><a href="{% url 'promotion_management:offer_view' %}">Offers</a></li>
-    <li class="breadcrumb-item">Add Offer</li>
+    <li class="breadcrumb-item">Edit Offer</li>
   </ol>
 </nav>
 {% endblock breadcrumbs %}
@@ -30,7 +30,7 @@
         <!-- Discount Percentage -->
         <div class="col-md-6">
           <label for="discount_percentage" class="form-label">Discount Percentage</label>
-          <input type="number" step="0.01" class="form-control" id="discount_percentage" name="discount_percentage" value="{{ offer.discount_percentage }}" required>
+          <input type="number" step="0.01" class="form-control" id="discount_percentage" min="0" max="100" name="discount_percentage" value="{{ offer.discount_percentage }}" required>
         </div>
 
         <!-- Start Date -->

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from . models import *
 from django.views.decorators.cache import never_cache
 from datetime import datetime
+import re
 
 # Create your views here.
 
@@ -38,12 +39,21 @@ def add_offer(request):
                 errors.append('Start date must be today or a future date.')
             if end_date and start_date and end_date < start_date:
                 errors.append('End date must be greater than or equal to the start date.')
+            if  not re.match(r'^[A-Za-z\s]+$',offer_name):
+                errors.append('Name must contain only letters and spaces')
+            if len(offer_name)<3:
+                errors.append('Name should atleast contain 2 letters')
+            if  not re.match(r'^[A-Za-z\s.]+$',description):
+                errors.append('Description must contain only letters and spaces')
+            if len(description)<5:
+                errors.append('Description should atleast contain 5 letters')
             if errors:
                  context ={
                       'offer_name':offer_name,
                       'start_date':start_date,
                       'end_date':end_date,
                       'description':description,
+                      'discount_percentage':discount_percentage,
                       'errors':errors
                  }
                  return render(request,'my_admin/add_offer.html',context)
@@ -79,17 +89,25 @@ def edit_offer(request,offer_id):
             except ValueError:
                 return redirect('banner_management:add_banner')
             
-            if start_date and start_date.date() < datetime.today().date():
-                errors.append('Start date must be today or a future date.')
+            
             if end_date and start_date and end_date < start_date:
                 errors.append('End date must be greater than or equal to the start date.')
+            if  not re.match(r'^[A-Za-z\s]+$',offer_name):
+                errors.append('Name must contain only letters and spaces')
+            if len(offer_name)<3:
+                errors.append('Name should atleast contain 2 letters')
+            if  not re.match(r'^[A-Za-z\s.]+$',description):
+                errors.append('Description must contain only letters and spaces')
+            if len(description)<5:
+                errors.append('Description should atleast contain 5 letters')
             if errors:
                  context ={
                       'offer_name':offer_name,
                       'start_date':start_date,
                       'end_date':end_date,
                       'description':description,
-                      'errors':errors
+                      'errors':errors,
+                      'discount_percentage':discount_percentage
                  }
                  return render(request,'my_admin/add_offer.html',context)
             offer.offer_name=offer_name

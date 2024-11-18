@@ -15,38 +15,51 @@
 <div class="container-fluid">
   <div class="card">
     <div class="card-header">
-      <h5 class="card-title fw-semibold mb-0">{{product.product_name}}  Size & Quantity Management</h5>
+      <h5 class="card-title fw-semibold mb-0">{{product.product_name}} Size & Quantity Management</h5>
     </div>
     <div class="card-body">
-      <!-- Current Stock Table -->
       <div class="mb-4">
-        <form method="POST" action="{% url 'product_management:product_add_quantity' product.id %}" >
-            {% csrf_token %}
-            <input type="text" value="{{product.id}}" name="product_id" hidden>
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th class="text-center col-4">Size</th>
-                <th class="text-center col-4">Available Quantity</th>
-                <th class="text-center col-4" >Add Stock</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for product_size in product_sizes %}
-              <tr>
-                <td class="text-center">{{ product_size.size.size_name }}</td>
-                <td class="text-center">{{ product_size.quantity }}</td>
-                <td>
-                    <input type="number" class="form-control w-50" name="{{product_size.id}}" min="1" placeholder="Enter quantity">
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <button type="submit" class="btn btn-primary">Add stock</button>
-    </form>
+        <form method="POST" action="{% url 'product_management:product_add_quantity' product.id %}">
+          {% csrf_token %}
+          <input type="text" value="{{product.id}}" name="product_id" hidden>
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th class="text-center col-3">Size</th>
+                  <th class="text-center col-3">Current Quantity</th>
+                  <th class="text-center col-3">Add Stock</th>
+                  <th class="text-center col-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product_size in product_sizes %}
+                <tr>
+                  <td class="text-center">{{ product_size.size.size_name }}</td>
+                  <td class="text-center">
+                    {% if not product_size.is_listed or not product.is_listed or not product.subcategory.is_listed or not product.subcategory.category.is_listed %}
+                      <input type="number" class="form-control d-inline-block w-50" name="edit_{{product_size.id}}" value="{{ product_size.quantity }}" min="0">
+                    {% else %}
+                      {{ product_size.quantity }}
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <input type="number" class="form-control d-inline-block w-50" name="add_{{product_size.id}}" min="1" placeholder="Enter quantity">
+                  </td>
+                  <td class="text-center">
+                    {% if not product_size.is_listed or not product.is_listed or not product.subcategory.is_listed or not product.subcategory.category.is_listed %}
+                      <span class="badge bg-warning">Unlisted - Editing Enabled</span>
+                    {% else %}
+                      <span class="badge bg-success">Listed</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
       </div>
     </div>
   </div>

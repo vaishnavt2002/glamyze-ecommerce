@@ -72,14 +72,14 @@ def address_view(request):
             
             address_obj =                                                                                                                                                                                                                                                           Address(
                 user=request.user,
-                    name=name,
-                    phone=phone,
-                    pincode=pincode,
-                    locality=locality,
-                    address=address,
-                    city=city,
-                    state=state,
-                    landmark=landmark,
+                    name=name.strip(),
+                    phone=phone.strip(),
+                    pincode=pincode.strip(),
+                    locality=locality.strip(),
+                    address=address.strip(),
+                    city=city.strip(),
+                    state=state.strip(),
+                    landmark=landmark.strip(),
                     office_home=address_type
                     )
             address_obj.save()
@@ -131,19 +131,19 @@ def update_address(request, address_id):
             if not pincode.isdigit() or len(pincode) != 6 or  pincode.startswith('0'):
                 errors.append('Pincode is wrong')
             if errors:
-                        return render(request, 'user/edit_address.html', {'address': address,'errors':errors})
+                return render(request, 'user/edit_address.html', {'address': address,'errors':errors})
 
-            address.name = name
-            address.phone = phone
-            address.pincode = pincode
-            address.locality = locality
-            address.address = address_data
-            address.city = city
-            address.state = state
+            address.name = name.strip()
+            address.phone = phone.strip()
+            address.pincode = pincode.strip()
+            address.locality = locality.strip()
+            address.address = address_data.strip()
+            address.city = city.strip()
+            address.state = state.strip()
             landmark = landmark
             alternate_phone = alternate_phone
-            address.landmark = landmark if landmark else None
-            address.alternate_phone = alternate_phone if alternate_phone else None
+            address.landmark = landmark.strip() if landmark else None
+            address.alternate_phone = alternate_phone.strip() if alternate_phone else None
             address.office_home = address_type
             address.save()
             return redirect('address_app:address_view') 
@@ -152,11 +152,6 @@ def update_address(request, address_id):
     else:
         return redirect('auth_app:login')
     
-
-
-
-
-
 def delete_address(request,address_id):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard')
@@ -165,6 +160,8 @@ def delete_address(request,address_id):
         if request.user.is_block:
             return redirect('auth_app:logout') 
         address = get_object_or_404(Address, id=address_id)
+        if request.user != address.user:
+            return redirect('auth_app:logout')
         address.delete()
         return redirect('address_app:address_view')
     else:

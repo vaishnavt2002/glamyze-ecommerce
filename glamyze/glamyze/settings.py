@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'banner_management',
     'promotion_management',
     'order_app',
+    'order_management',
     'django.contrib.sites',
     'allauth',
     'allauth.account',

@@ -40,8 +40,8 @@ def add_to_cart(request):
                 return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'noquantity':True})
 
 
-                # At this point, all conditions are satisfied
-            product = variant.product  # Retrieve the related product
+               
+            product = variant.product 
             try:
                 cart = Cart.objects.get(user_id=request.user.id)
             except Exception:

@@ -186,5 +186,23 @@
     });
 </script>
 {% endif %}
+{% if address %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: 'Add an address and continue',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000,
+            showConfirmButton: false
+        });
+
+        setTimeout(() => {
+            window.location.href = "{% url 'order_app:checkout_view' %}";
+        }, 3000);
+    });
+</script>
+{% endif %}
 
 {% endblock %}

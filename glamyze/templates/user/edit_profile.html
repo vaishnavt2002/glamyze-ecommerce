@@ -19,20 +19,29 @@
       {% csrf_token %}
       <div class="form-group">
         <label for="first_name">First Name</label>
-        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user_data.first_name }}" required>
+        <input type="text" class="form-control" id="first_name" name="first_name" value="{% if first_name %}{{first_name}}{% else %}{{ user_data.first_name }}{% endif %}" required>
       </div>
       <div class="form-group">
         <label for="last_name">Last Name</label>
-        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user_data.last_name }}" required>
+        <input type="text" class="form-control" id="last_name" name="last_name" value="{% if last_name %}{{last_name}}{% else %}{{ user_data.last_name }}{% endif %}" required>
       </div>
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" class="form-control" id="email" name="email" value="{{ user_data.email }}" required>
+        <input type="email" class="form-control" id="email" name="email" value="{% if email %}{{email}}{% else %}{{ user_data.email }}{% endif %}" required>
       </div>
       <div class="form-group">
         <label for="phone_number">Phone</label>
-        <input type="text" class="form-control" id="phone_number" name="phone" value="{{ user_data.phone_number }}">
+        <input type="text" class="form-control" id="phone_number" name="phone" value="{% if phone_number %}{{phone_number}}{% else %}{{ user_data.phone_number }}{% endif %}" reaquired>
       </div>
+      {% if errors %}
+      <div class="alert alert-danger">
+          <ul>
+              {% for error in errors %}
+                  <li>{{ error }}</li>
+              {% endfor %}
+          </ul>
+      </div>
+      {% endif %}
       <button type="submit" class="btn btn-dark mt-3">Save Changes</button>
     </form>
   </div>
@@ -64,14 +73,14 @@
             title: 'Failed!',
             text: 'A account with this email id already exists. Try another email id. Other changes applied.',
             icon: 'error',
-            timer: 4000,  // Display the alert for 3 seconds (3000 milliseconds)
-            showConfirmButton: false  // Hide the confirm button to automatically close
+            timer: 4000, 
+            showConfirmButton: false 
         });
 
         // Redirect after 3 seconds
         setTimeout(function() {
-            window.location.href = "{% url 'profile_app:profile_view' %}";  // Replace 'desired_redirect_url' with your target URL
-        }, 3000);  // Redirect after 3 seconds
+            window.location.href = "{% url 'profile_app:profile_view' %}"; 
+        }, 3000); 
     });
 </script>
 {% endif %}

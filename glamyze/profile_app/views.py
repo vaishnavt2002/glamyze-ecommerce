@@ -122,9 +122,26 @@ def edit_profile(request):
             phone_number = request.POST.get('phone')
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
+            errors = []
+            if not re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$', email):
+                errors.append('Invalid email format')
+            if len(first_name)<2 or not re.match(r'^[A-Za-z\s]+$', first_name):
+                errors.append("First name should be at least 2 characters and only contain letters.")
+            if  not re.match(r'^[A-Za-z\s]+$', last_name):
+                errors.append("Last name should only contain letters.")
+            if not phone_number.isdigit() or len(phone_number) != 10 or not phone_number.startswith(('4','5','6', '7', '8', '9')):
+                errors.append('Phone number is in invalid format')
+            if errors:
+                context = {'errors':errors,
+                           'email':email,
+                           'phone_number':phone_number,
+                           'first_name':first_name,
+                           'last_name':last_name}
+                return render(request,'user/edit_profile.html',context)
+            
             user_data.phone_number = phone_number
-            user_data.first_name = first_name
-            user_data.last_name = last_name
+            user_data.first_name = first_name.strip()
+            user_data.last_name = last_name.strip()
             user_data.save()
             if email != user_data.email:
                 request.session['email_change'] = email
@@ -135,7 +152,6 @@ def edit_profile(request):
                     return render(request,'user/edit_profile.html',{'user_data':user_data,'email_change':True})
             else:
                 return redirect('profile_app:profile_view')
-                
         return render(request,'user/edit_profile.html',{'user_data':user_data})
         
     else:
@@ -156,11 +172,9 @@ def change_password(request):
             if not check_password(current_password, request.user.password):
                 errors.append('Current Password is wrong')
 
-            # Check if new password and confirm password match
             if new_password != confirm_password:
                 errors.append('new password and confirm password not matching')
             
-            # Check if the new password is different from the current one
             if current_password == new_password:
                 errors.append('new password and old password are same')
             password_errors = Validation.password_validation(new_password)
@@ -169,7 +183,6 @@ def change_password(request):
             if errors:
                 return render(request,'user/change_password.html',{'errors':errors})
 
-            # Update password
             request.user.set_password(new_password)
             request.user.save()
             update_session_auth_hash(request, request.user)

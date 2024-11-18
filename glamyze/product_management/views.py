@@ -73,7 +73,7 @@ def product_add(request):
             error1 = validate_image_format(image1,'Image1')
             error2 = validate_image_format(image2,'Image2')
             error3 = validate_image_format(image3,'Image3')
-            if not re.match(r'^[A-Za-z\s]+$', product_name):
+            if not re.match(r"^[A-Za-z\s']+$", product_name):
                 errors.append("Product Name must contain only letters and spaces.")
             if len(product_name)<3:
                 errors.append("Product name should be atleast 3 characters")
@@ -93,7 +93,7 @@ def product_add(request):
                 context.update({'product_name':product_name,'subcategory_id':subcategory_id,'material':material,'color':color,'description':description,'errors':errors})
                 return render(request,'my_admin/addproduct.html',context)
 
-            product_obj=Product(product_name=product_name,subcategory_id=subcategory_id,material=material,color=color,description=description,image1=image1,image2=image2,image3=image3)
+            product_obj=Product(product_name=product_name.strip(),subcategory_id=subcategory_id,material=material.strip(),color=color.strip(),description=description.strip(),image1=image1,image2=image2,image3=image3)
             offer_id = request.POST.get('offer_id')
             if offer_id:
                 product_obj.offer_id = offer_id
@@ -266,7 +266,7 @@ def product_edit(request,product_id):
             material = request.POST.get('material')
             color = request.POST.get('color')
             description = request.POST.get('description')
-            if not re.match(r'^[A-Za-z\s]+$', product_name):
+            if not re.match(r"^[A-Za-z\s']+$", product_name):
                 errors.append("Product Name must contain only letters and spaces.")
             if len(product_name)<3:
                 errors.append("Product name should be atleast 3 characters")
@@ -374,18 +374,39 @@ def product_add_quantity(request, product_id):
 
         if request.method == 'POST':
             updated_count = 0
+            for product_size in product_sizes:          
+                edit_quantity_key = f'edit_{product_size.id}'
+                if edit_quantity_key in request.POST:
+                    if (not product_size.is_listed or 
+                        not product.is_listed or 
+                        not product.subcategory.is_listed or 
+                        not product.subcategory.category.is_listed):
+                        
+                        edit_quantity = request.POST.get(edit_quantity_key, '')
+                        if edit_quantity.strip():
+                                new_quantity = int(edit_quantity)
+                                if new_quantity >= 0: 
+                                    variant = ProductVariant.objects.get(id=product_size.id)
+                                    variant.quantity = new_quantity
+                                    variant.save()
+                                    updated_count += 1
+                                else:
+                                    return redirect('product_management:product_add_quantity', product_id=product_id)
+                                
             for product_size in product_sizes:
-                product_size_id = str(product_size.id)
-                if product_size_id in request.POST:
-                    quantity_to_add = request.POST.get(product_size_id,0)
-                    if quantity_to_add:
-                        quantity_to_add = int(quantity_to_add)
-                    else:
-                        quantity_to_add = 0
-                    if quantity_to_add > 0:
-                        product_size.quantity = F('quantity') + quantity_to_add
-                        product_size.save()
-                        updated_count += 1
+                add_quantity_key = f'add_{product_size.id}'
+                if add_quantity_key in request.POST:
+                    add_quantity = request.POST.get(add_quantity_key,'')
+                    if add_quantity.strip():
+                        try:
+                            quantity_to_add = int(add_quantity)
+                            if quantity_to_add > 0:
+                                product_size.quantity = F('quantity') + quantity_to_add
+                                product_size.save()
+                                updated_count += 1
+                        except ValueError:
+                            return redirect('product_management:product_add_quantity', product_id=product_id)
+                                   
             if updated_count > 0:
                 messages.success(request, f'{updated_count} size(s) updated successfully!')
             return redirect('product_management:product_details')

@@ -22,6 +22,7 @@
     });
 </script>
 {% endif %}
+
 {% if category %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -40,4 +41,22 @@
     });
 </script>
 {% endif %}
+{% if order_update %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Successfull',
+            text: 'Order Updated Successfully.',
+            confirmButtonText: 'OK',
+            icon: 'success',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'order_management:order_detail' order_id %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
 {% endblock content %}
+
