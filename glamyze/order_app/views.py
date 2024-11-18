@@ -26,7 +26,6 @@ def proceed_to_checkout(request):
         change = False
         for item in cart_items:
             original_price = float(item.productvariant.price)
-            # Calculate offer price if offer exists
             current_date = timezone.now().date()
             if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
                 discount = float(item.productvariant.product.offer.discount_percentage)
@@ -67,7 +66,7 @@ def checkout_view(request):
         if request.user.is_block:
             return redirect('auth_app:logout')
         
-        addresses = Address.objects.filter(user=request.user)
+        addresses = Address.objects.filter(user=request.user).order_by('id')
         context={}
         user_id = request.user.id
         cart = Cart.objects.get(user_id=user_id)
@@ -76,7 +75,6 @@ def checkout_view(request):
         
         for item in cart_items:
             original_price = float(item.productvariant.price)
-            # Calculate offer price if offer exists
             current_date = timezone.now().date()
             if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
                 discount = float(item.productvariant.product.offer.discount_percentage)
@@ -115,7 +113,6 @@ def order_summary(request):
         
         for item in cart_items:
             original_price = float(item.productvariant.price)
-            # Calculate offer price if offer exists
             current_date = timezone.now().date()
             if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
                 discount = float(item.productvariant.product.offer.discount_percentage)
@@ -179,7 +176,6 @@ def confirm_order(request):
         if cart_items:
             for item in cart_items:
                 original_price = float(item.productvariant.price)
-                # Calculate offer price if offer exists
                 current_date = timezone.now().date()
                 if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
                     discount = float(item.productvariant.product.offer.discount_percentage)

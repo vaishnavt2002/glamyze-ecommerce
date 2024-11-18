@@ -322,7 +322,6 @@ def product_varient_management(request,product_id):
         obj = ProductVariant.objects.filter(product_id=product_id)
         excluded_sizes = obj.values_list('size_id', flat=True)
         product = Product.objects.get(id=product_id)
-        # Get added sizes with their listing status
         added_sizes_with_status = []
         for variant in obj:
             added_sizes_with_status.append({

@@ -1,23 +1,17 @@
 {% extends 'user/account_layout.html' %}
-{% block address_active3 %}active{% endblock %}
+{% block address_active5 %}active{% endblock %}
 {% block content %}
-<style>
-  .form-check {
-    margin-right: 20px; /* Adjust spacing between radio buttons */
-  }
-</style>
+
 <div class="card">
     
     
-    <!-- Edit Address Form -->
     <div class="card">
         <div class="card-header">
           <h4>Update Address</h4>
         </div>
         
-        <!-- Edit Address Form -->
         <div class="card-body">
-          <form method="post" action=""> <!-- Update this URL as per your routing -->
+          <form method="post" action=""> 
             {% csrf_token %}
             <div class="row">
               <div class="col-md-6 mb-3">

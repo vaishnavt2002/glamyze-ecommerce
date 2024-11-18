@@ -476,6 +476,34 @@
         });
     </script>
 {% endif %}
+{% if maxquantity %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: 'Failed!',
+                text: 'Maximum quantity allowed per user is 5.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = "{% url 'product_app:product_view' product.id %}?size={{size_id}}";  // Redirect after confirmation
+            });
+        });
+    </script>
+{% endif %}
+{% if minquantity %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: 'Failed!',
+                text: 'Atleast add one quantity.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = "{% url 'product_app:product_view' product.id %}?size={{size_id}}";  // Redirect after confirmation
+            });
+        });
+    </script>
+{% endif %}
 
 
 {% endblock %}

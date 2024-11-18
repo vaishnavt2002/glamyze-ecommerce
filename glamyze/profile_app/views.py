@@ -42,7 +42,6 @@ def send_otp(request,email):
 def email_otp(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    # Check if the user is authenticated
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')  
@@ -77,7 +76,6 @@ def user_otp_resend(request):
 def email_otp_verification(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    # Check if the user is authenticated
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')  
@@ -112,7 +110,6 @@ def email_otp_verification(request):
 def edit_profile(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    # Check if the user is authenticated
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')  

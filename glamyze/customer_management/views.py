@@ -33,7 +33,6 @@ def customer_details(request):
 
     
     
-#this function will produce Json Response. This is for the AJAX request coming.
 @never_cache
 def block_unblock_user(request, user_id):
     if request.user.is_superuser:

@@ -3,10 +3,7 @@
   {% extends 'user/account_layout.html' %}
   {% block address_active5 %}active{% endblock %}
 {% block content %}
-<style>
-  .form-check {
-    margin-right: 20px; /* Adjust spacing between radio buttons */
-}
+
 </style>
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -143,7 +140,7 @@
   document.querySelectorAll('.delete-btn').forEach(button => {
     button.addEventListener('click', function(event) {
       event.preventDefault();
-      const url = this.getAttribute('data-url');  // Get the URL from data attribute
+      const url = this.getAttribute('data-url');
       
       Swal.fire({
         title: 'Are you sure?',
@@ -154,7 +151,6 @@
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
-          // Redirect to the delete URL if confirmed
           window.location.href = url;
         }
       });

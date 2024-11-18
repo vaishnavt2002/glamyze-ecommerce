@@ -296,7 +296,6 @@ def home(request):
             variant = product.productvariant_set.first() if product.productvariant_set.exists() else None
             if variant:
                 product.variant_price = variant.price
-                # Calculate offer price if product has an active offer
                 if product.offer and product.offer.is_active and product.offer.start_date<=current_date and product.offer.end_date>=current_date:
                     discount = product.offer.discount_percentage
                     product.offer_price = round(variant.price * (1 - discount / 100), 2)

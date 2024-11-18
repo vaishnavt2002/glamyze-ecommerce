@@ -25,7 +25,7 @@ def address_view(request):
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout') 
-        addresses = Address.objects.filter(user=request.user)
+        addresses = Address.objects.filter(user=request.user).order_by('id')
         if request.POST:
             name = request.POST.get('name')
             phone = request.POST.get('phone')

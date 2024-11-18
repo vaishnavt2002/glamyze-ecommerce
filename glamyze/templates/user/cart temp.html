@@ -2,26 +2,23 @@
 {% load static %}
 
 {% block shop %}
-
-
-
 <!-- breadcrumb -->
 <div class="container">
     <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-        <a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+        <a href="{% url 'auth_app:home' %}" class="stext-109 cl8 hov-cl1 trans-04">
             Home
             <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
         </a>
 
         <span class="stext-109 cl4">
-            Shoping Cart
+            Shopping Cart
         </span>
     </div>
 </div>
-    
 
-<!-- Shoping Cart -->
+<!-- Check for empty cart -->
 {% if cart_items %}
+    <!-- Shoping Cart -->
     <div class="container">
         <div class="row">
             <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
@@ -86,7 +83,7 @@
                                             <span style="color: #ff0000;">
                                                 {{item.quantity}}x₹{{item.offer_price}} = ₹{{item.total_price}}
                                             </span>
-                                            <div class="total-savings" style="font-size: 12px; color: green;">
+                                            <div class="total-savings" style="font-size: 12px; color: #28a745;">
                                                 {{ item.productvariant.product.offer.offer_name }}
                                             </div>
                                         </div>
@@ -101,34 +98,6 @@
                                     </form>
                                 </td>
                             </tr>
-                            {% if item.not_listed %}
-                            <tr>
-                                <td colspan="5">
-                                    <div class="warning-message" style="color: #ff0000; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
-                                        The product is no longer available to buy. Remove from cart to continue.
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% if item.remove %}
-                            <tr>
-                                <td colspan="5">
-                                    <div class="warning-message" style="color: #ff0000; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
-                                        Sorry! This Product is Out of Stock. Remove from cart to continue.
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% if item.warning %}
-                            <tr>
-                                <td colspan="5">
-                                    <div class="warning-message" style="color: #ff0000; font-size: 12px; margin: 5px 0; font-weight: 500; text-align: center;">
-                                        The stock of this product is less than the selected quantity. Decrease the quantity to place order or remove to continue.
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endif %}
-                          
                             {% endfor %}
                         </table>
                     </div>
@@ -161,7 +130,7 @@
             </div>
         </div>
     </div>
-    {% else %}
+{% else %}
     <div class="container text-center" style="padding: 50px 0;">
         <h3 class="mtext-109 cl2 mb-5">Your cart is empty!</h3>
         <p class="stext-101 cl2 mb-5">Browse our shop and add items to your cart.</p>
@@ -170,6 +139,8 @@
         </a>
     </div>
 {% endif %}
+
+
 
 <script>
 function updateQuantityForm(itemId, newQuantity) {
@@ -259,3 +230,4 @@ document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(
 {% endif %}
     
 {% endblock %}
+

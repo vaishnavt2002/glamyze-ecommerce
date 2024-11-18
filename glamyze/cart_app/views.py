@@ -38,7 +38,15 @@ def add_to_cart(request):
                 product = Product.objects.get(id=variant.product.id)
                 print(variant.size.id)
                 return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'noquantity':True})
-
+            if  5 < int(num_product):
+                variant = ProductVariant.objects.get(id=variant_id)
+                product = Product.objects.get(id=variant.product.id)
+                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'maxquantity':True})
+            if  0 == int(num_product):
+                variant = ProductVariant.objects.get(id=variant_id)
+                product = Product.objects.get(id=variant.product.id)
+                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'minquantity':True})
+            
 
                
             product = variant.product 
@@ -81,6 +89,8 @@ def cart_view(request):
             elif int(num_products) > cart_item.quantity:
                 if int(num_products) > variant.quantity:
                     context = {'quantity_error' : True}
+                elif int(num_products) > 5:
+                    context = {'max_quantity_error' : True}
                 else:
                     cart_item.quantity=int(num_products)
                 cart_item.save()
@@ -92,7 +102,6 @@ def cart_view(request):
         
         for item in cart_items:
             original_price = float(item.productvariant.price)
-            # Calculate offer price if offer exists
             current_date = timezone.now().date()
             if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
                 discount = float(item.productvariant.product.offer.discount_percentage)
