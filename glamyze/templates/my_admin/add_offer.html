@@ -44,6 +44,17 @@
           <label for="end_date" class="form-label">End Date</label>
           <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" required>
         </div>
+        <!-- offer selection -->
+        <div class="col-md-6">
+          <label for="offerType" class="form-label">Select the Offer Type</label>
+          <select class="form-select" id="offerType"  name="offer_type" required>
+            {% for choice,display in offer_choices %}
+              <option value="{{ choice }}" {%  if offer_type == choice %}selected{% endif %}>
+                  {{ display }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
 
         <!-- Offer Description -->
         <div class="col-12">

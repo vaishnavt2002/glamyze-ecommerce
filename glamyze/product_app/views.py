@@ -77,7 +77,6 @@ def shop(request):
             if variant:
                 product.variant_price = variant.price
                 product.price = variant.price
-                # Calculate offer price if product has an active offer
                 current_date = timezone.now().date()
                 if (product.offer and product.offer.is_active and 
                             product.offer.start_date <= current_date <= product.offer.end_date):
@@ -139,11 +138,9 @@ def product_view(request, product_id):
             except ProductVariant.DoesNotExist:
                 return redirect('product_app:shop')
         
-        # Check if product has an active offer within valid dates
         current_date = timezone.now().date()
         if (product.offer and product.offer.is_active and 
             product.offer.start_date <= current_date <= product.offer.end_date):
-            # Calculate offer price for selected size
             discount = product.offer.discount_percentage
             selected_size.offer_price = round(selected_size.price * (1 - discount / 100), 2)
             selected_size.has_offer = True
@@ -164,7 +161,6 @@ def product_view(request, product_id):
             Prefetch('productvariant_set', 
                     queryset=ProductVariant.objects.filter(is_listed=True)))
         
-        # Calculate offer prices for related products
         for item in related_products:
             variant = item.productvariant_set.first() if item.productvariant_set.exists() else None
             if variant:

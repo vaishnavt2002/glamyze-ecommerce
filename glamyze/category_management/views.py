@@ -2,13 +2,15 @@ from django.shortcuts import render,redirect
 from product_app.models import *
 from django.views.decorators.cache import never_cache
 from django.db.models import Prefetch
+from promotion_management.models import *
+from datetime import datetime
+from django.utils import timezone
 
 
 # Create your views here.
 @never_cache
 def category_view(request):
     if request.user.is_superuser:
-        #adding new categories
         if request.POST:
             new_category = request.POST['new_category']
             if new_category:
@@ -17,7 +19,15 @@ def category_view(request):
                 Category.objects.create(category_name=new_category)
         subcategory_queryset = SubCategory.objects.order_by('id')
         category_data = Category.objects.prefetch_related(Prefetch('subcategory_set', queryset=subcategory_queryset)).order_by('id')
-        return render(request,'my_admin/category.html',{'category_data':category_data})
+        category_data = list(category_data)
+        current_date = timezone.now().date()
+        for category in category_data:
+            if category.offer and category.offer.end_date >= current_date and category.offer.is_active:
+                category.offer_valid=True
+
+        category_offers = Offer.objects.filter(is_active=True,end_date__gte = current_date,offer_type='CATEGORY')
+        print(category_offers)
+        return render(request,'my_admin/category.html',{'category_data':category_data,'category_offers':category_offers})
     elif request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
@@ -100,6 +110,21 @@ def subcategories_list_unlist(request,id):
         subcategory_obj = SubCategory.objects.get(id=id)
         subcategory_obj.is_listed = not subcategory_obj.is_listed
         subcategory_obj.save()
+        return redirect('category_management:category_view')
+    elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        return redirect('auth_app:home')
+    else:
+        return redirect('auth_app:login')
+    
+@never_cache
+def category_offer_update(request):
+    if request.user.is_superuser:
+        if request.POST:
+            category_id = request.POST.get('category_id')
+            offer_id = request.POST.get('offer_id')
+            Category.objects.filter(id=category_id).update(offer_id=offer_id)
         return redirect('category_management:category_view')
     elif request.user.is_authenticated:
         if request.user.is_block:

@@ -15,7 +15,7 @@
 <div class="container-fluid">
   <div class="card">
     <div class="card-header">
-      <h5 class="card-title fw-semibold mb-0">Add New Offer</h5>
+      <h5 class="card-title fw-semibold mb-0">Edit Offer</h5>
     </div>
     <div class="card-body">
       <form method="POST" class="row g-3">
@@ -44,6 +44,8 @@
           <label for="end_date" class="form-label">End Date</label>
           <input type="date" class="form-control" id="end_date" name="end_date" value="{{ offer.end_date|date:'Y-m-d' }}" required>
         </div>
+         <!-- offer selection -->
+       
 
         <!-- Offer Description -->
         <div class="col-12">

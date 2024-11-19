@@ -6,6 +6,7 @@ from promotion_management.models import *
 class Category(models.Model):
     category_name = models.CharField(max_length=100)
     is_listed = models.BooleanField(default=False)
+    offer = models.ForeignKey(Offer,on_delete=models.SET_NULL,null=True)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -16,6 +17,7 @@ class SubCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     subcategory_name = models.CharField(max_length=100)
     is_listed = models.BooleanField(default=False)
+    offer = models.ForeignKey(Offer,on_delete=models.SET_NULL,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self) -> str:

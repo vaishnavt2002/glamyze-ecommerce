@@ -86,7 +86,7 @@
                                             <span style="color: #ff0000;">
                                                 {{item.quantity}}x₹{{item.offer_price}} = ₹{{item.total_price}}
                                             </span>
-                                            <div class="total-savings" style="font-size: 12px; color: green;">
+                                            <div  style="font-size: 12px; color: green;">
                                                 {{ item.productvariant.product.offer.offer_name }}
                                             </div>
                                         </div>
@@ -184,12 +184,11 @@ document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(
         let newQuantity;
         if (btn.classList.contains('btn-num-product-down')) {
             newQuantity = currentQuantity - 1;
-            newQuantity = newQuantity < 1 ? 1 : newQuantity; // Prevent quantity from going below 1
+            newQuantity = newQuantity < 1 ? 1 : newQuantity; 
         } else {
             newQuantity = currentQuantity + 1;
         }
 
-        // Update the quantity display after a short delay
         setTimeout(() => {
             document.getElementById(`quantityDisplay-${itemId}`).value = newQuantity;
         }, 200);
@@ -197,7 +196,8 @@ document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(
         updateQuantityForm(itemId, newQuantity);
     });
 });
-</script>{% if noquantity %}
+</script>
+{% if noquantity %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         Swal.fire({

@@ -58,7 +58,7 @@ def product_add(request):
     if request.user.is_superuser:
         subcategories = SubCategory.objects.select_related('category')
         current_date = timezone.now().date()
-        offers = Offer.objects.filter(is_active=True,end_date__gte = current_date)
+        offers = Offer.objects.filter(is_active=True,end_date__gte = current_date,offer_type='PRODUCT')
         context={'subcategories':subcategories,'offers':offers}
         if request.POST:
             product_name = request.POST['product_name']
@@ -275,7 +275,7 @@ def product_edit(request,product_id):
             if len(material)<2 or not re.match(r'^[A-Za-z\s]+$', material):
                 errors.append("Material name should be at least 2 characters and only contain letters.")
             if len(description)<10:
-                errors.append("Description should be at least 10 characters.")
+                errors.append("Description should be at least 10 characters and less than  characters")
             
             if errors:
                 print(errors)

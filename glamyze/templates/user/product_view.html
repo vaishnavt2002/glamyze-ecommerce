@@ -93,6 +93,9 @@
                             <div style="color: #e65540; font-size: 14px; margin-top: 5px;">
                                 {{ product.offer.discount_percentage }}% OFF
                             </div>
+                            <div class="total-savings" style="font-size: 12px; color: green;">
+                                {{ selected_size.product.offer.offer_name }}
+                            </div>
                         {% else %}
                             <span class="mtext-106 cl2">
                                 ₹{{ selected_size.price }}
@@ -394,7 +397,6 @@
                 {% for item in related_products %}
                 <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
                     <div class="block2">
-                        <!-- Image section remains the same -->
                         <div class="block2-pic hov-img0">
                             <img src="{{ item.image1.url }}" alt="IMG-PRODUCT">
 
@@ -416,6 +418,7 @@
                                         <span class="stext-105 cl3" style="color: #e65540; margin-left: 5px;">
                                             ₹{{ item.offer_price }}
                                         </span>
+                                        
                                     {% else %}
                                         <span class="stext-105 cl3">
                                             ₹{{ item.variant_price }}
@@ -442,7 +445,7 @@
                 icon: 'success',
                 confirmButtonText: 'OK'
             }).then(() => {
-                window.location.href = "{% url 'product_app:shop' %}";  // Redirect after confirmation
+                window.location.href = "{% url 'product_app:shop' %}";  
             });
         });
     </script>
@@ -457,7 +460,7 @@
                 icon: 'error',
                 confirmButtonText: 'OK'
             }).then(() => {
-                window.location.href = "{% url 'product_app:shop' %}";  // Redirect after confirmation
+                window.location.href = "{% url 'product_app:shop' %}"; 
             });
         });
     </script>

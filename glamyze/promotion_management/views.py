@@ -22,6 +22,7 @@ def offer_view(request):
 @never_cache
 def add_offer(request):
     if request.user.is_superuser:
+        offer_choices = Offer.OFFER_TYPE_CHOICES
         if request.POST:
             errors = []
             offer_name = request.POST.get('offer_name')
@@ -29,6 +30,7 @@ def add_offer(request):
             start_date = request.POST.get('start_date')
             end_date = request.POST.get('end_date')
             description = request.POST.get('description')
+            offer_type = request.POST.get('offer_type')
             try:
                 start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
                 end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
@@ -47,6 +49,7 @@ def add_offer(request):
                 errors.append('Description must contain only letters and spaces')
             if len(description)<5:
                 errors.append('Description should atleast contain 5 letters')
+            
             if errors:
                  context ={
                       'offer_name':offer_name,
@@ -54,19 +57,22 @@ def add_offer(request):
                       'end_date':end_date,
                       'description':description,
                       'discount_percentage':discount_percentage,
-                      'errors':errors
+                      'errors':errors,
+                      'offer_type':offer_type,
+                      'offer_choices':offer_choices
                  }
                  return render(request,'my_admin/add_offer.html',context)
             offer = Offer(offer_name=offer_name,
                           start_date=start_date,
                           end_date=end_date,
                           description=description,
-                          discount_percentage =float(discount_percentage)
+                          discount_percentage =float(discount_percentage),
+                          offer_type = offer_type
                           )
             offer.save()
             return redirect('promotion_management:offer_view')
 
-        return render(request, 'my_admin/add_offer.html')
+        return render(request, 'my_admin/add_offer.html',{'offer_choices':offer_choices})
     elif request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
@@ -76,6 +82,7 @@ def add_offer(request):
     
 def edit_offer(request,offer_id):
     offer = Offer.objects.get(id=offer_id)
+    offer_choices = Offer.OFFER_TYPE_CHOICES
     if request.POST:
             errors = []
             offer_name = request.POST.get('offer_name')
@@ -83,6 +90,7 @@ def edit_offer(request,offer_id):
             start_date = request.POST.get('start_date')
             end_date = request.POST.get('end_date')
             description = request.POST.get('description')
+
             try:
                 start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
                 end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
@@ -107,7 +115,8 @@ def edit_offer(request,offer_id):
                       'end_date':end_date,
                       'description':description,
                       'errors':errors,
-                      'discount_percentage':discount_percentage
+                      'discount_percentage':discount_percentage,
+                      'offer_choices':offer_choices,
                  }
                  return render(request,'my_admin/add_offer.html',context)
             offer.offer_name=offer_name
@@ -118,7 +127,7 @@ def edit_offer(request,offer_id):
                       
             offer.save()
             return redirect('promotion_management:offer_view')
-    return render(request,'my_admin/edit_offer.html',{'offer':offer})
+    return render(request,'my_admin/edit_offer.html',{'offer':offer,'offer_choices':offer_choices})
     
 def delete_offer(request,offer_id):
     if request.user.is_superuser:
@@ -149,3 +158,5 @@ def activate_offer(request, offer_id):
         else:
             return redirect('auth_app:login')
     return JsonResponse({'status': 'error'}, status=400)
+
+    

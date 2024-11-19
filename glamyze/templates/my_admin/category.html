@@ -26,7 +26,7 @@
                 <h2 class="accordion-header" id="heading">
                     <div class="d-flex justify-content-between align-items-center w-100">
                         <button class="accordion-button bg-light text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category.id }}" aria-expanded="true" aria-controls="collapse{{ category.id }}">
-                            {{ category.category_name }}
+                            {{ category.category_name }}{% if category.offer_valid %}<span style="margin-left: 20px;" class="badge bg-success">{{category.offer.offer_name}}</span>{% endif %}
                         </button>
                         <div class="d-flex gap-2 me-3">
                             <button class="btn btn-primary" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}">EDIT</button>
@@ -35,6 +35,8 @@
                                href="{% url 'category_management:categories_list_unlist' category.id %}">
                                 {% if category.is_listed %}Unlist{% else %}List{% endif %}
                             </a>
+                            <button class="btn btn-outline-primary" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#applyCategoryOfferModal{{ category.id }}">APPLY OFFER</button>
+
                         </div>
                     </div>
                 </h2>
@@ -114,6 +116,41 @@
                                 <div class="mb-3">
                                     <label for="edit-category-name" class="form-label">Category Name</label>
                                     <input type="text" class="form-control border-dark" id="edit-category-name" name="new_catagory_name" value="{{category.category_name}}" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-dark">Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Category Offer Modal -->
+            <div class="modal fade" id="applyCategoryOfferModal{{ category.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="POST" action="{% url 'category_management:category_offer_update' %}">
+                        {% csrf_token %}
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title" id="staticBackdropLabel">Select an offer to apply</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" value="{{ category.id }}" name="category_id">
+                                <div class="mb-3">
+                                    {% if category_offers %}
+                                    <label for="offer" class="form-label">Select the Offer to add</label>
+                                    <select class="form-select" id="offer" name="offer_id" required>
+                                        <option value="">Select</option>
+                                        {% for offer_details in category_offers %}
+                                        <option value="{{ offer_details.id }}">{{offer_details.offer_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% else %}
+                                        <div>No offers to add</div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="modal-footer">

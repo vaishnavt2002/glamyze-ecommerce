@@ -20,6 +20,7 @@
                     <th scope="col">Offer Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Discount Percentage</th>
+                    <th scope="col">Offer Type</th>
                     <th scope="col">Start Date</th>
                     <th scope="col">End Date</th>
                     <th scope="col">Action</th>
@@ -31,6 +32,7 @@
                     <td>{{ offer.offer_name }}</td>
                     <td>{{ offer.description }}</td>
                     <td>{{ offer.discount_percentage }}%</td>
+                    <td>{{ offer.get_offer_type_display }}</td>
                     <td>{{ offer.start_date }}</td>
                     <td>{{ offer.end_date }}</td>
                     <td>
