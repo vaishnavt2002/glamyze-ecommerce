@@ -87,7 +87,13 @@
                                                 {{item.quantity}}x₹{{item.offer_price}} = ₹{{item.total_price}}
                                             </span>
                                             <div  style="font-size: 12px; color: green;">
+                                                {% if item.offer_applied == 'PRODUCT' %}
                                                 {{ item.productvariant.product.offer.offer_name }}
+                                                {% elif item.offer_applied == 'CATEGORY' %}
+                                                {{ item.productvariant.product.subcategory.category.offer.offer_name }}
+                                                {% elif item.offer_applied == 'SUBCATEGORY' %}
+                                                {{ item.productvariant.product.subcategory.offer.offer_name }}
+                                                {% endif %}
                                             </div>
                                         </div>
                                     {% else %}
@@ -218,8 +224,8 @@ document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(
             title: 'Failed!',
             text: 'There is no quantity available to add. Try a lesser quantity.',
             icon: 'error',
-            timer: 3000,  // Display the alert for 3 seconds (3000 milliseconds)
-            showConfirmButton: false  // Hide the confirm button to automatically close
+            timer: 3000,  
+            showConfirmButton: false 
         });
     });
 </script>

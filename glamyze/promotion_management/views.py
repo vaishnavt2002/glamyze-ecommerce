@@ -45,7 +45,7 @@ def add_offer(request):
                 errors.append('Name must contain only letters and spaces')
             if len(offer_name)<3:
                 errors.append('Name should atleast contain 2 letters')
-            if  not re.match(r'^[A-Za-z\s.]+$',description):
+            if  not re.match(r'^[A-Za-z0-9\s.]+$',description):
                 errors.append('Description must contain only letters and spaces')
             if len(description)<5:
                 errors.append('Description should atleast contain 5 letters')
@@ -104,7 +104,7 @@ def edit_offer(request,offer_id):
                 errors.append('Name must contain only letters and spaces')
             if len(offer_name)<3:
                 errors.append('Name should atleast contain 2 letters')
-            if  not re.match(r'^[A-Za-z\s.]+$',description):
+            if  not re.match(r'^[A-Za-z0-9\s.]+$',description):
                 errors.append('Description must contain only letters and spaces')
             if len(description)<5:
                 errors.append('Description should atleast contain 5 letters')

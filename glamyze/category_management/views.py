@@ -24,10 +24,12 @@ def category_view(request):
         for category in category_data:
             if category.offer and category.offer.end_date >= current_date and category.offer.is_active:
                 category.offer_valid=True
-
+            for subcategory in category.subcategory_set.all():
+                if subcategory.offer and subcategory.offer.end_date >= current_date and subcategory.offer.is_active:
+                    subcategory.offer_valid=True
         category_offers = Offer.objects.filter(is_active=True,end_date__gte = current_date,offer_type='CATEGORY')
-        print(category_offers)
-        return render(request,'my_admin/category.html',{'category_data':category_data,'category_offers':category_offers})
+        subcategory_offers = Offer.objects.filter(is_active=True,end_date__gte = current_date,offer_type='SUBCATEGORY')
+        return render(request,'my_admin/category.html',{'category_data':category_data,'category_offers':category_offers,'subcategory_offers':subcategory_offers})
     elif request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
@@ -125,6 +127,49 @@ def category_offer_update(request):
             category_id = request.POST.get('category_id')
             offer_id = request.POST.get('offer_id')
             Category.objects.filter(id=category_id).update(offer_id=offer_id)
+        return redirect('category_management:category_view')
+    elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        return redirect('auth_app:home')
+    else:
+        return redirect('auth_app:login')
+    
+@never_cache
+def subcategory_offer_update(request):
+    if request.user.is_superuser:
+        if request.POST:
+            subcategory_id = request.POST.get('subcategory_id')
+            offer_id = request.POST.get('offer_id')
+            SubCategory.objects.filter(id=subcategory_id).update(offer_id=offer_id)
+        return redirect('category_management:category_view')
+    elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        return redirect('auth_app:home')
+    else:
+        return redirect('auth_app:login')
+    
+@never_cache
+def category_offer_delete(request,category_id):
+    if request.user.is_superuser:
+        category = Category.objects.get(id=category_id)
+        category.offer_id = None
+        category.save()
+        return redirect('category_management:category_view')
+    elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        return redirect('auth_app:home')
+    else:
+        return redirect('auth_app:login')
+    
+@never_cache
+def subcategory_offer_delete(request,subcategory_id):
+    if request.user.is_superuser:
+        subcategory = SubCategory.objects.get(id=subcategory_id)
+        subcategory.offer_id = None
+        subcategory.save()
         return redirect('category_management:category_view')
     elif request.user.is_authenticated:
         if request.user.is_block:

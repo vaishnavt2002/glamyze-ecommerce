@@ -35,6 +35,7 @@ class OrderItem(models.Model):
     product_variant = models.ForeignKey(ProductVariant,on_delete=models.SET_NULL,null=True)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10,decimal_places=2)
+    offer_price = models.DecimalField(max_digits=10,decimal_places=2,null=True,default=None)
     total_price = models.DecimalField(max_digits=10,decimal_places=2)
     offer_applied = models.ForeignKey(Offer,on_delete=models.SET_NULL,null=True)
     created_at = models.DateTimeField(auto_now_add=True)

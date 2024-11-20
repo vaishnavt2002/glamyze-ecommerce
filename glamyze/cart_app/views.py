@@ -103,16 +103,44 @@ def cart_view(request):
         for item in cart_items:
             original_price = float(item.productvariant.price)
             current_date = timezone.now().date()
-            if item.productvariant.product.offer and item.productvariant.product.offer.is_active and item.productvariant.product.offer.start_date<=current_date and item.productvariant.product.offer.end_date>=current_date:
-                discount = float(item.productvariant.product.offer.discount_percentage)
-                offer_price = original_price - (original_price * (discount / 100))
-                item.offer_price = round(offer_price, 2)
+            product_discount = 0
+            category_discount = 0
+            subcategory_discount = 0
+
+            # Check for product-level offer
+            if (item.productvariant.product.offer and item.productvariant.product.offer.is_active and 
+                    item.productvariant.product.offer.start_date <= current_date <= item.productvariant.product.offer.end_date):
+                product_discount = item.productvariant.price * (item.productvariant.product.offer.discount_percentage / 100)
+
+            # Check for category-level offer
+            if (item.productvariant.product.subcategory.category.offer and item.productvariant.product.subcategory.category.offer.is_active and 
+                    item.productvariant.product.subcategory.category.offer.start_date <= current_date <= item.productvariant.product.subcategory.category.offer.end_date):
+                category_discount = item.productvariant.price * (item.productvariant.product.subcategory.category.offer.discount_percentage / 100)
+
+            # Check for subcategory-level offer
+            if (item.productvariant.product.subcategory.offer and item.productvariant.product.subcategory.offer.is_active and 
+                    item.productvariant.product.subcategory.offer.start_date <= current_date <= item.productvariant.product.subcategory.offer.end_date):
+                subcategory_discount = item.productvariant.price * (item.productvariant.product.subcategory.offer.discount_percentage / 100)
+            max_discount = max(product_discount, category_discount, subcategory_discount)
+
+            # Apply the highest discount to the product price
+            if max_discount > 0:
+                item.offer_price = round(item.productvariant.price - max_discount, 2)
                 item.total_price = item.offer_price * item.quantity
             else:
                 item.offer_price = None
-                item.total_price = original_price * item.quantity
-            
+                item.total_price = original_price * item.quantity            
             total_price += item.total_price
+            if max_discount > 0:
+                if max_discount == product_discount:
+                    offer_applied = 'PRODUCT'
+                elif max_discount == subcategory_discount:
+                    offer_applied = 'SUBCATEGORY'
+                elif max_discount == category_discount:
+                    offer_applied = 'CATEGORY'
+            else:
+                offer_applied = None
+            item.offer_applied = offer_applied
             
             if not item.productvariant.is_listed or not item.productvariant.product.is_active or not item.productvariant.product.is_listed or not item.productvariant.product.subcategory.is_listed or not item.productvariant.product.subcategory.category.is_listed:
                 item.not_listed = True

@@ -90,12 +90,30 @@
                             <span class="mtext-106 cl2" style="color: #e65540; margin-left: 10px;">
                                 ₹{{ selected_size.offer_price }}
                             </span>
+                            {% if offer_applied == 'PRODUCT' %}
                             <div style="color: #e65540; font-size: 14px; margin-top: 5px;">
                                 {{ product.offer.discount_percentage }}% OFF
                             </div>
                             <div class="total-savings" style="font-size: 12px; color: green;">
                                 {{ selected_size.product.offer.offer_name }}
                             </div>
+                            {% endif %}
+                            {% if offer_applied == 'CATEGORY' %}
+                            <div style="color: #e65540; font-size: 14px; margin-top: 5px;">
+                                {{ product.subcategory.category.offer.discount_percentage }}% OFF
+                            </div>
+                            <div class="total-savings" style="font-size: 12px; color: green;">
+                                {{ selected_size.product.subcategory.category.offer.offer_name }}
+                            </div>
+                            {% endif %}
+                            {% if offer_applied == 'SUBCATEGORY' %}
+                            <div style="color: #e65540; font-size: 14px; margin-top: 5px;">
+                                {{ product.subcategory.offer.discount_percentage }}% OFF
+                            </div>
+                            <div class="total-savings" style="font-size: 12px; color: green;">
+                                {{ selected_size.product.subcategory.offer.offer_name }}
+                            </div>
+                            {% endif %}
                         {% else %}
                             <span class="mtext-106 cl2">
                                 ₹{{ selected_size.price }}

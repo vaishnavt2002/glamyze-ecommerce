@@ -35,8 +35,11 @@
                                href="{% url 'category_management:categories_list_unlist' category.id %}">
                                 {% if category.is_listed %}Unlist{% else %}List{% endif %}
                             </a>
-                            <button class="btn btn-outline-primary" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#applyCategoryOfferModal{{ category.id }}">APPLY OFFER</button>
-
+                            {% if category.offer_valid %}
+                            <a class="btn btn-outline-primary" href="{% url 'category_management:category_offer_delete' category.id %}" style="font-size: 12px; width: 130px;">Remove Offer</a>
+                            {% else %}
+                            <button class="btn btn-outline-primary" style="font-size: 12px; width: 115px;" data-bs-toggle="modal" data-bs-target="#applyCategoryOfferModal{{ category.id }}">APPLY OFFER</button>
+                            {% endif %}
                         </div>
                     </div>
                 </h2>
@@ -48,7 +51,7 @@
                         {% if category.subcategory_set.all %}
                         {% for subcategory in category.subcategory_set.all %}
                         <div class="list-group-item d-flex justify-content-between align-items-center border-dark mb-2">
-                            {{ subcategory.subcategory_name }}
+                            <div>{{ subcategory.subcategory_name }}{% if subcategory.offer_valid %}<span style="margin-left: 20px;" class="badge bg-success">{{subcategory.offer.offer_name}}</span>{% endif %}</div>
                             <div class="d-flex gap-2 ms-2">
                                 <button class="btn btn-primary" style="font-size: 12px; width: 60px;" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal{{ subcategory.id }}" data-id="{{ subcategory.id }}" data-name="{{ subcategory.subcategory_name }}">Edit</button>
                                 <a class="{% if subcategory.is_listed %}btn btn-dark{% else %}btn btn-outline-dark{% endif %} btn-md" 
@@ -56,6 +59,11 @@
                                    href="{% url 'category_management:subcategories_list_unlist' subcategory.id %}">
                                     {% if subcategory.is_listed %}Unlist{% else %}List{% endif %}
                                 </a>
+                                {% if subcategory.offer_valid %}
+                                <a class="btn btn-outline-primary" href="{% url 'category_management:subcategory_offer_delete' subcategory.id %}" style="font-size: 12px; width: 130px;">Remove Offer</a>
+                                {% else %}
+                                <button class="btn btn-outline-primary" style="font-size: 12px; width: 130px;" data-bs-toggle="modal" data-bs-target="#applySubcategoryOfferModal{{ subcategory.id }}" data-id="{{ subcategory.id }}" data-name="{{ subcategory.subcategory_name }}">Apply Offer</button>    
+                                {% endif %}                        
                             </div>
                         </div>
                         
@@ -74,6 +82,40 @@
                                             <div class="mb-3">
                                                 <label for="edit-category-name" class="form-label">Subcategory Name</label>
                                                 <input type="text" class="form-control border-dark" id="edit-category-name" name="new_subcatagory_name" value="{{subcategory.subcategory_name}}" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-dark">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- subcategory offer modal -->
+                        <div class="modal fade" id="applySubcategoryOfferModal{{ subcategory.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form method="POST" action="{% url 'category_management:subcategory_offer_update' %}">
+                                    {% csrf_token %}
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-light">
+                                            <h5 class="modal-title" id="staticBackdropLabel">Select an offer to apply</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" value="{{ subcategory.id }}" name="subcategory_id">
+                                            <div class="mb-3">
+                                                {% if subcategory_offers %}
+                                                <label for="offer" class="form-label">Select the Offer to add</label>
+                                                <select class="form-select" id="offer" name="offer_id" required>
+                                                    <option value="">Select</option>
+                                                    {% for offer_details in subcategory_offers %}
+                                                    <option value="{{ offer_details.id }}">{{offer_details.offer_name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                {% else %}
+                                                    <div>No offers to add</div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="modal-footer">

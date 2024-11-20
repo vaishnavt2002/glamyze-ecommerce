@@ -53,7 +53,13 @@
                                 <td>{{ item.productvariant.size.size_code }}</td>
                                 <td>{{ item.productvariant.price}}</td>
                                 {% if item.offer_price %}
-                                <td>₹{{ item.offer_price }} <span style="color: green;">--{{ item.productvariant.product.offer.offer_name}}</span></td> 
+                                <td>₹{{ item.offer_price }} <span style="color: green;">--
+                                    {% if item.offer_applied == 'PRODUCT' %}{{ item.productvariant.product.offer.offer_name}}
+                                    {% elif item.offer_applied == 'CATEGORY' %}{{ item.productvariant.product.subcategory.category.offer.offer_name }}
+                                    {% elif item.offer_applied == 'SUBCATEGORY' %}{{ item.productvariant.product.subcategory.offer.offer_name }}
+                                    {% endif %}
+
+                                </span></td> 
                                 {% else %}
                                 <td>No offer for this product</td>
                                 {% endif %}

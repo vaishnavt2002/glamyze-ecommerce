@@ -43,11 +43,11 @@ def shop(request):
         
         if price_range:
             if price_range != 'all':
-                min,max = price_range.split('-')
-                if max == "":
-                   products = products.filter(lowest_price__gte=min)
+                min_value,max_value = price_range.split('-')
+                if max_value == "":
+                   products = products.filter(lowest_price__gte=min_value)
                 else:
-                   products = products.filter(lowest_price__gte=min,lowest_price__lte=max)
+                   products = products.filter(lowest_price__gte=min_value,lowest_price__lte=max_value)
 
         if sort:
             if sort == 'id':
@@ -78,13 +78,37 @@ def shop(request):
                 product.variant_price = variant.price
                 product.price = variant.price
                 current_date = timezone.now().date()
+
+                # Initialize variables for different offer discounts
+                product_discount = 0
+                category_discount = 0
+                subcategory_discount = 0
+
+                # Check for product-level offer
                 if (product.offer and product.offer.is_active and 
-                            product.offer.start_date <= current_date <= product.offer.end_date):
-                    discount = product.offer.discount_percentage
-                    product.offer_price = round(variant.price * (1 - discount / 100), 2)
+                        product.offer.start_date <= current_date <= product.offer.end_date):
+                    product_discount = variant.price * (product.offer.discount_percentage / 100)
+
+                # Check for category-level offer
+                if (product.subcategory.category.offer and product.subcategory.category.offer.is_active and 
+                        product.subcategory.category.offer.start_date <= current_date <= product.subcategory.category.offer.end_date):
+                    category_discount = variant.price * (product.subcategory.category.offer.discount_percentage / 100)
+
+                # Check for subcategory-level offer
+                if (product.subcategory.offer and product.subcategory.offer.is_active and 
+                        product.subcategory.offer.start_date <= current_date <= product.subcategory.offer.end_date):
+                    subcategory_discount = variant.price * (product.subcategory.offer.discount_percentage / 100)
+
+                # Determine the highest discount
+                max_discount = max(product_discount, category_discount, subcategory_discount)
+
+                # Apply the highest discount to the product price
+                if max_discount > 0:
+                    product.offer_price = round(variant.price - max_discount, 2)
                     product.price = product.offer_price
                 else:
                     product.offer_price = None
+
     
 
         context = {
@@ -139,14 +163,43 @@ def product_view(request, product_id):
                 return redirect('product_app:shop')
         
         current_date = timezone.now().date()
+        product_discount = 0
+        category_discount = 0
+        subcategory_discount = 0
+        # Check for product-level offer
         if (product.offer and product.offer.is_active and 
-            product.offer.start_date <= current_date <= product.offer.end_date):
-            discount = product.offer.discount_percentage
-            selected_size.offer_price = round(selected_size.price * (1 - discount / 100), 2)
+                        product.offer.start_date <= current_date <= product.offer.end_date):
+                    product_discount = selected_size.price * (product.offer.discount_percentage / 100)
+
+        if (product.subcategory.category.offer and product.subcategory.category.offer.is_active and 
+                        product.subcategory.category.offer.start_date <= current_date <= product.subcategory.category.offer.end_date):
+                    category_discount = selected_size.price * (product.subcategory.category.offer.discount_percentage / 100)
+
+                # Check for subcategory-level offer
+        if (product.subcategory.offer and product.subcategory.offer.is_active and 
+                        product.subcategory.offer.start_date <= current_date <= product.subcategory.offer.end_date):
+                    subcategory_discount = selected_size.price * (product.subcategory.offer.discount_percentage / 100)
+
+        
+        max_discount = max(product_discount, category_discount, subcategory_discount)
+        if max_discount > 0:
+            selected_size.offer_price = round(selected_size.price - max_discount, 2)
             selected_size.has_offer = True
+            if max_discount == product_discount:
+                offer_applied = 'PRODUCT'
+            elif max_discount == subcategory_discount:
+                offer_applied = 'SUBCATEGORY'
+            elif max_discount == category_discount:
+                offer_applied = 'CATEGORY'
         else:
             selected_size.offer_price = None
             selected_size.has_offer = False
+            offer_applied = None
+
+        
+        
+        
+        
 
         related_products = Product.objects.filter(
             is_active=True,
@@ -183,7 +236,8 @@ def product_view(request, product_id):
             'sizes': sizes,
             'selected_size': selected_size,
             'related_products': related_products,
-            'added' : added
+            'added' : added,
+            'offer_applied':offer_applied
         })
     else:
         return redirect('auth_app:login')
