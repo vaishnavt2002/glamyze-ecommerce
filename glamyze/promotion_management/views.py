@@ -118,7 +118,7 @@ def edit_offer(request,offer_id):
                       'discount_percentage':discount_percentage,
                       'offer_choices':offer_choices,
                  }
-                 return render(request,'my_admin/add_offer.html',context)
+                 return render(request,'my_admin/edit_offer.html',{'offer':offer,'offer_choices':offer_choices,'errors':errors})
             offer.offer_name=offer_name
             offer.start_date=start_date
             offer.end_date=end_date
@@ -159,4 +159,105 @@ def activate_offer(request, offer_id):
             return redirect('auth_app:login')
     return JsonResponse({'status': 'error'}, status=400)
 
+
+@never_cache
+def coupon_view(request):
+    if request.user.is_superuser:
+        coupons = Coupon.objects.all()
+        return render(request, 'my_admin/coupons.html',{'coupons':coupons})
+    elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        return redirect('auth_app:home')
+    else:
+        return redirect('auth_app:login')
     
+
+@never_cache
+def add_coupon(request):
+    if request.user.is_superuser:
+        if request.POST:
+            errors = []
+            coupon_code = request.POST.get('code')
+            mininum_order_amount = request.POST.get('mininum_order_amount')
+            maximum_order_amount = request.POST.get('maximum_order_amount')
+            discount_amount = request.POST.get('discount_amount')
+            usage_limit = request.POST.get('usage_limit')
+            expiry_date = request.POST.get('expiry_date')
+            try:
+                expiry_date = datetime.strptime(expiry_date, '%Y-%m-%d') if expiry_date else None
+            except ValueError:
+                return redirect('promotion_management:add_coupon')
+            
+            if  not re.match(r'^[A-Za-z0-9]+$',coupon_code):
+                errors.append('Code must contain only letters and number only')
+            if len(coupon_code)<3:
+                errors.append('Coupon should atleast contain 2 letters')
+
+            if not usage_limit.isdigit:
+                errors.append('Usage limit must be a number')
+            
+            if errors:
+                 context ={
+                      'code':coupon_code,
+                      'mininum_order_amount':mininum_order_amount,
+                      'maximum_order_amount':maximum_order_amount,
+                      'discount_amount':discount_amount,
+                      'usage_limit':usage_limit,
+                      'errors':errors,
+                      'expiry_date':expiry_date,
+                 }
+                 return render(request,'my_admin/add_coupon.html',context)
+            coupon = Coupon(code=coupon_code,
+                          mininum_order_amount=mininum_order_amount,
+                          maximum_order_amount=maximum_order_amount,
+                          discount_amount=discount_amount,
+                          usage_limit=usage_limit,
+                          expiry_date =expiry_date,
+                          )
+            coupon.save()
+            return redirect('promotion_management:coupon_view')
+
+        return render(request, 'my_admin/add_coupon.html')
+    elif request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        return redirect('auth_app:home')
+    else:
+        return redirect('auth_app:login')
+
+def edit_coupon(request,coupon_id):
+    coupon = Coupon.objects.get(id=coupon_id)
+    if request.POST:
+            errors = []
+            code = request.POST.get('code')
+            mininum_order_amount = request.POST.get('mininum_order_amount')
+            maximum_order_amount = request.POST.get('maximum_order_amount')
+            discount_amount = request.POST.get('discount_amount')
+            usage_limit = request.POST.get('usage_limit')
+            expiry_date = request.POST.get('expiry_date')
+
+            try:
+                expiry_date = datetime.strptime(expiry_date, '%Y-%m-%d') if expiry_date else None
+            except ValueError:
+                return redirect('promotion_management:add_coupon')
+            
+            if  not re.match(r'^[A-Za-z0-9]+$',code):
+                errors.append('Code must contain only letters and number only')
+            if len(code)<3:
+                errors.append('Coupon should atleast contain 2 letters')
+
+            if not usage_limit.isdigit:
+                errors.append('Usage limit must be a number')
+            
+            if errors:
+                 return render(request,'my_admin/edit_coupon.html',{'coupon':coupon,'errors':errors})
+            coupon.code=code
+            coupon.mininum_order_amount=mininum_order_amount
+            coupon.maximum_order_amount=maximum_order_amount
+            coupon.discount_amount=discount_amount
+            coupon.usage_limit=usage_limit
+            coupon.expiry_date =expiry_date
+            coupon.save()
+            return redirect('promotion_management:coupon_view')
+    return render(request,'my_admin/edit_coupon.html',{'coupon':coupon})

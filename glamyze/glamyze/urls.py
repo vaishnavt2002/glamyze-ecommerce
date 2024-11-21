@@ -34,6 +34,7 @@ urlpatterns = [
     path('admin-panel/',include('banner_management.urls')),
     path('admin-panel/',include('promotion_management.urls')),
     path('user/',include('order_app.urls')),
-    path('admin-panel/',include('order_management.urls'))
+    path('admin-panel/',include('order_management.urls')),
+    path('paypal', include("paypal.standard.ipn.urls"))
 ]
 urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

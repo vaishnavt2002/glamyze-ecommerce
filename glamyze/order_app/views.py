@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,HttpResponse
 from address_app.models import *
 from cart_app.models import *
 from django.urls import reverse
@@ -6,6 +6,8 @@ from . models import *
 from django.utils import timezone
 from django.db.models import Count
 from django.views.decorators.cache import never_cache
+import razorpay
+from django.conf import settings
 
 
 
@@ -55,7 +57,7 @@ def proceed_to_checkout(request):
             else:
                 item.offer_price = None
                 item.total_price = original_price * item.quantity            
-            total_price += item.total_price
+            total_price += float(item.total_price)
             
             if not item.productvariant.is_listed or not item.productvariant.product.is_active or not item.productvariant.product.is_listed or not item.productvariant.product.subcategory.is_listed or not item.productvariant.product.subcategory.category.is_listed:
                 change = True
@@ -133,7 +135,7 @@ def checkout_view(request):
             else:
                 offer_applied = None
             item.offer_applied = offer_applied
-            total_price += item.total_price
+            total_price += float(item.total_price)
         context.update({
             'cart_items': cart_items,
             'total_price': round(total_price, 2),
@@ -188,7 +190,7 @@ def order_summary(request):
             else:
                 item.offer_price = None
                 item.total_price = original_price * item.quantity            
-            total_price += item.total_price
+            total_price += float(item.total_price)
             if max_discount > 0:
                 if max_discount == product_discount:
                     offer_applied = 'PRODUCT'
@@ -229,6 +231,8 @@ def order_summary(request):
             'selected_address' : address,
             'payment_method' : payment_method
         })
+        
+        
 
         return render(request, 'user/summary.html',context)
     else:
@@ -278,7 +282,7 @@ def confirm_order(request):
                 else:
                     item.offer_price = None
                     item.total_price = original_price * item.quantity            
-                total_price += item.total_price
+                total_price += float(item.total_price)
                 if max_discount > 0:
                     if max_discount == product_discount:
                         offer_applied = 'PRODUCT'
@@ -305,22 +309,21 @@ def confirm_order(request):
             'total_price': round(total_price, 2),
             })
             return render(request, 'user/summary.html',context)
-                
+        
         if request.POST:
             selected_address = request.POST.get('selected_address')
             payment_method = request.POST.get('payment_method')
             summary_total = request.POST.get('summary_total')
             if summary_total != str(total_price):
-                context['offer_change'] = True
-                return render(request,'user/summary.html',context)
-
+                    context['offer_change'] = True
+                    return render(request,'user/summary.html',context)
             address = Address.objects.get(id=selected_address)
             order = Order.objects.create(user=request.user,
-                                         total_amount=total_price,
-                                         payment_method=payment_method,
-                                         payment_status='PENDING',
-                                         order_status='PROCESSING',
-                                         )
+                                            total_amount=total_price,
+                                            payment_method=payment_method,
+                                            payment_status='PENDING',
+                                            order_status='PROCESSING',
+                                            )
             OrderAddress.objects.create(order=order,
                                         address=address,
                                         name=address.name,
@@ -334,6 +337,7 @@ def confirm_order(request):
                                         alternate_phone=address.alternate_phone,
                                         office_home=address.office_home
                                         )
+            
             for item in cart_items:
                     product_variant = item.productvariant
                     original_price = float(product_variant.price)
@@ -366,25 +370,126 @@ def confirm_order(request):
 
                     order_item.save()
                     
-                    product_variant.quantity -= item.quantity
+            if payment_method == 'cod':
+                order_items = OrderItem.objects.filter(order=order)
+                for item in order_items:
+                    product_variant = item.product_variant
+                    product_variant.quantity = product_variant.quantity - item.quantity
                     product_variant.save()
-            cart_items.delete()
-            context['success'] = True
+                cart_items.delete()
+                context['success'] = True
+            if payment_method == 'razorpay':
+                client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
+                print(settings.RAZOR_PAY_KEY_ID)
+                print(settings.KEY_SECRET)
+                payment = client.order.create({'amount' : int(total_price*100), 'currency':'INR','payment_capture':1})
+                print(payment)
+                context = {'cart' : cart,'payment':payment}
+                order.razorpay_order_id=payment['id']
+                order.save()
+                return render(request,'user/payment.html',context)
             return render(request, 'user/summary.html',context)
+        
         return render(request, 'user/summary.html')
     else:
         return redirect('auth_app:login')
     
 @never_cache
 def order_view(request):
-    orders = Order.objects.filter(user=request.user).annotate(total_items=Count('orderitem')).order_by('-id')
-    return render(request,'user/orders.html',{'orders':orders})
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        orders = Order.objects.filter(user=request.user).annotate(total_items=Count('orderitem')).order_by('-id')
+        return render(request,'user/orders.html',{'orders':orders})
+        
+    else:
+        return redirect('auth_app:login')
+    
 
 @never_cache
 def order_details(request,order_id):
-    order = Order.objects.get(id=order_id)
-    if request.user != order.user:
-        return redirect('auth_app:logout')
-    address = OrderAddress.objects.filter(order_id=order_id)
-    return render(request,'user/order_details.html',{'order':order,'address':address})
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
     
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        order = Order.objects.get(id=order_id)
+        if request.user != order.user:
+            return redirect('auth_app:logout')
+        address = OrderAddress.objects.filter(order_id=order_id)
+        return render(request,'user/order_details.html',{'order':order,'address':address})
+        
+    else:
+        return redirect('auth_app:login')
+    
+
+def payment_success(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        if request.GET.get('payment_status') == 'success':
+            payment_id= request.GET.get('payment_id')
+            order_id = request.GET.get('order_id')
+            signature = request.GET.get('signature')
+            print(payment_id)
+            print(order_id)
+            print(signature)
+            order = Order.objects.get(razorpay_order_id=order_id)
+            order.razorpay_payment_id = payment_id
+            order.payment_status = 'PAID'
+            order.order_status = 'PROCESSING'
+            order.save()
+            cart = Cart.objects.get(user=request.user)
+            cart_items = CartItem.objects.filter(cart=cart).select_related('cart')
+            cart_items.delete()
+            order_items = OrderItem.objects.filter(order=order)
+            for item in order_items:
+                product_variant = item.product_variant
+                product_variant.quantity = product_variant.quantity - item.quantity
+                product_variant.save()
+        return render(request,'user/alert.html',{'success':True})
+        
+    else:
+        return redirect('auth_app:login')
+    
+
+def payment_failure(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        order_id = request.GET.get('order_id')
+        order = Order.objects.get(razorpay_order_id=order_id)
+        order.payment_status = 'FAILED'
+        order.order_status = 'PENDING'
+        order.save()
+        return render(request,'user/alert.html',{'failed':True})
+        
+    else:
+        return redirect('auth_app:login')
+    
+
+
+@never_cache
+def apply_coupon(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        if request.POST:
+            code = request.POST.get('code')
+            request.session['coupon_code'] = code
+        return redirect('order_app:checkout_view')
+        
+    else:
+        return redirect('auth_app:login')

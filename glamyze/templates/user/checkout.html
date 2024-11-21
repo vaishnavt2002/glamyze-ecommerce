@@ -18,7 +18,18 @@
         </span>
     </div>
 </div>
-
+<form action="">
+<div style="width: 100%;">
+    <div style="display: flex; padding-left: 18rem; padding-top: 2rem;">
+        <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="code" placeholder="Coupon Code">
+            
+        <button type="submit" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
+            Apply coupon
+        </button>
+        
+    </div>
+</div>
+</form>
 <!-- Checkout Content -->
  <form method="post" action="{% url 'order_app:order_summary' %}">
     {% csrf_token %}
@@ -123,7 +134,7 @@
                             <label for="cod" class="stext-102" style="padding-top: 10px;">Cash on Delivery</label>
                         </div>
                         <div class="payment-option m-b-10" style="display: flex;">
-                            <input type="radio" name="payment_method" value="razorpay" style="margin-right: 10px;" disabled>
+                            <input type="radio" name="payment_method" value="razorpay" style="margin-right: 10px;">
                             <label for="razorpay" class="stext-102" style="padding-top: 10px;">Razorpay</label>
                         </div>
                         <div class="payment-option" style="display: flex;">
@@ -143,6 +154,7 @@
     </div>
 </div>
 </form>
+
 
 {% if change %}
 <script>

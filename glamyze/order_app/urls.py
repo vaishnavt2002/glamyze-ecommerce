@@ -8,5 +8,8 @@ urlpatterns = [
     path('checkout/order-summary',views.order_summary,name='order_summary'),
     path('checkout/order-summary/confirm/',views.confirm_order,name='confirm_order'),
     path('account/orders/',views.order_view,name='order_view'),
-    path('account/orders/<int:order_id>/order-details',views.order_details,name='order_details')
+    path('account/orders/<int:order_id>/order-details/',views.order_details,name='order_details'),
+    path('payment_success/',views.payment_success,name='payment_success'),
+    path('payment-filed/',views.payment_failure,name='payment_failure'),
+    path('checkout/apply-coupon/',views.apply_coupon,name='apply_coupon')
 ]

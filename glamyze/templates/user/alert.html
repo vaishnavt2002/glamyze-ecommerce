@@ -1,0 +1,38 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block shop %}
+{% if success %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Successfull',
+            text: 'Order Placed Successfully.',
+            icon: 'success',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:home' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+{% if failed %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Order Failed.',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:home' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+
+{% endblock %}

@@ -130,7 +130,7 @@ def cart_view(request):
             else:
                 item.offer_price = None
                 item.total_price = original_price * item.quantity            
-            total_price += item.total_price
+            total_price += float(item.total_price)
             if max_discount > 0:
                 if max_discount == product_discount:
                     offer_applied = 'PRODUCT'

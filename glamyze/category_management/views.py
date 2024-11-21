@@ -22,10 +22,10 @@ def category_view(request):
         category_data = list(category_data)
         current_date = timezone.now().date()
         for category in category_data:
-            if category.offer and category.offer.end_date >= current_date and category.offer.is_active:
+            if category.offer and category.offer.end_date >= current_date:
                 category.offer_valid=True
             for subcategory in category.subcategory_set.all():
-                if subcategory.offer and subcategory.offer.end_date >= current_date and subcategory.offer.is_active:
+                if subcategory.offer and subcategory.offer.end_date >= current_date:
                     subcategory.offer_valid=True
         category_offers = Offer.objects.filter(is_active=True,end_date__gte = current_date,offer_type='CATEGORY')
         subcategory_offers = Offer.objects.filter(is_active=True,end_date__gte = current_date,offer_type='SUBCATEGORY')
