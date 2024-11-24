@@ -230,6 +230,22 @@
     
 </script>
 {% endif %}
+{% if failed %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Order Failed. Your wallet balance is low.',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:home' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
 {% if offer_change %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {

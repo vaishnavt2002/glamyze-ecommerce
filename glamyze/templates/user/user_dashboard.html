@@ -50,7 +50,7 @@
               <div class="card text-center bg-light mb-3">
                 <div class="card-body">
                   <h6 class="card-title">Wallet Balance</h6>
-                  <p class="card-text display-4">₹500</p>
+                  <p class="card-text display-4">₹{% if wallet %}{{wallet.balance}}{% else %}0{% endif %}</p>
                 </div>
               </div>
             </div>

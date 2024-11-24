@@ -162,8 +162,8 @@
                             <label for="razorpay" class="stext-102" style="padding-top: 10px;">Razorpay</label>
                         </div>
                         <div class="payment-option" style="display: flex;">
-                            <input type="radio" name="payment_method" value="wallet" style="margin-right: 10px;" disabled>
-                            <label for="wallet" class="stext-102" style="padding-top: 10px;">Wallet</label>
+                            <input type="radio" name="payment_method" value="wallet" style="margin-right: 10px;" {% if wallet_enabled %}{% else %} disabled{% endif %}>
+                            <label for="wallet" class="stext-102" style="padding-top: 10px;">Wallet  {% if wallet_enabled %}{% else %}<span>--</span><span style="color: red;">Wallet is disabled because of low balance</span>{% endif %}</label>
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@ from auth_app.models import *
 from . models import *
 from django.views.decorators.cache import never_cache
 import re
-
+from wallet_app.models import *
 # Create your views here.
 @never_cache
 def account_management(request):
@@ -13,7 +13,8 @@ def account_management(request):
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout') 
-        return render(request,'user/user_dashboard.html')
+        wallet,created = Wallet.objects.get_or_create(user=request.user)
+        return render(request,'user/user_dashboard.html',{'wallet':wallet})
     else:
         return redirect('auth_app:login')
     

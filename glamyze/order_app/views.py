@@ -9,6 +9,7 @@ from django.views.decorators.cache import never_cache
 import razorpay
 from django.conf import settings
 from wallet_app.models import *
+from decimal import Decimal
 
 
 
@@ -155,11 +156,18 @@ def checkout_view(request):
                 else:
                     context['coupon_failed']='Invalid Coupon'
                     del request.session['coupon_code']
+        #check the wallet amount to know is it possible to use wallet.
+        wallet_obj,created = Wallet.objects.get_or_create(user=request.user)
+        wallet_enabled = False
+        if wallet_obj.balance:
+            if wallet_obj.balance >= total_price:
+                wallet_enabled = True
         context.update({
             'cart_items': cart_items,
             'total_price': round(total_price, 2),
             'addresses' : addresses,
-            'coupon_applied' : coupon_applied
+            'coupon_applied' : coupon_applied,
+            'wallet_enabled' : wallet_enabled
         })
         return render(request, 'user/checkout.html', context)
     else:
@@ -426,6 +434,26 @@ def confirm_order(request):
                 order.save()
                 cart_items.delete()
                 context['success'] = True
+            if payment_method == 'wallet':
+                order_items = OrderItem.objects.filter(order=order)
+                for item in order_items:
+                    product_variant = item.product_variant
+                    product_variant.quantity = product_variant.quantity - item.quantity
+                    product_variant.save()
+                order.order_status='PROCESSING'
+                order.payment_status = 'PAID'
+                order.payment_method = 'wallet'
+                wallet,created = Wallet.objects.get_or_create(user=request.user)
+                if wallet.balance >= order.total_amount:
+                    transaction = WalletTransaction(wallet=wallet, transaction_type='DEBIT',amount=order.total_amount)
+                    wallet.balance -= Decimal(order.total_amount)
+                    transaction.save()
+                    wallet.save()
+                    order.save()
+                    cart_items.delete()
+                    context['success'] = True
+                else:
+                    context['failed'] = True
             if payment_method == 'razorpay':
                 client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
                 payment = client.order.create({'amount' : int(float(summary_total)*100), 'currency':'INR','payment_capture':1})
@@ -497,7 +525,7 @@ def payment_success(request):
                         wallet = Wallet.objects.create(user=request.user)
                     transacion=WalletTransaction(wallet=wallet,transaction_type='REFUND',amount=order.total_amount)
                     transacion.save()
-                    wallet.balance += order.total_amount
+                    wallet.balance += Decimal(order.total_amount)
                     wallet.save()
                     order.order_status = 'FAILED'
                     order.payment_status = 'REFUNDED'

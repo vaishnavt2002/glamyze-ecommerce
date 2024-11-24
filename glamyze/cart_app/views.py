@@ -4,6 +4,8 @@ from django.views.decorators.cache import never_cache
 from . models import *
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
+from django.http import JsonResponse
+import json
 
 
 
@@ -82,22 +84,7 @@ def cart_view(request):
             
 
         context={}
-        if request.POST:
-            num_products = request.POST.get('num_product')
-            item_id = request.POST.get('item_id')
-            cart_item = CartItem.objects.get(id=item_id)
-            variant = ProductVariant.objects.get(id=cart_item.productvariant_id)
-            if int(num_products) < cart_item.quantity:
-                cart_item.quantity=int(num_products)
-                cart_item.save()
-            elif int(num_products) > cart_item.quantity:
-                if int(num_products) > variant.quantity:
-                    context = {'quantity_error' : True}
-                elif int(num_products) > 5:
-                    context = {'max_quantity_error' : True}
-                else:
-                    cart_item.quantity=int(num_products)
-                cart_item.save()
+       
         
         user_id = request.user.id
         cart, created = Cart.objects.get_or_create(user_id=user_id)
@@ -171,6 +158,51 @@ def cart_item_delete(request,id):
             return redirect('cart_app:cart_view')
     else:
         return redirect('auth_app:login')
+    
+
+def cart_update(request,item_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        action = data.get('action')
+        print(action)
+        price = data.get('price')
+        print(price)
+        price=float(price)
+        total_price =data.get('total_price')
+        total_price=float(total_price)
+        print(total_price)
+        try:
+            cart_item = CartItem.objects.get(id=item_id)
+            variant = ProductVariant.objects.get(id=cart_item.productvariant_id)
+            if cart_item.cart.user == request.user:
+                if action == 'increase':
+                    if cart_item.quantity + 1 > variant.quantity:
+                        return JsonResponse({'status': 'error', 'message': 'No quantity to add.','new_quantity': cart_item.quantity})
+                    elif cart_item.quantity + 1 > 5:
+                        return JsonResponse({'status': 'error', 'message': 'Maximum allowed quantity is 5.','new_quantity': cart_item.quantity})
+                    else:
+                        cart_item.quantity += 1
+                        total_price += price
+                else:
+                    if cart_item.quantity - 1 == 0:
+                        pass
+                    else:
+                        cart_item.quantity -=1
+                        total_price -= price
+                cart_item.save()
+                original_price = cart_item.productvariant.price
+                return JsonResponse({
+                'status': 'success',
+                'new_quantity': cart_item.quantity,
+                'price': price,
+                'total_price':total_price,
+                'original_price':original_price
+                })
+        except CartItem.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Item not found.','new_quantity': cart_item.quantity})
+        
+        
+
 
 
 

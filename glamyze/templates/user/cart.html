@@ -55,35 +55,29 @@
                                         ₹{{ item.productvariant.price }}
                                     {% endif %}
                                 </td>
-                                <td class="column-4">
-                                    <form id="quantityForm-{{ item.id }}" action="{% url 'cart_app:cart_view' %}" method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" value="{{item.id}}" name="item_id">
-                                        <input type="hidden" id="quantityInput-{{ item.id }}" name="num_product" value="{{ item.quantity }}">
-                                
+                                <td class="column-4">        
                                         <div class="wrap-num-product flex-w m-l-auto m-r-0">
-                                            <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
+                                            <button class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="quantity_update('{{item.id}}','decrease','{% if item.offer_price %}{{ item.offer_price }}{% else %}{{ item.productvariant.price }}{% endif %}')">
                                                 <i class="fs-16 zmdi zmdi-minus"></i>
-                                            </div>
+                                            </button>
                                             <input class="mtext-104 cl3 txt-center num-product" 
                                                    id="quantityDisplay-{{ item.id }}" 
                                                    type="number" 
                                                    value="{{ item.quantity }}" 
                                                    readonly>
-                                            <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
+                                            <button class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="quantity_update('{{item.id}}','increase','{% if item.offer_price %}{{ item.offer_price }}{% else %}{{ item.productvariant.price }}{% endif %}')">
                                                 <i class="fs-16 zmdi zmdi-plus"></i>
-                                            </div>
+                                            </button>
                                         </div>
-                                    </form>
                                 </td>
                                 <td class="column-5">
                                     {% if item.offer_price %}
                                         <div>
-                                            <span style="text-decoration: line-through; color: #999;">
+                                            <span id="item-original-{{item.id}}" style="text-decoration: line-through; color: #999;">
                                                 {{item.quantity}}x₹{{item.productvariant.price}}
                                             </span>
                                             <br>
-                                            <span style="color: #ff0000;">
+                                            <span id="item-data-{{item.id}}" style="color: #ff0000;">
                                                 {{item.quantity}}x₹{{item.offer_price}} = ₹{{item.total_price}}
                                             </span>
                                             <div  style="font-size: 12px; color: green;">
@@ -97,7 +91,9 @@
                                             </div>
                                         </div>
                                     {% else %}
-                                        {{item.quantity}}x₹{{item.productvariant.price}} = ₹{{item.total_price}}
+                                        <span id="item-data-{{item.id}}" >
+                                            {{item.quantity}}x₹{{item.productvariant.price}} = ₹{{item.total_price}}
+                                        </span>
                                     {% endif %}
                                 </td>                                
                                 <td class="column-6">
@@ -154,7 +150,7 @@
                         </div>
 
                         <div class="size-209 p-t-1">
-                            <span class="mtext-110 cl2">
+                            <span class="mtext-110 cl2" id="cart-total">
                                 ₹{{total_price}}
                             </span>
                         </div>
@@ -178,30 +174,43 @@
 {% endif %}
 
 <script>
-function updateQuantityForm(itemId, newQuantity) {
-    document.getElementById(`quantityInput-${itemId}`).value = newQuantity;
-    document.getElementById(`quantityForm-${itemId}`).submit();
+function quantity_update(ItemId,action,price) {
+    total_price = parseFloat(document.getElementById('cart-total').textContent.replace('₹', '').trim());
+    fetch(`{% url 'cart_app:cart_update' 0 %}`.replace("0", ItemId), {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },body: JSON.stringify({ action: action, price: price, total_price: total_price })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const input = document.getElementById(`quantityDisplay-${ItemId}`);
+            input.value = data.new_quantity;
+            document.getElementById('cart-total').textContent = `₹ ${data.total_price}`;
+            document.getElementById(`item-data-${ItemId}`).textContent = `${data.new_quantity}X₹${data.price} = ₹${(data.new_quantity * data.price).toFixed(2)}`;
+            document.getElementById(`item-original-${ItemId}`).textContent = `${data.new_quantity}X₹${data.original_price} `;
+
+
+            
+        } else {
+            const input = document.getElementById(`quantityDisplay-${ItemId}`);
+            input.value = data.new_quantity;
+            
+            Swal.fire({
+            title: 'Failed!',
+            text: data.message,
+            icon: 'error',
+            timer: 3000,  // Display the alert for 3 seconds (3000 milliseconds)
+            showConfirmButton: false  // Hide the confirm button to automatically close
+        });
+        }
+    })
+    .catch(error => console.error("Error:", error));
+   
 }
 
-document.querySelectorAll('.btn-num-product-down, .btn-num-product-up').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const itemId = btn.closest('td.column-4').querySelector('input.num-product').id.split('-')[1];
-        const currentQuantity = parseInt(document.getElementById(`quantityDisplay-${itemId}`).value);
-        let newQuantity;
-        if (btn.classList.contains('btn-num-product-down')) {
-            newQuantity = currentQuantity - 1;
-            newQuantity = newQuantity < 1 ? 1 : newQuantity; 
-        } else {
-            newQuantity = currentQuantity + 1;
-        }
-
-        setTimeout(() => {
-            document.getElementById(`quantityDisplay-${itemId}`).value = newQuantity;
-        }, 200);
-
-        updateQuantityForm(itemId, newQuantity);
-    });
-});
 </script>
 {% if noquantity %}
 <script>
