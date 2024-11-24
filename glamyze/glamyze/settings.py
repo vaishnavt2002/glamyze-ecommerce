@@ -59,6 +59,9 @@ INSTALLED_APPS = [
     'promotion_management',
     'order_app',
     'order_management',
+    'sales_report',
+    'wishlist_app',
+    'wallet_app',
     'paypal.standard.ipn',
     'django.contrib.sites',
     'allauth',
@@ -188,5 +191,5 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 
-RAZOR_PAY_KEY_ID = ''
-KEY_SECRET = ''
+RAZOR_PAY_KEY_ID = env('RAZOR_PAY_KEY_ID')
+KEY_SECRET = env('KEY_SECRET')

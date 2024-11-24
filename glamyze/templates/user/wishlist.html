@@ -1,0 +1,81 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block shop %}
+
+<!-- breadcrumb -->
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+
+        <span class="stext-109 cl4">
+            Wishlist
+        </span>
+    </div>
+</div>
+
+<!-- Wishlist Items -->
+{% if wishlist_items %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
+                <div class="m-l-25 m-r--38 m-lr-0-xl">
+                    <div class="wrap-table-shopping-cart">
+                        <table class="table-shopping-cart">
+                            <tr class="table_head">
+                                <th class="column-1">Product</th>
+                                <th class="column-2"></th>
+                                <th class="column-3">Price</th>
+                                <th class="column-4">Actions</th>
+                            </tr>
+                            {% for item in wishlist_items %}
+                            <tr class="table_row">
+                                <td class="column-1">
+                                    <div class="how-itemcart1">
+                                        <img src="{{ item.product.image1.url }}" alt="IMG">
+                                    </div>
+                                </td>
+                                <td class="column-2">
+                                    <a style="color: black;" href="{% url 'product_app:product_view' item.product.id %}?size={{item.productvariant.size.id}}">
+                                        {{ item.product.product_name }}
+                                    </a>
+                                </td>
+                                <td class="column-3">
+                                        <div>
+                                            <!-- <span style="text-decoration: line-through; color: #999;"></span> -->
+                                            
+                                        </div>
+                                        ₹{{ item.product.price }}
+                                </td>
+                                <td class="column-4">
+                                    <div class="d-flex">
+                                        <a href="{% url 'product_app:product_view' item.product.id %}" 
+                                           class="btn btn-outline-dark" style="margin-right: 5px;">
+                                            View
+                                        </a>
+                                            <a href="{% url 'wishlist_app:delete_from_wishlist' item.id %}" class="btn btn-dark">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="container text-center" style="padding: 50px 0;">
+        <h3 class="mtext-109 cl2 mb-5">Your wishlist is empty!</h3>
+        <p class="stext-101 cl2 mb-5">Browse our shop and add items to your wishlist.</p>
+        <a style="margin: auto;" href="{% url 'product_app:shop' %}" 
+           class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer w-50">
+            Go to Shop
+        </a>
+    </div>
+{% endif %}
+
+{% endblock %}

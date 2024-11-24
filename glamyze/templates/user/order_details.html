@@ -102,48 +102,63 @@
             {% endif %}
             
             {% if order.order_status == 'PROCESSING' or order.order_status == 'SHIPPED' %}
-            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelOrderModal">
-                Cancel Order
+            <button type="submit" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal" {% if cancellation_request %}disabled{% endif %}>
+                {% if cancellation_request %}Cancel request sent{% else %}Cancel Order{% endif %}
             </button>
+           
             {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Cancel Order Modal -->
-<div class="modal fade" id="cancelOrderModal" tabindex="-1" role="dialog">
+<!-- Cancel Order Modal --> 
+
+  
+  <!-- Modal -->
+   <form action="{% url 'order_app:cancel_order' order.id %}" method="post">
+  <div style="margin-top: 100px;" class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cancel Order</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form method="post" action="">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <p>Are you sure you want to cancel this order?</p>
-                    <div class="form-group">
-                        <label>Reason for cancellation:</label>
-                        <select class="form-control" name="cancel_reason" required>
-                            <option value="">Select a reason</option>
-                            <option value="Changed my mind">Changed my mind</option>
-                            <option value="Ordered by mistake">Ordered by mistake</option>
-                            <option value="Found better price elsewhere">Found better price elsewhere</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger">Cancel Order</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Cancellation</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+        <div class="modal-body">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Reason for cancellation:</label>
+                <select id="reason" class="form-control" name="cancel_reason" required>
+                    <option value="">Select a reason</option>
+                    <option value="Changed my mind">Changed my mind</option>
+                    <option value="Ordered by mistake">Ordered by mistake</option>
+                    <option value="Found better price elsewhere">Found better price elsewhere</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div id="reason_explanation" class="form-group d-none">
+                <label for="exampleFormControlInput1">Explain the Reason</label>
+                <input type="text" name="explanation" class="form-control" maxlength="40" id="exampleFormControlInput1" placeholder="Enter the reason">
+              </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-dark">Save changes</button>
+        </div>
+      </div>
     </div>
-</div>
-
-
-
+  </div> 
+</form>
+  <script>
+    document.getElementById('reason').addEventListener('change',function(){
+        const reasonfield = document.getElementById('reason_explanation')
+        if (this.value === 'Other'){
+            reasonfield.classList.remove('d-none')
+        }
+        else{
+            reasonfield.classList.add('d-none')
+        }
+    })
+  </script>
 {% endblock content %}

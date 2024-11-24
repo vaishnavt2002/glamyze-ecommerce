@@ -14,6 +14,11 @@
 <h2 class="mb-4 px-4">Order Details</h2>
 
 <div class="container-fluid">
+    {% if cancellation %}
+    <div class="alert alert-danger" role="alert">
+        There is a cancellation request for this product. Reason : {{ cancellation.reason_type}}. <a href="{% url 'order_management:order_cancellation' order.id %}">Approve the cancellation</a>
+      </div>
+      {% endif %}
     <!-- Order Summary -->
     <div class="row mb-4">
         <div class="col-md-6">
@@ -33,7 +38,6 @@
             </p>
             <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
         </div>
-        
     </div>
 
     <!-- Address Details -->
@@ -63,7 +67,7 @@
             <tbody>
                 {% for item in order.orderitem_set.all %}
                 <tr>
-                    <td>{{ item.product_variant.product.product_name }}</td>
+                    <td>{{ item.product_variant.product.product_name }}-{{ item.product_variant.size.size_code }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>₹{{ item.price }}</td>
                     <td>₹{{ item.total_price }}</td>

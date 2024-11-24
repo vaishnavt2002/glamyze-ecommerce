@@ -4,7 +4,7 @@
     const orderId = "{{ payment.id }}"; // Ensure this is dynamically injected from the server
 
     var options = {
-        "key": "rzp_test_uEIA10sh63qE62", // Razorpay API key
+        "key": "{{ key }}", // Razorpay API key
         "amount": "{{ payment.amount }}", // Payment amount in subunits
         "currency": "INR",
         "name": "Glamyze",

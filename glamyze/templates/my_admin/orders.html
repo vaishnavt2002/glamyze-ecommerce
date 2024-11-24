@@ -27,6 +27,7 @@
                     <th scope="col">Order Status</th>
                     <th scope="col">Date</th>
                     <th scope="col">Actions</th>
+                    <th scope="col" class="col-1"></th>
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +42,7 @@
                     <td>
                         <a class="btn btn-outline-primary" href="{% url 'order_management:order_detail' order.id %}">View</a>
                     </td>
+                    <td>{% if order.cancellation_request %}<span class="badge rounded-pill bg-warning text-dark">Action Required</span>{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

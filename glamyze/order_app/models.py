@@ -10,9 +10,11 @@ class Order(models.Model):
         ('PENDING', 'Pending'),
         ('PAID', 'Paid'),
         ('FAILED', 'Failed'),
+        ('REFUNDED','Refunded')
     ]
     
     ORDER_STATUS_CHOICES = [
+        ('FAILED','Failed'),
         ('PENDING', 'Pending'),
         ('PROCESSING', 'Processing'),
         ('SHIPPED', 'Shipped'),
@@ -31,6 +33,23 @@ class Order(models.Model):
     coupon = models.ForeignKey(Coupon,on_delete=models.SET_NULL,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_subtotal(self):
+        subtotal=0
+        for item in self.orderitem_set.all():
+            subtotal += item.price * item.quantity
+        return subtotal
+    
+    def get_offer_discount(self):
+        offer_price = 0
+        for item in self.orderitem_set.all():
+            if item.offer_price is not None:
+                offer_price += (item.price-item.offer_price) * item.quantity
+        return offer_price
+
+
+    def get_coupon_discount(self):
+        return self.coupon.discount_amount if self.coupon else 0
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order,on_delete=models.CASCADE)
@@ -58,3 +77,19 @@ class OrderAddress(models.Model):
     landmark = models.CharField(max_length=100, blank=True, null=True)
     alternate_phone = models.CharField(max_length=15, blank=True, null=True)
     office_home = models.CharField(max_length=10)
+
+
+class OrderCancellation(models.Model):
+    CANCELLED_BY_CHOICES = [
+        ('CUSTOMER', 'Customer'),
+        ('ADMIN', 'Admin')
+    ]
+    STATUS_CHOICES = [
+        ('PENDING','Pending'),
+        ('APPROVED', 'Approved')
+    ]
+    order = models.OneToOneField(Order,on_delete=models.CASCADE)
+    reason_type = models.CharField(max_length=50)
+    cancelled_date = models.DateTimeField(auto_now_add=True)
+    cancelled_by = models.CharField(max_length=10, choices=CANCELLED_BY_CHOICES)
+    status = models.CharField(max_length=10, default=None, null=True)

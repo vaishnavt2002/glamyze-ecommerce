@@ -18,7 +18,8 @@
         </span>
     </div>
 </div>
-<form action="">
+<form action="{% url 'order_app:apply_coupon' %}" method="post">
+    {% csrf_token %}
 <div style="width: 100%;">
     <div style="display: flex; padding-left: 18rem; padding-top: 2rem;">
         <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="code" placeholder="Coupon Code">
@@ -102,7 +103,9 @@
                                 (x{{ item.quantity }})
                             </span>
                         </div>
+                        
                         <div class="size-209 text-right">
+                            
                             <span class="mtext-110 cl2">
                                 ₹{{ item.total_price }}
                             </span>
@@ -112,19 +115,40 @@
                 </div>
 
                 <!-- Total -->
-                <div class="flex-w flex-t p-t-27 p-b-33">
-                    <div class="size-208">
-                        <span class="mtext-101 cl2">
-                            Total:
-                        </span>
-                    </div>
-                    <div class="size-209 p-t-1">
-                        <span class="mtext-110 cl2">
-                            ₹{{ total_price }}
-                        </span>
+                <div class="d-flex flex-column p-t-27 p-b-33">
+                    {% if coupon_applied %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="size-208">
+                                <span class="mtext-101 cl2">
+                                    Coupon:
+                                </span>
+                            </div>
+                            <div class="size-209">
+                                <span class="badge badge-success">
+                                    {{ coupon_applied.code }}
+                                </span>
+                            </div>
+                            <div class="size-150">
+                                <span class="mtext-110 cl2">
+                                    Discount: ₹{{ coupon_applied.discount_amount }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="size-208">
+                            <span class="mtext-101 cl2">
+                                Total:
+                            </span>
+                        </div>
+                        <div class="size-209">
+                            <span class="mtext-110 cl2 font-weight-bold">
+                                ₹{{ total_price }}
+                            </span>
+                        </div>
                     </div>
                 </div>
-
+                
                 <!-- Payment Methods -->
                 <div class="payment-methods m-b-30">
                     <h4 class="mtext-109 cl2 p-b-20">Payment Method</h4>
@@ -174,8 +198,19 @@
     });
 </script>
 {% endif %}
-
-
+{% if coupon_failed %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed!',
+            text: '{{ coupon_failed }}',
+            icon: 'error',
+            timer: 3000,  // Display the alert for 3 seconds (3000 milliseconds)
+            showConfirmButton: false  // Hide the confirm button to automatically close
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}
 
 

@@ -19,6 +19,21 @@
     transition: background-color 0.3s ease;
 }
 
+.bigger-icon {
+    font-size: 24px;  
+}
+
+
+.disabled {
+    opacity: 0.6;       
+    cursor: not-allowed; 
+}
+
+.active-wishlisted {
+    color: red; 
+}
+
+
 .size-btn:hover {
     background-color: #333;
     color: #fff;
@@ -212,12 +227,17 @@
 
                     <div class="flex-w flex-m p-l-100 p-t-40 respon7">
                         <div class="flex-m bor9 p-r-10 m-r-11">
-                            <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist">
-                                <i class="zmdi zmdi-favorite"></i>
+                            <a href="{% if not wishlisted %}{% url 'wishlist_app:add_to_wishlist' product.id %}{% endif %}"
+                               class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100
+                                      {% if wishlisted %}active-wishlisted disabled{% endif %}"
+                               data-tooltip="{% if wishlisted %}Added to Wishlist{% else %}Add to Wishlist{% endif %}"
+                               {% if wishlisted %}style="pointer-events: none;"{% endif %}>
+                                <i class="zmdi {% if wishlisted %}zmdi-favorite{% else %}zmdi-favorite-outline{% endif %} bigger-icon"></i>
                             </a>
                         </div>
+                        
 
-                        <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
+                        <!-- <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
                             <i class="fa fa-facebook"></i>
                         </a>
 
@@ -227,7 +247,7 @@
 
                         <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
                             <i class="fa fa-google-plus"></i>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>

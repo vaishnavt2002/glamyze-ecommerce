@@ -8,6 +8,7 @@ from django.db.models import Count
 from django.views.decorators.cache import never_cache
 import razorpay
 from django.conf import settings
+from wallet_app.models import *
 
 
 
@@ -136,10 +137,29 @@ def checkout_view(request):
                 offer_applied = None
             item.offer_applied = offer_applied
             total_price += float(item.total_price)
+        #coupon checking
+        coupon_applied = False
+        if request.session.get('coupon_code'):
+            code = request.session.get('coupon_code')
+            if Coupon.objects.filter(code=code).exists():
+                coupon = Coupon.objects.get(code=code)
+                if current_date<= coupon.expiry_date and coupon.mininum_order_amount <= total_price<= coupon.maximum_order_amount:
+                    usage_count = Order.objects.filter(user=request.user,coupon=coupon).count()
+                    if usage_count < coupon.usage_limit:
+                        coupon_applied = coupon
+                        total_price -= float(coupon.discount_amount)
+                        
+                    else:
+                        context['coupon_failed']='Coupon Limit Reached'
+                        del request.session['coupon_code']
+                else:
+                    context['coupon_failed']='Invalid Coupon'
+                    del request.session['coupon_code']
         context.update({
             'cart_items': cart_items,
             'total_price': round(total_price, 2),
-            'addresses' : addresses
+            'addresses' : addresses,
+            'coupon_applied' : coupon_applied
         })
         return render(request, 'user/checkout.html', context)
     else:
@@ -207,6 +227,16 @@ def order_summary(request):
                 change = True
             elif item.quantity > item.productvariant.quantity:
                 change = True
+        coupon_applied = False
+        if request.session.get('coupon_code'):
+            code = request.session.get('coupon_code')
+            if Coupon.objects.filter(code=code).exists():
+                coupon = Coupon.objects.get(code=code)
+                if current_date<= coupon.expiry_date and coupon.mininum_order_amount <= total_price<= coupon.maximum_order_amount:
+                    usage_count = Order.objects.filter(user=request.user,coupon=coupon).exclude(order_status='PENDING').count()
+                    if usage_count < coupon.usage_limit:
+                        coupon_applied = coupon
+                        total_price -= float(coupon.discount_amount)
 
         if request.POST:
             selected_address = request.POST.get('selected_address')
@@ -225,11 +255,15 @@ def order_summary(request):
                 pass
             else:
                 context['change'] = True
+
+        
+                     
         context.update({
             'cart_items': cart_items,
             'total_price': round(total_price, 2),
             'selected_address' : address,
-            'payment_method' : payment_method
+            'payment_method' : payment_method,
+            'coupon_applied' : coupon_applied
         })
         
         
@@ -309,6 +343,17 @@ def confirm_order(request):
             'total_price': round(total_price, 2),
             })
             return render(request, 'user/summary.html',context)
+        coupon_applied = None
+        if request.session.get('coupon_code'):
+            code = request.session.get('coupon_code')
+            if Coupon.objects.filter(code=code).exists():
+                coupon = Coupon.objects.get(code=code)
+                if current_date<= coupon.expiry_date and coupon.mininum_order_amount <= total_price<= coupon.maximum_order_amount:
+                    usage_count = Order.objects.filter(user=request.user,coupon=coupon).count()
+                    if usage_count < coupon.usage_limit:
+                        coupon_applied = coupon
+                        total_price -= float(coupon.discount_amount)
+                        del request.session['coupon_code']
         
         if request.POST:
             selected_address = request.POST.get('selected_address')
@@ -322,7 +367,8 @@ def confirm_order(request):
                                             total_amount=total_price,
                                             payment_method=payment_method,
                                             payment_status='PENDING',
-                                            order_status='PROCESSING',
+                                            order_status='PENDING',
+                                            coupon=coupon_applied
                                             )
             OrderAddress.objects.create(order=order,
                                         address=address,
@@ -376,15 +422,15 @@ def confirm_order(request):
                     product_variant = item.product_variant
                     product_variant.quantity = product_variant.quantity - item.quantity
                     product_variant.save()
+                order.order_status='PROCESSING'
+                order.save()
                 cart_items.delete()
                 context['success'] = True
             if payment_method == 'razorpay':
                 client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
-                print(settings.RAZOR_PAY_KEY_ID)
-                print(settings.KEY_SECRET)
-                payment = client.order.create({'amount' : int(total_price*100), 'currency':'INR','payment_capture':1})
+                payment = client.order.create({'amount' : int(float(summary_total)*100), 'currency':'INR','payment_capture':1})
                 print(payment)
-                context = {'cart' : cart,'payment':payment}
+                context = {'payment':payment,'key':settings.RAZOR_PAY_KEY_ID}
                 order.razorpay_order_id=payment['id']
                 order.save()
                 return render(request,'user/payment.html',context)
@@ -402,7 +448,7 @@ def order_view(request):
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
-        orders = Order.objects.filter(user=request.user).annotate(total_items=Count('orderitem')).order_by('-id')
+        orders = Order.objects.filter(user=request.user).exclude(order_status='PENDING').annotate(total_items=Count('orderitem')).order_by('-id')
         return render(request,'user/orders.html',{'orders':orders})
         
     else:
@@ -420,8 +466,11 @@ def order_details(request,order_id):
         order = Order.objects.get(id=order_id)
         if request.user != order.user:
             return redirect('auth_app:logout')
+        cancellation_request = False
+        if OrderCancellation.objects.filter(order=order).exists():
+            cancellation_request = True
         address = OrderAddress.objects.filter(order_id=order_id)
-        return render(request,'user/order_details.html',{'order':order,'address':address})
+        return render(request,'user/order_details.html',{'order':order,'address':address,'cancellation_request':cancellation_request})
         
     else:
         return redirect('auth_app:login')
@@ -437,10 +486,23 @@ def payment_success(request):
             payment_id= request.GET.get('payment_id')
             order_id = request.GET.get('order_id')
             signature = request.GET.get('signature')
-            print(payment_id)
-            print(order_id)
-            print(signature)
             order = Order.objects.get(razorpay_order_id=order_id)
+            order_items = OrderItem.objects.filter(order=order)
+            for item in order_items:
+                if item.product_variant.quantity<item.quantity:
+                    
+                    if Wallet.objects.filter(user=request.user).exists():
+                        wallet = Wallet.objects.get(user=request.user)
+                    else:
+                        wallet = Wallet.objects.create(user=request.user)
+                    transacion=WalletTransaction(wallet=wallet,transaction_type='REFUND',amount=order.total_amount)
+                    transacion.save()
+                    wallet.balance += order.total_amount
+                    wallet.save()
+                    order.order_status = 'FAILED'
+                    order.payment_status = 'REFUNDED'
+                    order.save()
+                    return render(request,'user/alert.html',{'quantity_failed':True})
             order.razorpay_payment_id = payment_id
             order.payment_status = 'PAID'
             order.order_status = 'PROCESSING'
@@ -469,7 +531,7 @@ def payment_failure(request):
         order_id = request.GET.get('order_id')
         order = Order.objects.get(razorpay_order_id=order_id)
         order.payment_status = 'FAILED'
-        order.order_status = 'PENDING'
+        order.order_status = 'FAILED'
         order.save()
         return render(request,'user/alert.html',{'failed':True})
         
@@ -490,6 +552,30 @@ def apply_coupon(request):
             code = request.POST.get('code')
             request.session['coupon_code'] = code
         return redirect('order_app:checkout_view')
+        
+    else:
+        return redirect('auth_app:login')
+    
+def cancel_order(request,order_id):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        if request.POST:
+            cancel_reason = request.POST.get('cancel_reason')
+            if request.POST.get('explanation'):
+                explantion = request.POST.get('explanation')
+                explantion = "-"+explantion
+                cancel_reason += explantion
+            order = Order.objects.get(id=order_id)
+            if request.user == order.user and order.order_status!='DELIVERED':
+                cancel=OrderCancellation(order_id=order_id, reason_type=cancel_reason, cancelled_by='CUSTOMER',status='PENDING')
+                cancel.save()
+                return redirect('order_app:order_details', order_id=order_id)
+            else:
+                return redirect('auth_app:logout')
         
     else:
         return redirect('auth_app:login')

@@ -77,6 +77,10 @@ def cart_view(request):
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
+        if request.session.get('coupon_code'):
+            del request.session['coupon_code']
+            
+
         context={}
         if request.POST:
             num_products = request.POST.get('num_product')

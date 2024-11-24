@@ -34,5 +34,20 @@
     
 </script>
 {% endif %}
-
+{% if quantity_failed %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Order Failed due to quantity issue from our side. Amount added to the wallet',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:home' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
 {% endblock %}

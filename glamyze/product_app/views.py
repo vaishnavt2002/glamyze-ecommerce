@@ -7,6 +7,7 @@ from django.db.models import Q,Sum,Min
 from datetime import datetime
 from django.utils import timezone
 from cart_app.models import *
+from wishlist_app.models import *
 
 
 
@@ -229,7 +230,11 @@ def product_view(request, product_id):
         added = False
         if cart:
             added = CartItem.objects.filter(cart=cart, productvariant=selected_size).exists()
-
+        wishlisted = False
+        if Wishlist.objects.filter(user=request.user).exists():
+            wishlist = Wishlist.objects.get(user=request.user)
+            if WishlistItem.objects.filter(wishlist=wishlist,product=product).exists():
+                wishlisted = True
 
         return render(request, 'user/product_view.html', {
             'product': product,
@@ -237,7 +242,8 @@ def product_view(request, product_id):
             'selected_size': selected_size,
             'related_products': related_products,
             'added' : added,
-            'offer_applied':offer_applied
+            'offer_applied':offer_applied,
+            'wishlisted' : wishlisted
         })
     else:
         return redirect('auth_app:login')

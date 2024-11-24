@@ -22,7 +22,7 @@
           <a href="{% url 'profile_app:change_password' %}" class="list-group-item list-group-item-action {% block address_active3 %}{% endblock %}">Change Password</a>
           <a href="{% url 'order_app:order_view' %}" class="list-group-item list-group-item-action {% block address_active4 %}{% endblock %}">Orders</a>
           <a href="{% url 'address_app:address_view' %}" class="list-group-item list-group-item-action {% block address_active5 %}{% endblock %}">Addresses</a>
-          <a href="#" class="list-group-item list-group-item-action {% block address_active6 %}{% endblock %}">Wallet</a>
+          <a href="{% url 'wallet_app:wallet_view' %}" class="list-group-item list-group-item-action {% block address_active6 %}{% endblock %}">Wallet</a>
         </div>
       </div>
       <div class="col-md-9">

@@ -73,16 +73,37 @@
                 </div>
         
                 <!-- Total Price -->
-                <div class="flex-w flex-t p-t-27 p-b-33">
-                    <div class="size-208">
-                        <span class="mtext-101 cl2">
-                            Total:
-                        </span>
-                    </div>
-                    <div class="size-209 p-t-1">
-                        <span class="mtext-110 cl2">
-                            ₹{{ total_price }}
-                        </span>
+                <div class="d-flex flex-column p-t-27 p-b-33">
+                    {% if coupon_applied %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="size-208">
+                                <span class="mtext-101 cl2">
+                                    Coupon:
+                                </span>
+                            </div>
+                            <div class="size-209">
+                                <span class="badge badge-success">
+                                    {{ coupon_applied.code }}
+                                </span>
+                            </div>
+                            <div class="size-150">
+                                <span class="mtext-110 cl2">
+                                    Discount: ₹{{ coupon_applied.discount_amount }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="size-208">
+                            <span class="mtext-101 cl2">
+                                Total:
+                            </span>
+                        </div>
+                        <div class="size-209">
+                            <span class="mtext-110 cl2 font-weight-bold">
+                                ₹{{ total_price }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

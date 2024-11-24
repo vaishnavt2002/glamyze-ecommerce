@@ -11,5 +11,6 @@ urlpatterns = [
     path('account/orders/<int:order_id>/order-details/',views.order_details,name='order_details'),
     path('payment_success/',views.payment_success,name='payment_success'),
     path('payment-filed/',views.payment_failure,name='payment_failure'),
-    path('checkout/apply-coupon/',views.apply_coupon,name='apply_coupon')
+    path('checkout/apply-coupon/',views.apply_coupon,name='apply_coupon'),
+    path('account/orders/<int:order_id>/cancel/',views.cancel_order,name='cancel_order')
 ]
