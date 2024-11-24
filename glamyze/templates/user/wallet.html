@@ -5,7 +5,17 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4>My Wallet</h4>
-        <h5 class="text-primary">Balance: ₹{{ wallet.balance }}</h5>
+        <div class="d-flex">
+        <div>
+            <form action="{% url 'wallet_app:add_amount' %}" class="form-group" method="post" style="display: flex; margin-top: 10px;">
+                {% csrf_token %}
+                <input class="form-control" type="number" name="amount" placeholder="Enter the amount to add" required>
+                <button class="btn btn-dark" type="submit" >Add</button>
+            </form>
+        </div>
+            <h5 class="text-primary" style="margin-top: 15px; margin-left: 10px;">Balance: ₹{{ wallet.balance }}</h5>
+        </div>
+        
     </div>
 
     <div class="card-body">

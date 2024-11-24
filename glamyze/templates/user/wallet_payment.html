@@ -1,0 +1,49 @@
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    // Store the order_id from the server-side template or API
+    const orderId = "{{ payment.id }}"; // Ensure this is dynamically injected from the server
+
+    var options = {
+        "key": "{{ key }}", // Razorpay API key
+        "amount": "{{ payment.amount }}", // Payment amount in subunits
+        "currency": "INR",
+        "name": "Glamyze",
+        "description": "Purchase Transaction",
+        "image": "https://example.com/your_logo",
+        "order_id": orderId, // Pass the dynamic order_id here
+        "handler": function (response) {
+            const url = "{% url 'wallet_app:payment_success' %}";
+            const queryParams = `?payment_status=success&payment_id=${response.razorpay_payment_id}&order_id=${response.razorpay_order_id}&signature=${response.razorpay_signature}`;
+            window.location.href = url + queryParams;
+        },
+        "theme": {
+            "color": "#3399cc"
+        },
+        "modal": {
+            "ondismiss": function() {
+                // Redirect to a custom cancellation page when the user closes the modal
+                const cancelUrl = "{% url 'wallet_app:payment_failure' %}";
+                const cancelQueryParams = `?order_id=${orderId}`;
+                window.location.href = cancelUrl + cancelQueryParams;
+            }
+        }
+    };
+
+    // Initialize Razorpay instance
+    var rzp1 = new Razorpay(options);
+
+    // Handle payment failure explicitly
+    rzp1.on('payment.failed', function (response) {
+        const failureUrl = "{% url 'order_app:payment_failure' %}";
+        const failureQueryParams = `?order_id=${response.error.metadata.order_id}`;
+        window.location.href = failureUrl + failureQueryParams;
+
+        // Optionally log error details for debugging
+        console.error("Payment failed:", response);
+    });
+
+    // Automatically open Razorpay modal on page load
+    window.onload = function() {
+        rzp1.open();
+    }
+</script>

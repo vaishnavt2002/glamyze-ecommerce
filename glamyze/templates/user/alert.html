@@ -50,4 +50,36 @@
     
 </script>
 {% endif %}
+{% if wallet_success %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Successfull',
+            text: 'Amount Added Successfully.',
+            icon: 'success',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'wallet_app:wallet_view' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+{% if wallet_failed %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Payment failed. Try again!',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'wallet_app:wallet_view' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
 {% endblock %}
