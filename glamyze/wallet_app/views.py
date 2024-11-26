@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.views.decorators.cache import never_cache
 from .models import *
 import razorpay
@@ -52,7 +52,10 @@ def payment_success(request):
             payment_id= request.GET.get('payment_id')
             order_id = request.GET.get('order_id')
             signature = request.GET.get('signature')
-            transacion = WalletRazrorPay.objects.get(razorpay_order_id=order_id)
+            try:
+                transacion = WalletRazrorPay.objects.get(razorpay_order_id=order_id,status='PENDING')
+            except:
+                return render(request,'user/alert.html',{'wallet_failed':True})
             transacion.razorpay_payment_id = payment_id
             transacion.status = 'PAID'
             transacion.save()

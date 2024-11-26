@@ -40,7 +40,6 @@
                         <button id="offer-button-{{ offer.id }}" class="{% if offer.is_active %} btn btn-primary {% else %} btn btn-outline-primary {% endif %} btn-md" onclick="toggleOfferStatus({{ offer.id }})">
                             {% if offer.is_active %}Deactivate{% else %}Activate{% endif %}
                         </button>
-                        <a href="{% url 'promotion_management:delete_offer' offer.id %}" class="btn btn-danger btn-md">Delete</a>
                         
                     </td>
                 </tr>

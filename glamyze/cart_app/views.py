@@ -47,10 +47,7 @@ def add_to_cart(request):
             if  0 == int(num_product):
                 variant = ProductVariant.objects.get(id=variant_id)
                 product = Product.objects.get(id=variant.product.id)
-                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'minquantity':True})
-            
-
-               
+                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'minquantity':True})   
             product = variant.product 
             try:
                 cart = Cart.objects.get(user_id=request.user.id)

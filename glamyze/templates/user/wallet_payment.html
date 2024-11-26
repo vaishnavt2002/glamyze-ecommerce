@@ -34,7 +34,7 @@
 
     // Handle payment failure explicitly
     rzp1.on('payment.failed', function (response) {
-        const failureUrl = "{% url 'order_app:payment_failure' %}";
+        const failureUrl = "{% url 'wallet_app:payment_failure' %}";
         const failureQueryParams = `?order_id=${response.error.metadata.order_id}`;
         window.location.href = failureUrl + failureQueryParams;
 

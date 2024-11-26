@@ -10,7 +10,9 @@ urlpatterns = [
     path('account/orders/',views.order_view,name='order_view'),
     path('account/orders/<int:order_id>/order-details/',views.order_details,name='order_details'),
     path('payment_success/',views.payment_success,name='payment_success'),
-    path('payment-filed/',views.payment_failure,name='payment_failure'),
+    path('payment-failed/',views.payment_failure,name='payment_failure'),
     path('checkout/apply-coupon/',views.apply_coupon,name='apply_coupon'),
-    path('account/orders/<int:order_id>/cancel/',views.cancel_order,name='cancel_order')
+    path('account/orders/<int:order_id>/cancel/',views.cancel_order,name='cancel_order'),
+    path('account/orders/item/return/',views.return_product,name='return_product')
+
 ]

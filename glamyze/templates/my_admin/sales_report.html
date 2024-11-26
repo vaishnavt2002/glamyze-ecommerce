@@ -114,7 +114,7 @@
                         {% for order in orders %}
                         <tr>
                             <td>{{ order.id }}</td>
-                            <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ order.created_at|date:"d M Y h.iA" }}</td>
                             <td>{{ order.user.email }}</td>
                             <td>
                                 {% for item in order.orderitem_set.all %}

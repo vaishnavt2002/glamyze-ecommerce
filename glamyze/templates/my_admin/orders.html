@@ -42,7 +42,7 @@
                     <td>
                         <a class="btn btn-outline-primary" href="{% url 'order_management:order_detail' order.id %}">View</a>
                     </td>
-                    <td>{% if order.cancellation_request %}<span class="badge rounded-pill bg-warning text-dark">Action Required</span>{% endif %}</td>
+                    <td>{% if order.has_pending_return %}<span class="badge rounded-pill bg-warning text-dark">Action Required</span>{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -55,7 +55,8 @@
                         <th>Details</th>
                         <th class="text-center">Price</th>
                         <th class="text-center">Quantity</th>
-                        <th class="text-right">Total</th>
+                        <th class="text-center">Total</th>
+                        {% if return_enabled %}<th class="text-center">Action</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -72,18 +73,77 @@
                             
                         </td>
                         <td class="text-center">
-                            <p>₹{{ item.price }}</p>
+                            <p {% if item.offer_applied %} style="text-decoration: line-through" {% endif %}>₹{{ item.price }}</p>
                             {% if item.offer_applied %}
-                            <p>{{ item.offer_applied.offer_name }} Discount {{ item.offer_applied.discount_percentage }}%</p>
+                            <p>{{ item.offer_applied.offer_name }}</p>
+                            <p>₹{{ item.offer_price }}</p>
                             {% endif %}
                         </td>
                         <td class="text-center">{{ item.quantity }}</td>
-                        <td class="text-right">₹{{ item.total_price }}</td>
+                        <td class="text-center">₹{{ item.total_price }}</td>
+                        <td class="text-center" >
+                            {% if item.orderreturn.status == 'REQUESTED' %}
+                            <button class="btn btn-danger" disabled >Return Requested</button>
+                            {% elif item.orderreturn.status == 'APPROVED' %}
+                            <button class="btn btn-danger" disabled >Return Accepted</button>
+                            {% elif item.orderreturn.status == 'REJECTED' %}
+                            <button class="btn btn-danger" disabled >Return Rejected</button>
+                            {% elif item.order.order_status == 'DELIVERED' %}
+                            <button class="btn btn-danger" data-toggle="modal" data-target="#returnModal{{ item.id }}">
+                                Return
+                            </button>
+                            {% endif %}
+                        
+                    
+                        <form action="{% url 'order_app:return_product' %}" method="post">
+                            <div style="padding-top: 100px;" class="modal fade" id="returnModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="returnModalLabel{{ item.id }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="returnModalLabel{{ item.id }}">Return Product</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                                            
+                                            <div class="form-group">
+                                                <label>Reason for return:</label>
+                                                <select class="form-control" name="return_reason" required>
+                                                    <option value="">Select a reason</option>
+                                                    <option value="Damaged product">Damaged product</option>
+                                                    <option value="Wrong item received">Wrong item received</option>
+                                                    <option value="Not satisfied">Not satisfied</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Explain the Reason (optional)</label>
+                                                <input type="text" name="return_explanation" class="form-control" maxlength="40" placeholder="Enter the reason">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-danger">Submit Return Request</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form></td>
+                        
+
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot class="border-top">
-                   
+                    {% if order.coupon %}
+                    <tr>
+                        <td colspan="4" class="text-right"><strong>Coupon: {{ order.coupon.code }} :</strong></td>
+                        <td class="text-right"><strong>₹-{{ order.coupon.discount_amount }}</strong></td>
+                    </tr>
+                    {% endif %}
                    
                     <tr>
                         <td colspan="4" class="text-right"><strong>Total:</strong></td>
@@ -95,7 +155,6 @@
 
        
 
-        <!-- Action Buttons -->
         <div class="mt-4">
             {% if order.order_status == 'DELIVERED' %}
             <a href="#" class="btn btn-dark">Download Invoice</a>
@@ -103,7 +162,7 @@
             
             {% if order.order_status == 'PROCESSING' or order.order_status == 'SHIPPED' %}
             <button type="submit" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal" {% if cancellation_request %}disabled{% endif %}>
-                {% if cancellation_request %}Cancel request sent{% else %}Cancel Order{% endif %}
+                Cancel Order
             </button>
            
             {% endif %}
@@ -115,41 +174,41 @@
 
   
   <!-- Modal -->
-   <form action="{% url 'order_app:cancel_order' order.id %}" method="post">
-  <div style="margin-top: 100px;" class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Cancellation</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-            {% csrf_token %}
-            <div class="form-group">
-                <label>Reason for cancellation:</label>
-                <select id="reason" class="form-control" name="cancel_reason" required>
-                    <option value="">Select a reason</option>
-                    <option value="Changed my mind">Changed my mind</option>
-                    <option value="Ordered by mistake">Ordered by mistake</option>
-                    <option value="Found better price elsewhere">Found better price elsewhere</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div id="reason_explanation" class="form-group d-none">
-                <label for="exampleFormControlInput1">Explain the Reason</label>
-                <input type="text" name="explanation" class="form-control" maxlength="40" id="exampleFormControlInput1" placeholder="Enter the reason">
+  <form action="{% url 'order_app:cancel_order' order.id %}" method="post">
+    <div style="margin-top: 100px;" class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Cancellation</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              {% csrf_token %}
+              <div class="form-group">
+                  <label>Reason for cancellation:</label>
+                  <select id="reason" class="form-control" name="cancel_reason" required>
+                      <option value="">Select a reason</option>
+                      <option value="Changed my mind">Changed my mind</option>
+                      <option value="Ordered by mistake">Ordered by mistake</option>
+                      <option value="Found better price elsewhere">Found better price elsewhere</option>
+                      <option value="Other">Other</option>
+                  </select>
               </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-dark">Save changes</button>
+              <div id="reason_explanation" class="form-group d-none">
+                  <label for="exampleFormControlInput1">Explain the Reason</label>
+                  <input type="text" name="explanation" class="form-control" maxlength="40" id="exampleFormControlInput1" placeholder="Enter the reason">
+                </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-dark">Save changes</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div> 
-</form>
+    </div> 
+  </form>
   <script>
     document.getElementById('reason').addEventListener('change',function(){
         const reasonfield = document.getElementById('reason_explanation')

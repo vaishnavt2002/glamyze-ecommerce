@@ -12,6 +12,7 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 from django.http import HttpResponse
+from datetime import datetime
 # Create your views here.
 def sales_view(request):
     date_filter = request.GET.get('date_filter', 'today')
@@ -31,7 +32,6 @@ def sales_view(request):
     elif date_filter == 'custom' and start_date and end_date:
         orders = orders.filter(created_at__date__range=[start_date, end_date])
 
-    # Apply price filters
     if min_price:
         orders = orders.filter(total_amount__gte=min_price)
     if max_price:
@@ -42,8 +42,7 @@ def sales_view(request):
         total_orders=Count('id'),
         avg_order_value=Avg('total_amount')
     )
-
-    # Calculate total discounts (both offer and coupon)
+    print(values)
     total_discounts = Decimal('0.0')
     for order in orders:
         for item in order.orderitem_set.all():
@@ -53,11 +52,24 @@ def sales_view(request):
         coupon_discount = order.coupon.discount_amount if order.coupon else Decimal('0.0')
         total_discounts += offer_discount + coupon_discount
 
-    # Handle Excel export
+    #Excel export
     if request.GET.get('export') == 'excel':
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
         writer = csv.writer(response)
+        if date_filter == 'today':
+            date_excel = timezone.now().date().strftime('%d %b %Y')
+        elif date_filter == 'week':
+            date_excel =f'{week_start.strftime('%d %b %Y')} to till today'
+        elif date_filter == 'month':
+            date_excel = f"Month: {today.strftime('%B %Y')}"
+        elif date_filter == 'custom' and start_date and end_date:
+            date_excel = f"Custom Range: {datetime.strptime(start_date, '%Y-%m-%d').date()} - {datetime.strptime(end_date, '%Y-%m-%d').date()}"
+        else:
+            date_excel = 'All sales data'
+        writer.writerow([
+            'Date Range',date_excel
+        ])
         writer.writerow([
             'Order ID', 'Date', 'Customer', 'Items', 'Subtotal', 
             'Offer Discount', 'Coupon Discount', 'Final Amount', 
@@ -97,16 +109,10 @@ def sales_view(request):
 
         buffer = BytesIO()
         pdf = SimpleDocTemplate(buffer, pagesize=landscape(A4), leftMargin=20, rightMargin=20, topMargin=30, bottomMargin=30)
-        
-        # Define table headings
         data = [['Order ID', 'Date', 'Customer', 'Items', 'Subtotal', 'Offer Discount', 'Coupon Discount', 'Final Amount']]
-
-        # Get styles for wrapping
         styles = getSampleStyleSheet()
         normal_style = styles['BodyText']
-        normal_style.wordWrap = 'CJK'  # For better text wrapping
 
-        # Add order data to the table with wrapping
         for order in orders:
             items = ', '.join([
                 f"{item.product_variant.product.product_name} ({item.quantity})"
@@ -123,40 +129,32 @@ def sales_view(request):
                 order.id,
                 order.created_at.strftime('%Y-%m-%d'),
                 order.user.email,
-                Paragraph(items, normal_style),  # Wrap items text
+                Paragraph(items, normal_style), 
                 f"Rs.{sum(item.price * item.quantity for item in order.orderitem_set.all()):.2f}",
                 f"Rs.{offer_discount:.2f}",
                 f"Rs.{coupon_discount:.2f}",
                 f"Rs.{order.total_amount:.2f}"
             ])
 
-        # Create the table and set column widths
-        col_widths = [60, 80, 120, 200, 80, 80, 80, 80]  # Adjust as needed
+        col_widths = [60, 80, 120, 200, 80, 80, 80, 80]
         table = Table(data, colWidths=col_widths)
 
-        # Table styling
         style = TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 11),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ])
         table.setStyle(style)
 
-        # Build and return the PDF
         pdf.build([table])
         buffer.seek(0)
         response.write(buffer.read())
         buffer.close()
         return response
-
-    # Existing logic for HTML and Excel export...
-
 
     context = {
         'orders': orders,

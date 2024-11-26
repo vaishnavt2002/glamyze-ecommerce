@@ -14,7 +14,9 @@ def account_management(request):
         if request.user.is_block:
             return redirect('auth_app:logout') 
         wallet,created = Wallet.objects.get_or_create(user=request.user)
-        return render(request,'user/user_dashboard.html',{'wallet':wallet})
+        user_obj = CustomUser.objects.get(id=request.user.id)
+        user_obj.save()
+        return render(request,'user/user_dashboard.html',{'wallet':wallet,'user_obj':user_obj})
     else:
         return redirect('auth_app:login')
     

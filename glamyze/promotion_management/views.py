@@ -4,6 +4,7 @@ from . models import *
 from django.views.decorators.cache import never_cache
 from datetime import datetime
 import re
+from decimal import Decimal
 
 # Create your views here.
 
@@ -36,13 +37,15 @@ def add_offer(request):
                 end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
             except ValueError:
                 return redirect('banner_management:add_banner')
+            if Offer.objects.filter(offer_name__iexact=offer_name).exists():
+                errors.append("Offer with same name already exists")
             
             if start_date and start_date.date() < datetime.today().date():
                 errors.append('Start date must be today or a future date.')
             if end_date and start_date and end_date < start_date:
                 errors.append('End date must be greater than or equal to the start date.')
-            if  not re.match(r'^[A-Za-z\s]+$',offer_name):
-                errors.append('Name must contain only letters and spaces')
+            if  not re.match(r'^[A-Za-z0-9\s]+$',offer_name):
+                errors.append('Name must contain only letters,digits and spaces')
             if len(offer_name)<3:
                 errors.append('Name should atleast contain 2 letters')
             if  not re.match(r'^[A-Za-z0-9\s.]+$',description):
@@ -97,11 +100,12 @@ def edit_offer(request,offer_id):
             except ValueError:
                 return redirect('banner_management:add_banner')
             
-            
+            if Offer.objects.filter(offer_name__iexact=offer_name).exclude(id=offer_id).exists():
+                errors.append("Offer with same name already exists")
             if end_date and start_date and end_date < start_date:
                 errors.append('End date must be greater than or equal to the start date.')
-            if  not re.match(r'^[A-Za-z\s]+$',offer_name):
-                errors.append('Name must contain only letters and spaces')
+            if  not re.match(r'^[A-Za-z0-9\s]+$',offer_name):
+                errors.append('Name must contain only letters,digits and spaces')
             if len(offer_name)<3:
                 errors.append('Name should atleast contain 2 letters')
             if  not re.match(r'^[A-Za-z0-9\s.]+$',description):
@@ -189,6 +193,8 @@ def add_coupon(request):
             except ValueError:
                 return redirect('promotion_management:add_coupon')
             
+            if Coupon.objects.filter(code__iexact=coupon_code).exists():
+                errors.append("Coupon with same name already exists")
             if  not re.match(r'^[A-Za-z0-9]+$',coupon_code):
                 errors.append('Code must contain only letters and number only')
             if len(coupon_code)<3:
@@ -196,6 +202,12 @@ def add_coupon(request):
 
             if not usage_limit.isdigit:
                 errors.append('Usage limit must be a number')
+            if discount_amount>=mininum_order_amount:
+                errors.append('Discount amount must be less than minimum order amount')
+            if Decimal(maximum_order_amount)<=Decimal(mininum_order_amount):
+                errors.append('Maximum amount must be greater than or equal to minimum order amount.')
+            if expiry_date.date() < datetime.today().date():
+                errors.append('Expiry date must be today or a future date.')
             
             if errors:
                  context ={
@@ -241,7 +253,8 @@ def edit_coupon(request,coupon_id):
                 expiry_date = datetime.strptime(expiry_date, '%Y-%m-%d') if expiry_date else None
             except ValueError:
                 return redirect('promotion_management:add_coupon')
-            
+            if Coupon.objects.filter(code__iexact=code).exclude(id=coupon_id).exists():
+                errors.append("Offer with same name already exists")
             if  not re.match(r'^[A-Za-z0-9]+$',code):
                 errors.append('Code must contain only letters and number only')
             if len(code)<3:
@@ -249,6 +262,12 @@ def edit_coupon(request,coupon_id):
 
             if not usage_limit.isdigit:
                 errors.append('Usage limit must be a number')
+            if discount_amount>=mininum_order_amount:
+                errors.append('Discount amount must be less than minimum order amount')
+            if expiry_date.date() < datetime.today().date():
+                errors.append('Expiry date must be today or a future date.')
+            if Decimal(maximum_order_amount)<=Decimal(mininum_order_amount):
+                errors.append('Maximum amount must be greater than or equal to minimum order amount.')
             
             if errors:
                  return render(request,'my_admin/edit_coupon.html',{'coupon':coupon,'errors':errors})

@@ -14,28 +14,37 @@
 <h2 class="mb-4 px-4">Order Details</h2>
 
 <div class="container-fluid">
-    {% if cancellation %}
-    <div class="alert alert-danger" role="alert">
-        There is a cancellation request for this product. Reason : {{ cancellation.reason_type}}. <a href="{% url 'order_management:order_cancellation' order.id %}">Approve the cancellation</a>
-      </div>
-      {% endif %}
     <!-- Order Summary -->
     <div class="row mb-4">
         <div class="col-md-6">
             <h5>Order ID: {{ order.id }}</h5>
             <p><strong>Date:</strong> {{ order.created_at|date:"d M, Y" }}</p>
+            <p><strong>Payment Status:</strong> {{ order.payment_method }}</p>
             <p><strong>Payment Status:</strong> {{ order.payment_status }}</p>
             <p><strong>Order Status:</strong> 
+                {% if order.order_status == 'CANCELLED'%}
+                {{ order.order_status }}</p>
+                {% elif order.order_status == 'DELIVERED' %}
+                {{ order.order_status}}--{{order.delivery_date}}
+                {% else %}
+                {{order.order_status}}
                 <form method="POST" action="{% url 'order_management:order_update' order.id  %}">
                     {% csrf_token %}
                     <select name="order_status" class="form-select d-inline w-auto">
                         {% for status, display in order.ORDER_STATUS_CHOICES %}
+                        {% if status == 'SHIPPED' or status == 'DELIVERED' %}
                             <option value="{{ status }}" {% if order.order_status == status %}selected{% endif %}>{{ display }}</option>
+                            {% endif %}
+                        
                         {% endfor %}
                     </select>
                     <button type="submit" class="btn btn-outline-primary btn-sm">Update</button>
                 </form>
+                {% endif %}
             </p>
+            {% if order.coupon %}
+            <p><strong>Coupon:</strong> ₹-{{ order.coupon.discount_amount }}->{{order.coupon.code}}</p>
+            {% endif %}
             <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
         </div>
     </div>
@@ -62,6 +71,11 @@
                     <th scope="col">Quantity</th>
                     <th scope="col">Price</th>
                     <th scope="col">Total</th>
+                     {% if has_pending_return %}
+                     <th>Return</th>
+                     {% else %}
+                     <th></th>
+                     {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -69,12 +83,34 @@
                 <tr>
                     <td>{{ item.product_variant.product.product_name }}-{{ item.product_variant.size.size_code }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>₹{{ item.price }}</td>
+                    <td> <p {% if item.offer_applied %} style="text-decoration: line-through" {% endif %}>₹{{ item.price }}</p>
+                        {% if item.offer_applied %}
+                        <p>{{ item.offer_applied.offer_name }}</p>
+                        <p>₹{{ item.offer_price }}</p>
+                        {% endif %}</td>
                     <td>₹{{ item.total_price }}</td>
+                    {% if item.orderreturn.status == 'REQUESTED' %}
+                     <td><span>{{item.orderreturn.return_reason}}-</span><a href="{% url 'order_management:order_return_approve' item.id %}" class="btn btn-primary mx-2">Approve</a><a href="{% url 'order_management:order_return_reject' item.id %}" class="btn btn-outline-primary">Reject</a></td>
+                     
+                     {% elif item.orderreturn.status == 'APPROVED' %}
+                <td><span class="text-success">Return approved</span></td>
+            {% elif item.orderreturn.status == 'REJECTED' %}
+                <td><span class="text-danger">Return rejected</span></td>
+                {% else %}
+                <td><span>No request</span></td>
+            {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% if order.order_status != 'DELIVERED' and order.order_status != 'CANCELLED' %}
+    <form action="{% url 'order_management:order_cancellation' order.id %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" value="CANCELLED" name="order_status" class="btn btn-danger">
+            Cancel the Order
+        </button>
+    </form>
+{% endif %}
     </div>
 </div>
 {% endblock content %}

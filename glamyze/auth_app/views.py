@@ -13,6 +13,8 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch,Count
 from django.db.models import Q,Sum,Min
 from banner_management.models import *
+from wallet_app.models import *
+from decimal import Decimal
 
 
 
@@ -50,9 +52,10 @@ def user_signup(request):
         confirm_password = request.POST.get('confirm_password')
         fname = request.POST.get('fname')
         lname = request.POST.get('lname')
+        referral_code = request.POST.get('referral_code')
         errors = validate_data(email,phonenumber,password,confirm_password,fname,lname)
         if errors:
-                context={'errors':errors,'email':email,'phonenumber':phonenumber,'first_name':fname,'last_name':lname}
+                context={'errors':errors,'email':email,'phonenumber':phonenumber,'first_name':fname,'last_name':lname,'referral_code':referral_code}
                 return render(request,'auth_app/signup.html',context)
         else:
             if CustomUser.objects.filter(email=email).exists():
@@ -65,7 +68,16 @@ def user_signup(request):
                     user.last_name = lname
                     user.save()
             else:
-                CustomUser.objects.create_user(username=email,email=email,phone_number=phonenumber,password=password,first_name=fname,last_name=lname,is_active=False)
+                referred_by=None
+                if referral_code:
+                    try:
+                        referred_by = CustomUser.objects.get(referral_code=referral_code)
+                    except:
+                        errors =['Invalid referral']
+                        context={'errors':errors,'email':email,'phonenumber':phonenumber,'first_name':fname,'last_name':lname,'referral_code':referral_code}
+                        return render(request,'auth_app/signup.html',context)
+
+                CustomUser.objects.create_user(username=email,email=email,phone_number=phonenumber,password=password,first_name=fname,last_name=lname,is_active=False,referred_by=referred_by)
             try:
                 send_otp(request,email)
             except Exception:
@@ -97,8 +109,20 @@ def user_otp_verification(request):
                 user = CustomUser.objects.get(email=email)
                 user.is_active = True
                 user.save()
+                if user.referred_by:
+                    wallet,created = Wallet.objects.get_or_create(user=user)
+                    tranasaction = WalletTransaction(wallet=wallet,transaction_type='REFERRAL',amount=100)
+                    tranasaction.save()
+                    wallet.balance += Decimal(100.00)
+                    wallet.save()
+                    ref_wallet,created = Wallet.objects.get_or_create(user=user.referred_by)
+                    tranasaction = WalletTransaction(wallet=ref_wallet,transaction_type='REFERRAL',amount=100)
+                    tranasaction.save()
+                    ref_wallet.balance += Decimal(100.00)
+                    ref_wallet.save()
                 del request.session['otp']
                 del request.session['otp_expiry']
+                del request.session['email']
                 return render(request, 'auth_app/otp.html', {"signup_success": True})
             else:
                 return render(request, 'auth_app/otp.html', {"errors": ["Invalid OTP. Please try again."]})

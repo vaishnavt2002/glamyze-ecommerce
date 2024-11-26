@@ -31,6 +31,7 @@ class Order(models.Model):
     razorpay_payment_id = models.CharField(max_length=100, null=True, blank=True)
     razorpay_payment_signature = models.CharField(max_length=100, null=True, blank=True)
     coupon = models.ForeignKey(Coupon,on_delete=models.SET_NULL,null=True)
+    delivery_date = models.DateTimeField(null=True,default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -83,13 +84,22 @@ class OrderCancellation(models.Model):
     CANCELLED_BY_CHOICES = [
         ('CUSTOMER', 'Customer'),
         ('ADMIN', 'Admin')
-    ]
-    STATUS_CHOICES = [
-        ('PENDING','Pending'),
-        ('APPROVED', 'Approved')
-    ]
+    ]   
     order = models.OneToOneField(Order,on_delete=models.CASCADE)
     reason_type = models.CharField(max_length=50)
     cancelled_date = models.DateTimeField(auto_now_add=True)
     cancelled_by = models.CharField(max_length=10, choices=CANCELLED_BY_CHOICES)
-    status = models.CharField(max_length=10, default=None, null=True)
+
+class OrderReturn(models.Model):
+    RETURN_STATUS_CHOICES = [
+        ('REQUESTED','requested'),
+        ('APPROVED','approved'),
+        ('REJECTED','Rejected')
+    ]
+    order_item = models.OneToOneField(OrderItem,on_delete=models.CASCADE)
+    return_reason = models.CharField(max_length=20)
+    return_explanation = models.TextField(null=True)
+    status = models.CharField(max_length=20, choices=RETURN_STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+

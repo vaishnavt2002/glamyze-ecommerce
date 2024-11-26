@@ -1,4 +1,4 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render,HttpResponse,redirect
 from address_app.models import *
 from cart_app.models import *
 from django.urls import reverse
@@ -491,14 +491,17 @@ def order_details(request,order_id):
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
-        order = Order.objects.get(id=order_id)
+        order = Order.objects.prefetch_related('orderitem_set').get(id=order_id)
+
         if request.user != order.user:
             return redirect('auth_app:logout')
-        cancellation_request = False
-        if OrderCancellation.objects.filter(order=order).exists():
-            cancellation_request = True
+        return_enabled = False
+        if order.order_status == 'DELIVERED':
+            return_enabled = True        
         address = OrderAddress.objects.filter(order_id=order_id)
-        return render(request,'user/order_details.html',{'order':order,'address':address,'cancellation_request':cancellation_request})
+        order_items = order.orderitem_set.all()
+        
+        return render(request,'user/order_details.html',{'order':order,'address':address,'return_enabled':return_enabled})
         
     else:
         return redirect('auth_app:login')
@@ -514,7 +517,10 @@ def payment_success(request):
             payment_id= request.GET.get('payment_id')
             order_id = request.GET.get('order_id')
             signature = request.GET.get('signature')
-            order = Order.objects.get(razorpay_order_id=order_id)
+            try:
+                order = Order.objects.get(razorpay_order_id=order_id,payment_status='PENDING')
+            except:
+                return render(request,'user/alert.html',{'failed':True})
             order_items = OrderItem.objects.filter(order=order)
             for item in order_items:
                 if item.product_variant.quantity<item.quantity:
@@ -599,7 +605,25 @@ def cancel_order(request,order_id):
                 cancel_reason += explantion
             order = Order.objects.get(id=order_id)
             if request.user == order.user and order.order_status!='DELIVERED':
-                cancel=OrderCancellation(order_id=order_id, reason_type=cancel_reason, cancelled_by='CUSTOMER',status='PENDING')
+                print('HI')
+                cancel=OrderCancellation(order_id=order_id, reason_type=cancel_reason, cancelled_by='CUSTOMER')
+                
+                order.order_status='CANCELLED'
+                order.payment_status = 'REFUNDED'
+                
+                order_items = OrderItem.objects.filter(order=order)
+                for item in order_items:
+                    item.product_variant.quantity += item.quantity
+                    item.product_variant.save()
+                if order.payment_method == 'razorpay' or order.payment_method == 'wallet':
+                    try:
+                        wallet = Wallet.objects.get(user=order.user)
+                    except:
+                        wallet = Wallet.objects.create(user=order.user)
+                    transaction = WalletTransaction.objects.create(wallet=wallet,transaction_type='CANCELLATION',amount=order.total_amount)
+                    wallet.balance += order.total_amount
+                    wallet.save()
+                order.save()
                 cancel.save()
                 return redirect('order_app:order_details', order_id=order_id)
             else:
@@ -607,3 +631,27 @@ def cancel_order(request,order_id):
         
     else:
         return redirect('auth_app:login')
+    
+
+def return_product(request):
+    if request.POST:
+        item_id = request.POST.get('item_id')
+        return_reason = request.POST.get('return_reason')
+        return_explanation = request.POST.get('return_explanation', '')
+        try:
+            order_item = OrderItem.objects.get(id=item_id)
+        except:
+            return redirect('order_app:order_view')
+        if request.user == order_item.order.user:
+            if order_item.order.order_status == 'DELIVERED':
+                if OrderReturn.objects.filter(order_item=order_item).exists():
+                    pass
+                else:
+                    return_obj = OrderReturn(order_item=order_item,return_reason=return_reason,return_explanation= return_explanation if return_explanation else None,status='REQUESTED')
+                    return_obj.save()
+                return redirect('order_app:order_details',order_id = order_item.order_id)
+            else:
+                return redirect('order_app:order_details',order_id = order_item.order_id)
+        else:
+            return redirect('auth_app:logout')
+            
