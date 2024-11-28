@@ -655,3 +655,42 @@ def return_product(request):
         else:
             return redirect('auth_app:logout')
             
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from .models import Order, OrderItem, OrderAddress
+import datetime
+
+
+def generate_invoice_pdf(request, order_id):
+   # Fetch the order and related data
+   order = Order.objects.get(id=order_id)
+   order_items = OrderItem.objects.filter(order=order)
+   order_address = OrderAddress.objects.get(order=order)
+
+
+   # Prepare data for the template
+   context = {
+       'order': order,
+       'order_items': order_items,
+       'order_address': order_address,
+       'subtotal': order.get_subtotal(),
+       'offer_discount': order.get_offer_discount(),
+       'coupon_discount': order.get_coupon_discount(),
+       'total_amount': order.total_amount,
+       'date': datetime.datetime.now().strftime('%Y-%m-%d'),
+   }
+
+
+   # Render the HTML template
+   html_string = render_to_string('invoice_print.html', context)
+
+
+   # Generate the PDF
+   pdf_file = HTML(string=html_string).write_pdf()
+
+
+   # Return the PDF as a response
+   response = HttpResponse(pdf_file, content_type='application/pdf')
+   response['Content-Disposition'] = f'attachment; filename="invoice_{order_id}.pdf"'
+   return response

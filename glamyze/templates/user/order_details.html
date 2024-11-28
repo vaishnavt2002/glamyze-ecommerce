@@ -157,7 +157,7 @@
 
         <div class="mt-4">
             {% if order.order_status == 'DELIVERED' %}
-            <a href="#" class="btn btn-dark">Download Invoice</a>
+            <a href="{% url 'order_app:generate_invoice_pdf' order.id %}" class="btn btn-dark">Download Invoice</a>
             {% endif %}
             
             {% if order.order_status == 'PROCESSING' or order.order_status == 'SHIPPED' %}

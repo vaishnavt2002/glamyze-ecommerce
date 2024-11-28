@@ -1,4 +1,103 @@
 {% extends 'my_admin/base.html' %}
 {% block content %}
+<h2>Admin Dashboard</h2>
 
-{% endblock content %}
+<!-- Filter buttons -->
+<div>
+    <a href="?filter=yearly" class="btn btn-outline-primary btn-sm">Yearly</a>
+    <a href="?filter=monthly" class="btn btn-outline-primary btn-sm">Monthly</a>
+    <a href="?filter=daily" class="btn btn-outline-primary btn-sm">Daily</a>
+
+</div>
+
+<!-- Chart.js container -->
+<canvas id="salesChart" width="80%" height="10rem"></canvas>
+
+<!-- Container for the tables with Bootstrap grid system -->
+<div class="row mt-4">
+    
+    <!-- Top Products Table -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Top 10 Best-Selling Products</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr class="table-light">
+                            <th>Product</th>
+                            <th>Total Quantity Sold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in top_products %}
+                        <tr>
+                            <td>{{ product.product_variant__product__product_name }}</td>
+                            <td>{{ product.total_quantity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Subcategories Table -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Top 10 Best-Selling Subcategories</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr class="table-light">
+                            <th>Subcategory</th>
+                            <th>Total Quantity Sold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subcategory in top_subcategories %}
+                        <tr>
+                            <td>{{ subcategory.category_and_subcategory }}</td>
+                            <td>{{ subcategory.total_quantity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ labels|safe }};
+    const sales = {{ sales|safe }};
+
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Sales',
+                data: sales,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
