@@ -70,7 +70,7 @@
                     <td>{{product.subcategory.subcategory_name}}</td>
                     <td><img src="{{ product.image1.url }}" alt="{{ product.product_name }}" style="width: 70px;"></td>
                     <td>{{product.material}}</td>
-                    <td>{% if product.is_listed %}<span class="badge bg-success">Listed</span>{% else %}%}<span class="badge bg-danger">Unlisted</span>{% endif %} </td>
+                    <td>{% if product.is_listed %}<span class="badge bg-success">Listed</span>{% else %}<span class="badge bg-danger">Unlisted</span>{% endif %} </td>
                     <td>
                         <a class="btn btn-outline-primary" href="{% url 'product_management:product_edit'  product.id  %}">Edit</a>
                         <button class="{% if product.is_listed %}

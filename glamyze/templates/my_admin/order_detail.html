@@ -26,6 +26,10 @@
                 {{ order.order_status }}</p>
                 {% elif order.order_status == 'DELIVERED' %}
                 {{ order.order_status}}--{{order.delivery_date}}
+                {% elif order.order_status == 'FAILED' %}
+                {{ order.order_status}}
+                {% elif order.order_status == 'PENDING' %}
+                {{ order.order_status}}
                 {% else %}
                 {{order.order_status}}
                 <form method="POST" action="{% url 'order_management:order_update' order.id  %}">
@@ -101,6 +105,26 @@
             {% endif %}
                 </tr>
                 {% endfor %}
+                {% if order.coupon %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td class="text-right">Coupon Amount</td>
+                    <td>-₹{{ order.coupon.discount_amount }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td class="text-right">Delivery Charge:</td>
+                    <td>+₹40</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td class="text-right">Total:</td>
+                    <td>₹{{ order.total_amount }}</td>
+                </tr>
             </tbody>
         </table>
         {% if order.order_status != 'DELIVERED' and order.order_status != 'CANCELLED' %}

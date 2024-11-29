@@ -50,6 +50,40 @@
     
 </script>
 {% endif %}
+
+{% if product_unlisted %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Sorry, The product is currently unavailable',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'order_app:order_view' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+
+{% if time_limit %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Order Failed due to time limit exceeded to complete the payment',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'order_app:order_view' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
 {% if wallet_success %}
 <script>    
     document.addEventListener("DOMContentLoaded", function() {
@@ -77,6 +111,38 @@
         });
         setTimeout(() => {
             window.location.href = "{% url 'wallet_app:wallet_view' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+{% if quantity_issue %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Order Failed due to quantity issue from our side. Amount not debited',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:home' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+{% if low_balance %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'Order Failed. Low balance in wallet',
+            icon: 'error',
+            showconfirmButtonText: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'auth_app:home' %}";
         },3000);
     });
     

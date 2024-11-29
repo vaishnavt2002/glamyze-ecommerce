@@ -14,7 +14,8 @@ urlpatterns = [
     path('checkout/apply-coupon/',views.apply_coupon,name='apply_coupon'),
     path('account/orders/<int:order_id>/cancel/',views.cancel_order,name='cancel_order'),
     path('account/orders/item/return/',views.return_product,name='return_product'),
-    path('account/orders/<int:order_id>/invoice/',views.generate_invoice_pdf,name='generate_invoice_pdf')
+    path('account/orders/<int:order_id>/invoice/',views.generate_invoice_pdf,name='generate_invoice_pdf'),
+    path('account/orders/<int:order_id>/continue-payment/',views.continue_payment,name='continue_payment')
 
 
 ]

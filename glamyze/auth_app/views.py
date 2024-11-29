@@ -336,3 +336,9 @@ def user_logout(request):
     if request.user.is_authenticated:
         logout(request)
     return redirect('auth_app:home')
+
+def about(request):
+    return render(request,'user/about.html')
+
+def contact(request):
+    return render(request,'user/contact.html')

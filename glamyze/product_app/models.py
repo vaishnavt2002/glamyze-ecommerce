@@ -1,5 +1,6 @@
 from django.db import models
 from promotion_management.models import *
+from auth_app.models import *
 
 
 # Create your models here.
@@ -60,3 +61,12 @@ class ProductVariant(models.Model):
 
     def __str__(self):
         return f"{self.product.product_name} - {self.size.size_name}"
+    
+
+class ProductReview(models.Model):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField()
+    review = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

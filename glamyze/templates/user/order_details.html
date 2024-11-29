@@ -5,7 +5,12 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4>Order Details</h4>
+        <div>
+        {% if show_continue_payment %}
+            <a href="{% url 'order_app:continue_payment' order.id %}" class="btn btn-dark btn-sm">Continue Payment</a>
+        {% endif %}
         <a href="{% url 'order_app:order_view' %}" class="btn btn-outline-dark btn-sm">Back to Orders</a>
+    </div>
     </div>
     
     <div class="card-body">
@@ -144,7 +149,10 @@
                         <td class="text-right"><strong>₹-{{ order.coupon.discount_amount }}</strong></td>
                     </tr>
                     {% endif %}
-                   
+                    <tr>
+                        <td colspan="4" class="text-right"><strong>Delivery Charge:</strong></td>
+                        <td class="text-right"><strong>+₹40</strong></td>
+                    </tr>
                     <tr>
                         <td colspan="4" class="text-right"><strong>Total:</strong></td>
                         <td class="text-right"><strong>₹{{ order.total_amount }}</strong></td>

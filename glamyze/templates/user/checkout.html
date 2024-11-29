@@ -116,6 +116,19 @@
 
                 <!-- Total -->
                 <div class="d-flex flex-column p-t-27 p-b-33">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="size-208">
+                            <span class="mtext-101 cl2">
+                                Delivery Charge:
+                            </span>
+                        </div>
+                        
+                        <div class="size-150">
+                            <span class="mtext-110 cl2">
+                                 ₹40
+                            </span>
+                        </div>
+                    </div>
                     {% if coupon_applied %}
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="size-208">
@@ -154,8 +167,8 @@
                     <h4 class="mtext-109 cl2 p-b-20">Payment Method</h4>
                     <div class="payment-options">
                         <div class="payment-option m-b-10" style="display: flex;">
-                            <input type="radio" name="payment_method" value="cod" style="margin-right: 10px;" checked>
-                            <label for="cod" class="stext-102" style="padding-top: 10px;">Cash on Delivery</label>
+                            <input type="radio" name="payment_method" value="cod" style="margin-right: 10px;" {% if cod_disabled %}disabled{% endif %}>
+                            <label for="cod" class="stext-102" style="padding-top: 10px;">Cash on Delivery{% if cod_disabled %}<span>--</span><span style="color: red;">Only for order below 1000</span>{% endif %}</label>
                         </div>
                         <div class="payment-option m-b-10" style="display: flex;">
                             <input type="radio" name="payment_method" value="razorpay" style="margin-right: 10px;">
@@ -205,8 +218,8 @@
             title: 'Failed!',
             text: '{{ coupon_failed }}',
             icon: 'error',
-            timer: 3000,  // Display the alert for 3 seconds (3000 milliseconds)
-            showConfirmButton: false  // Hide the confirm button to automatically close
+            timer: 3000,
+            showConfirmButton: false 
         });
     });
 </script>

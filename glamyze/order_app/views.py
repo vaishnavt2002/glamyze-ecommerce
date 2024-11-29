@@ -4,13 +4,19 @@ from cart_app.models import *
 from django.urls import reverse
 from . models import *
 from django.utils import timezone
+from datetime import timedelta
 from django.db.models import Count
 from django.views.decorators.cache import never_cache
 import razorpay
 from django.conf import settings
 from wallet_app.models import *
 from decimal import Decimal
-
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from .models import Order, OrderItem, OrderAddress
+import datetime
+from django.db.models import Q
 
 
 # Create your views here.
@@ -18,7 +24,6 @@ from decimal import Decimal
 def proceed_to_checkout(request):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 
-    
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
@@ -138,6 +143,11 @@ def checkout_view(request):
                 offer_applied = None
             item.offer_applied = offer_applied
             total_price += float(item.total_price)
+        #delivery charge
+        total_price += 40
+        #cod elegibility checking
+        if total_price > 1000:
+            context['cod_disabled'] = True
         #coupon checking
         coupon_applied = False
         if request.session.get('coupon_code'):
@@ -235,6 +245,8 @@ def order_summary(request):
                 change = True
             elif item.quantity > item.productvariant.quantity:
                 change = True
+        #delivery charge
+        total_price += 40
         coupon_applied = False
         if request.session.get('coupon_code'):
             code = request.session.get('coupon_code')
@@ -250,7 +262,8 @@ def order_summary(request):
             selected_address = request.POST.get('selected_address')
             payment_method = request.POST.get('payment_method')
             summary_total = request.POST.get('summary_total')
-            
+            print('summery_total',summary_total)
+            print('total',total_price)
             if summary_total != str(total_price):
                 context['offer_change'] = True
                 return render(request,'user/summary.html',context)
@@ -325,6 +338,7 @@ def confirm_order(request):
                     item.offer_price = None
                     item.total_price = original_price * item.quantity            
                 total_price += float(item.total_price)
+                
                 if max_discount > 0:
                     if max_discount == product_discount:
                         offer_applied = 'PRODUCT'
@@ -341,6 +355,8 @@ def confirm_order(request):
                     change = True
                 elif item.quantity > item.productvariant.quantity:
                     change = True
+            #delivery charge
+            total_price += 40
         else:
             return redirect('product_app:shop')
 
@@ -460,6 +476,7 @@ def confirm_order(request):
                 print(payment)
                 context = {'payment':payment,'key':settings.RAZOR_PAY_KEY_ID}
                 order.razorpay_order_id=payment['id']
+                cart_items.delete()
                 order.save()
                 return render(request,'user/payment.html',context)
             return render(request, 'user/summary.html',context)
@@ -476,9 +493,8 @@ def order_view(request):
     if request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')
-        orders = Order.objects.filter(user=request.user).exclude(order_status='PENDING').annotate(total_items=Count('orderitem')).order_by('-id')
-        return render(request,'user/orders.html',{'orders':orders})
-        
+        orders = Order.objects.filter(user=request.user).annotate(total_items=Count('orderitem')).order_by('-id')
+        return render(request,'user/orders.html',{'orders':orders})  
     else:
         return redirect('auth_app:login')
     
@@ -492,7 +508,6 @@ def order_details(request,order_id):
         if request.user.is_block:
             return redirect('auth_app:logout')
         order = Order.objects.prefetch_related('orderitem_set').get(id=order_id)
-
         if request.user != order.user:
             return redirect('auth_app:logout')
         return_enabled = False
@@ -500,8 +515,19 @@ def order_details(request,order_id):
             return_enabled = True        
         address = OrderAddress.objects.filter(order_id=order_id)
         order_items = order.orderitem_set.all()
+        show_continue_payment = False
+        if (order.order_status == 'PENDING' or (order.order_status=='FAILED' and order.payment_status == 'FAILED')) and (timezone.now() <= order.created_at + timedelta(minutes=15)):
+            for item in order_items:
+                product_variant = item.product_variant
+                if not item.product_variant.is_listed or not item.product_variant.product.is_active or not item.product_variant.product.is_listed or not item.product_variant.product.subcategory.is_listed or not item.product_variant.product.subcategory.category.is_listed:
+                    break
+                if item.quantity > product_variant.quantity:
+                    break
+            else:
+                show_continue_payment = True
         
-        return render(request,'user/order_details.html',{'order':order,'address':address,'return_enabled':return_enabled})
+            
+        return render(request,'user/order_details.html',{'order':order,'address':address,'return_enabled':return_enabled,'show_continue_payment':show_continue_payment})
         
     else:
         return redirect('auth_app:login')
@@ -518,7 +544,7 @@ def payment_success(request):
             order_id = request.GET.get('order_id')
             signature = request.GET.get('signature')
             try:
-                order = Order.objects.get(razorpay_order_id=order_id,payment_status='PENDING')
+                order = Order.objects.get(Q(razorpay_order_id=order_id)&(Q(payment_status='PENDING')|Q(payment_status='FAILED')))
             except:
                 return render(request,'user/alert.html',{'failed':True})
             order_items = OrderItem.objects.filter(order=order)
@@ -541,9 +567,7 @@ def payment_success(request):
             order.payment_status = 'PAID'
             order.order_status = 'PROCESSING'
             order.save()
-            cart = Cart.objects.get(user=request.user)
-            cart_items = CartItem.objects.filter(cart=cart).select_related('cart')
-            cart_items.delete()
+            
             order_items = OrderItem.objects.filter(order=order)
             for item in order_items:
                 product_variant = item.product_variant
@@ -605,7 +629,6 @@ def cancel_order(request,order_id):
                 cancel_reason += explantion
             order = Order.objects.get(id=order_id)
             if request.user == order.user and order.order_status!='DELIVERED':
-                print('HI')
                 cancel=OrderCancellation(order_id=order_id, reason_type=cancel_reason, cancelled_by='CUSTOMER')
                 
                 order.order_status='CANCELLED'
@@ -655,21 +678,13 @@ def return_product(request):
         else:
             return redirect('auth_app:logout')
             
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from weasyprint import HTML
-from .models import Order, OrderItem, OrderAddress
-import datetime
-
 
 def generate_invoice_pdf(request, order_id):
-   # Fetch the order and related data
    order = Order.objects.get(id=order_id)
    order_items = OrderItem.objects.filter(order=order)
    order_address = OrderAddress.objects.get(order=order)
 
 
-   # Prepare data for the template
    context = {
        'order': order,
        'order_items': order_items,
@@ -682,15 +697,83 @@ def generate_invoice_pdf(request, order_id):
    }
 
 
-   # Render the HTML template
    html_string = render_to_string('invoice_print.html', context)
 
 
-   # Generate the PDF
    pdf_file = HTML(string=html_string).write_pdf()
 
 
-   # Return the PDF as a response
    response = HttpResponse(pdf_file, content_type='application/pdf')
    response['Content-Disposition'] = f'attachment; filename="invoice_{order_id}.pdf"'
    return response
+
+@never_cache
+def apply_coupon(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        if request.POST:
+            code = request.POST.get('code')
+            request.session['coupon_code'] = code
+        return redirect('order_app:checkout_view')
+    else:
+        return redirect('auth_app:login')
+    
+
+
+    
+def continue_payment(request,order_id):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        try:
+            order = Order.objects.get(id=order_id)
+            if order.user == request.user and (order.order_status == 'PENDING' or (order.order_status=='FAILED' and order.payment_status == 'FAILED')) and (timezone.now() <= order.created_at + timedelta(minutes=15)):
+                order_items = OrderItem.objects.filter(order=order)
+                if order.payment_method == 'wallet':
+                    for item in order_items:
+                        product_variant = item.product_variant
+                        if not item.product_variant.is_listed or not item.product_variant.product.is_active or not item.product_variant.product.is_listed or not item.product_variant.product.subcategory.is_listed or not item.product_variant.product.subcategory.category.is_listed:
+                            return render(request,'user/alert.html',{'product_unlisted':True})
+                        if item.quantity <= product_variant.quantity:
+                            product_variant.quantity = product_variant.quantity - item.quantity
+                            product_variant.save()
+                        else:
+                            return render(request,'user/alert.html',{'quantity_issue':True})
+                    order.order_status='PROCESSING'
+                    order.payment_status = 'PAID'
+                    order.payment_method = 'wallet'
+                    wallet,created = Wallet.objects.get_or_create(user=request.user)
+                    if wallet.balance >= order.total_amount:
+                        transaction = WalletTransaction(wallet=wallet, transaction_type='DEBIT',amount=order.total_amount)
+                        wallet.balance -= Decimal(order.total_amount)
+                        transaction.save()
+                        wallet.save()
+                        order.save()
+                        return render(request,'user/alert.html',{'success':True})
+                    else:
+                        return render(request,'user/alert.html',{'low_balance':True})
+                elif order.payment_method == 'razorpay':
+                    for item in order_items:
+                        product_variant = item.product_variant
+                        if not item.product_variant.is_listed or not item.product_variant.product.is_active or not item.product_variant.product.is_listed or not item.product_variant.product.subcategory.is_listed or not item.product_variant.product.subcategory.category.is_listed:
+                            return render(request,'user/alert.html',{'product_unlisted':True})
+                        if item.quantity <= product_variant.quantity:
+                            pass
+                        else:
+                            return render(request,'user/alert.html',{'quantity_issue':True})
+                    client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID, settings.KEY_SECRET))
+                    payment = client.order.fetch(order.razorpay_order_id)
+                    context = {'payment':payment,'key':settings.RAZOR_PAY_KEY_ID}
+                    return render(request,'user/payment.html',context)
+            else:
+                return render(request,'user/alert.html',{'time_limit':True})
+        except Order.DoesNotExist:
+            return redirect('order_app:order_view')  
+    else:
+        return redirect('auth_app:login')

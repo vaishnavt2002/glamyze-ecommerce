@@ -235,20 +235,29 @@
                                 <i class="zmdi {% if wishlisted %}zmdi-favorite{% else %}zmdi-favorite-outline{% endif %} bigger-icon"></i>
                             </a>
                         </div>
-                        
-
-                        <!-- <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
-                            <i class="fa fa-facebook"></i>
-                        </a>
-
-                        <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
-                            <i class="fa fa-twitter"></i>
-                        </a>
-
-                        <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
-                            <i class="fa fa-google-plus"></i>
-                        </a> -->
                     </div>
+
+                    <div class="flex-m m-l-20"> 
+                        <div class="avg-rating-display">
+                            {% with avg_rating|floatformat:1 as rating %}
+                                {% for i in "12345" %}
+                                    {% if i <= rating %}
+                                        <i class="zmdi zmdi-star cl11 star-size"></i> 
+                                    {% elif i|add:"-0.5" < rating %}
+                                        <i class="zmdi zmdi-star-half cl11 star-size"></i> 
+                                    {% else %}
+                                        <i class="zmdi zmdi-star-outline cl11 star-size"></i> 
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                            
+                            <!-- Display the numeric average rating -->
+                            <span class="mtext-107 cl2 p-l-10">
+                                {{ avg_rating }} / 5.0
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -271,9 +280,7 @@
                     </li>
                 </ul>
 
-                <!-- Tab panes -->
                 <div class="tab-content p-t-43">
-                    <!-- - -->
                     <div class="tab-pane fade show active" id="description" role="tabpanel">
                         <div class="how-pos2 p-lr-15-md">
                             <p class="stext-102 cl6">
@@ -282,7 +289,6 @@
                         </div>
                     </div>
 
-                    <!-- - -->
                     <div class="tab-pane fade" id="information" role="tabpanel">
                         <div class="row">
                             <div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
@@ -321,84 +327,91 @@
                         </div>
                     </div>
 
-                    <!-- - -->
                     <div class="tab-pane fade" id="reviews" role="tabpanel">
                         <div class="row">
                             <div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
                                 <div class="p-b-30 m-lr-15-sm">
-                                    <!-- Review -->
-                                    <div class="flex-w flex-t p-b-68">
-                                        <div class="wrap-pic-s size-109 bor0 of-hidden m-r-18 m-t-6">
-                                            <img src="images/avatar-01.jpg" alt="AVATAR">
-                                        </div>
-
-                                        <div class="size-207">
-                                            <div class="flex-w flex-sb-m p-b-17">
-                                                <span class="mtext-107 cl2 p-r-20">
-                                                    Ariana Grande
-                                                </span>
-
-                                                <span class="fs-18 cl11">
-                                                    <i class="zmdi zmdi-star"></i>
-                                                    <i class="zmdi zmdi-star"></i>
-                                                    <i class="zmdi zmdi-star"></i>
-                                                    <i class="zmdi zmdi-star"></i>
-                                                    <i class="zmdi zmdi-star-half"></i>
-                                                </span>
+                                    <!-- Display reviews -->
+                                    {% if reviews %}
+                                        {% for review in reviews %}
+                                        <div class="flex-w flex-t p-b-68">
+                                            <div class="size-207">
+                                                <div class="flex-w flex-sb-m p-b-17">
+                                                    <span class="mtext-107 cl2 p-r-20">
+                                                        {{ review.user.first_name }} {{ review.user.last_name }}
+                                                    </span>
+                    
+                                                    <span class="fs-18 cl11">
+                                                        <!-- Display full stars based on review.rating -->
+                                                        {% for i in "12345" %}
+                                                            {% if forloop.counter <= review.rating %}
+                                                                <i class="zmdi zmdi-star"></i> <!-- Full star -->
+                                                            {% else %}
+                                                                <i class="zmdi zmdi-star-outline"></i> <!-- Empty star -->
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </span>
+                                                </div>
+                    
+                                                <p class="stext-102 cl6">
+                                                    {{ review.review }}
+                                                </p>
                                             </div>
-
-                                            <p class="stext-102 cl6">
-                                                Quod autem in homine praestantissimum atque optimum est, id deseruit. Apud ceteros autem philosophos
-                                            </p>
                                         </div>
+                                        {% endfor %}
+                                    {% endif %}
+                    
+                                    <!-- "Show All" Button -->
+                                    {% if reviews%}
+                                    <div style="width: 100%; display: flex; justify-content: center;">
+                                    <a href="{% url 'product_app:review_view' product.id %}" class="btn btn-dark my-3">
+                                        Show All Reviews
+                                    </a>
                                     </div>
-                                    
+                                    {% endif %}
+                    
                                     <!-- Add review -->
-                                    <form class="w-full">
-                                        <h5 class="mtext-108 cl2 p-b-7">
-                                            Add a review
-                                        </h5>
-
-                                        <p class="stext-102 cl6">
-                                            Your email address will not be published. Required fields are marked *
-                                        </p>
-
-                                        <div class="flex-w flex-m p-t-50 p-b-23">
-                                            <span class="stext-102 cl3 m-r-16">
-                                                Your Rating
-                                            </span>
-
-                                            <span class="wrap-rating fs-18 cl11 pointer">
-                                                <i class="item-rating pointer zmdi zmdi-star-outline"></i>
-                                                <i class="item-rating pointer zmdi zmdi-star-outline"></i>
-                                                <i class="item-rating pointer zmdi zmdi-star-outline"></i>
-                                                <i class="item-rating pointer zmdi zmdi-star-outline"></i>
-                                                <i class="item-rating pointer zmdi zmdi-star-outline"></i>
-                                                <input class="dis-none" type="number" name="rating">
-                                            </span>
+                                     {% if item_bought %}
+                                    {% if review_added %}
+                                        <div class="alert alert-primary" role="alert">
+                                            Your review for this product is already added
                                         </div>
-
-                                        <div class="row p-b-25">
-                                            <div class="col-12 p-b-5">
-                                                <label class="stext-102 cl3" for="review">Your review</label>
-                                                <textarea class="size-110 bor8 stext-102 cl2 p-lr-20 p-tb-10" id="review" name="review"></textarea>
+                                    {% else %}
+                                        <form class="w-full" method="POST" action="{% url 'product_app:product_review' product.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="product_id" id="{{ product.id }}">
+                                            <h5 class="mtext-108 cl2 p-b-7">Add a review</h5>
+                                            <p class="stext-102 cl6">Your details will not be published.</p>
+                    
+                                            <div class="flex-w flex-m p-t-50 p-b-23">
+                                                <span class="stext-102 cl3 m-r-16">Your Rating</span>
+                                                <span class="wrap-rating fs-18 cl11 pointer">
+                                                    <i class="item-rating pointer zmdi zmdi-star-outline"></i>
+                                                    <i class="item-rating pointer zmdi zmdi-star-outline"></i>
+                                                    <i class="item-rating pointer zmdi zmdi-star-outline"></i>
+                                                    <i class="item-rating pointer zmdi zmdi-star-outline"></i>
+                                                    <i class="item-rating pointer zmdi zmdi-star-outline"></i>
+                                                    <input class="dis-none" type="number" name="rating">
+                                                </span>
                                             </div>
-
-                                            <div class="col-sm-6 p-b-5">
-                                                <label class="stext-102 cl3" for="name">Name</label>
-                                                <input class="size-111 bor8 stext-102 cl2 p-lr-20" id="name" type="text" name="name">
+                    
+                                            <div class="row p-b-25">
+                                                <div class="col-12 p-b-5">
+                                                    <label class="stext-102 cl3" for="review">Your review</label>
+                                                    <textarea class="size-110 bor8 stext-102 cl2 p-lr-20 p-tb-10" id="review" name="review"></textarea>
+                                                </div>
                                             </div>
-
-                                            <div class="col-sm-6 p-b-5">
-                                                <label class="stext-102 cl3" for="email">Email</label>
-                                                <input class="size-111 bor8 stext-102 cl2 p-lr-20" id="email" type="text" name="email">
-                                            </div>
-                                        </div>
-
-                                        <button class="flex-c-m stext-101 cl0 size-112 bg7 bor11 hov-btn3 p-lr-15 trans-04 m-b-10">
-                                            Submit
-                                        </button>
-                                    </form>
+                    
+                                            <button class="flex-c-m stext-101 cl0 size-112 bg7 bor11 hov-btn3 p-lr-15 trans-04 m-b-10">
+                                                Submit
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    {% else %}
+                                    <div class="alert alert-primary" role="alert">
+                                        You can't add review for the product you didn't bought
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -545,6 +558,22 @@
         });
     </script>
 {% endif %}
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                icon: '{{ message.tags }}',  // Use message tags for icon type (e.g., 'success' or 'error')
+                title: '{{ message|escapejs }}',  // Ensure escaping for JavaScript safety
+                showConfirmButton: false,
+                timer: 2000  // Optional: auto-close after 2 seconds
+            });
+            {% if not forloop.last %} await new Promise(resolve => setTimeout(resolve, 2200)); {% endif %}
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
 
 
 {% endblock %}

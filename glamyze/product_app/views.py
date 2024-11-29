@@ -3,11 +3,13 @@ from django.views.decorators.cache import never_cache
 from product_app.models import *
 from django.core.paginator import Paginator
 from django.db.models import Prefetch,Count
-from django.db.models import Q,Sum,Min
+from django.db.models import Q,Sum,Min,Avg
 from datetime import datetime
 from django.utils import timezone
 from cart_app.models import *
 from wishlist_app.models import *
+from order_app.models import *
+from django.contrib import messages
 
 
 
@@ -119,7 +121,6 @@ def shop(request):
             'categories': categories,
             'sort':sort,
             'price_range':price_range
-
         }
         if sort:
             context['sort'] = sort
@@ -132,9 +133,7 @@ def shop(request):
     else:
         return redirect('auth_app:login')
 
-    
 
-    
 @never_cache
 def product_view(request, product_id):
     if request.user.is_superuser:
@@ -172,11 +171,12 @@ def product_view(request, product_id):
                         product.offer.start_date <= current_date <= product.offer.end_date):
                     product_discount = selected_size.price * (product.offer.discount_percentage / 100)
 
+        # Check for category-level offer
         if (product.subcategory.category.offer and product.subcategory.category.offer.is_active and 
                         product.subcategory.category.offer.start_date <= current_date <= product.subcategory.category.offer.end_date):
                     category_discount = selected_size.price * (product.subcategory.category.offer.discount_percentage / 100)
 
-                # Check for subcategory-level offer
+        # Check for subcategory-level offer
         if (product.subcategory.offer and product.subcategory.offer.is_active and 
                         product.subcategory.offer.start_date <= current_date <= product.subcategory.offer.end_date):
                     subcategory_discount = selected_size.price * (product.subcategory.offer.discount_percentage / 100)
@@ -196,11 +196,6 @@ def product_view(request, product_id):
             selected_size.offer_price = None
             selected_size.has_offer = False
             offer_applied = None
-
-        
-        
-        
-        
 
         related_products = Product.objects.filter(
             is_active=True,
@@ -235,7 +230,18 @@ def product_view(request, product_id):
             wishlist = Wishlist.objects.get(user=request.user)
             if WishlistItem.objects.filter(wishlist=wishlist,product=product).exists():
                 wishlisted = True
-
+        if ProductReview.objects.filter(user=request.user,product=product).exists():
+            review_added = True
+            item_bought = True
+        elif OrderItem.objects.filter(order__user=request.user,product_variant__product=product).exists():
+            review_added = False
+            item_bought = True
+        else:
+            review_added =False
+            item_bought = False
+        reviews = ProductReview.objects.filter(product=product).order_by('-created_at')[:5]
+        avg_rating = ProductReview.objects.filter(product=product).aggregate(avg_rating=Avg('rating'))['avg_rating']
+        avg_rating = round(avg_rating,1) if avg_rating else 0.0
         return render(request, 'user/product_view.html', {
             'product': product,
             'sizes': sizes,
@@ -243,8 +249,51 @@ def product_view(request, product_id):
             'related_products': related_products,
             'added' : added,
             'offer_applied':offer_applied,
-            'wishlisted' : wishlisted
+            'wishlisted' : wishlisted,
+            'review_added': review_added,
+            'reviews' : reviews,
+            'avg_rating' : avg_rating,
+            'item_bought':item_bought
         })
     else:
         return redirect('auth_app:login')
+    
+def product_review(request,product_id):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        
+        if request.POST:
+            rating = request.POST.get('rating')
+            review = request.POST.get('review')
+            if OrderItem.objects.filter(order__user=request.user,order__order_status='DELIVERED',product_variant__product_id = product_id).exists():
+                ProductReview.objects.create(user=request.user,product_id=product_id,rating=rating,review=review)
+                messages.success(request, 'Review added successfully!')
 
+        return redirect('product_app:product_view', product_id=product_id)
+        
+    else:
+        return redirect('auth_app:login')
+
+def review_view(request,product_id):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        product = Product.objects.get(id=product_id)
+        reviews = ProductReview.objects.filter(product=product).order_by('-created_at')
+        avg_rating = reviews.aggregate(avg_rating=Avg('rating'))['avg_rating']
+        avg_rating = round(avg_rating,1) if avg_rating else 0
+
+        return render(request, 'user/reviews.html', {
+            'product': product,
+            'reviews': reviews,
+            'avg_rating': avg_rating,
+        })
+    else:
+        return redirect('auth_app:login')

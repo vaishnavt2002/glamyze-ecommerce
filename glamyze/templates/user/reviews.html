@@ -1,0 +1,78 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block shop %}
+<div class="container product-review-section mt-5">
+    <div class="row">
+        <div class="col-lg-4 col-md-5 product-info-column">
+            <div class="product-image-container mb-4">
+                <img src="{{ product.image1.url }}" alt="{{ product.product_name }}" class="img-fluid product-image">
+            </div>
+            <div class="product-details">
+                <h1 class="product-title mtext-108 cl2 mb-3">{{ product.product_name }}</h1>
+                <div class="overall-rating d-flex align-items-center mb-3">
+                    <span class="mtext-107 cl2 mr-3">Overall Rating:</span>
+                    <div class="rating-stars fs-18 cl11 mr-2">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating %}
+                                <i class="zmdi zmdi-star"></i>
+                            {% elif forloop.counter|add:"-0.5" < avg_rating %}
+                                <i class="zmdi zmdi-star-half"></i>
+                            {% else %}
+                                <i class="zmdi zmdi-star-outline"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="rating-text mtext-107 cl2">
+                        {{ avg_rating|floatformat:1 }} / 5 
+                        <span class="total-reviews text-muted ml-2">({{ reviews.count }} Reviews)</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-md-7 reviews-column">
+            <div class="reviews-header text-center mb-4 p-3 bg-light">
+                <h2 class="section-title mtext-108 cl2 m-0">Customer Reviews</h2>
+            </div>
+
+            {% if reviews %}
+                <div class="reviews-container">
+                    {% for review in reviews %}
+                        <div class="review-card border rounded p-3 mb-3">
+                            <div class="review-header d-flex justify-content-between align-items-center mb-2">
+                                <div class="reviewer-info">
+                                    <h4 class="reviewer-name h5 mb-1">
+                                        {{ review.user.first_name }} {{ review.user.last_name }}
+                                    </h4>
+                                    <small class="review-date text-muted">
+                                        {{ review.created_at|date:"F d, Y" }}
+                                    </small>
+                                </div>
+
+                                <div class="review-rating fs-18 cl11">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= review.rating %}
+                                            <i class="zmdi zmdi-star"></i>
+                                        {% else %}
+                                            <i class="zmdi zmdi-star-outline"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <p class="review-text mt-2 text-muted">
+                                {{ review.review }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-reviews text-center p-4 bg-light rounded">
+                    <p class="text-muted mb-0">No reviews available for this product.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
