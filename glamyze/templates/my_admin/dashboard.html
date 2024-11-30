@@ -2,7 +2,6 @@
 {% block content %}
 <h2>Admin Dashboard</h2>
 
-<!-- Filter buttons -->
 <div>
     <a href="?filter=yearly" class="btn btn-outline-primary btn-sm">Yearly</a>
     <a href="?filter=monthly" class="btn btn-outline-primary btn-sm">Monthly</a>
@@ -10,13 +9,10 @@
 
 </div>
 
-<!-- Chart.js container -->
-<canvas id="salesChart" width="80%" height="10rem"></canvas>
+<canvas id="salesChart" width="80%" height="10px"></canvas>
 
-<!-- Container for the tables with Bootstrap grid system -->
 <div class="row mt-4">
     
-    <!-- Top Products Table -->
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
@@ -43,7 +39,6 @@
         </div>
     </div>
     
-    <!-- Top Subcategories Table -->
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
@@ -71,7 +66,6 @@
     </div>
 </div>
 
-<!-- Include Chart.js library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const labels = {{ labels|safe }};

@@ -221,7 +221,7 @@ def product_edit(request,product_id):
     if request.user.is_superuser:    
         product = Product.objects.get(id=product_id)
         current_date = timezone.now().date()
-        offers = Offer.objects.filter(is_active=True,end_date__gte = current_date)
+        offers = Offer.objects.filter(is_active=True,end_date__gte = current_date,offer_type='PRODUCT')
         subcategories = SubCategory.objects.select_related('category')
         context = {
             'product': product,

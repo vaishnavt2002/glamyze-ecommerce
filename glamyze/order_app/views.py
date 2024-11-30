@@ -657,34 +657,41 @@ def cancel_order(request,order_id):
     
 
 def return_product(request):
-    if request.POST:
-        item_id = request.POST.get('item_id')
-        return_reason = request.POST.get('return_reason')
-        return_explanation = request.POST.get('return_explanation', '')
-        try:
-            order_item = OrderItem.objects.get(id=item_id)
-        except:
-            return redirect('order_app:order_view')
-        if request.user == order_item.order.user:
-            if order_item.order.order_status == 'DELIVERED':
-                if OrderReturn.objects.filter(order_item=order_item).exists():
-                    pass
-                else:
-                    return_obj = OrderReturn(order_item=order_item,return_reason=return_reason,return_explanation= return_explanation if return_explanation else None,status='REQUESTED')
-                    return_obj.save()
-                return redirect('order_app:order_details',order_id = order_item.order_id)
-            else:
-                return redirect('order_app:order_details',order_id = order_item.order_id)
-        else:
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
             return redirect('auth_app:logout')
+        if request.POST:
+            item_id = request.POST.get('item_id')
+            return_reason = request.POST.get('return_reason')
+            return_explanation = request.POST.get('return_explanation', '')
+            try:
+                order_item = OrderItem.objects.get(id=item_id)
+            except:
+                return redirect('order_app:order_view')
+            if request.user == order_item.order.user:
+                if order_item.order.order_status == 'DELIVERED':
+                    if OrderReturn.objects.filter(order_item=order_item).exists():
+                        pass
+                    else:
+                        return_obj = OrderReturn(order_item=order_item,return_reason=return_reason,return_explanation= return_explanation if return_explanation else None,status='REQUESTED')
+                        return_obj.save()
+                    return redirect('order_app:order_details',order_id = order_item.order_id)
+                else:
+                    return redirect('order_app:order_details',order_id = order_item.order_id)
+            else:
+                return redirect('auth_app:logout')
+    else:
+        return redirect('auth_app:login')
+
             
 
 def generate_invoice_pdf(request, order_id):
    order = Order.objects.get(id=order_id)
    order_items = OrderItem.objects.filter(order=order)
    order_address = OrderAddress.objects.get(order=order)
-
-
    context = {
        'order': order,
        'order_items': order_items,

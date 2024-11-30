@@ -41,7 +41,7 @@ def shop(request):
         elif subcategory_id:
             products = products.filter(subcategory_id=subcategory_id)
         
-        products = products.prefetch_related(Prefetch('productvariant_set',queryset=ProductVariant.objects.filter(is_listed=True).order_by('price')))
+        products = products.prefetch_related(Prefetch('productvariant_set',queryset=ProductVariant.objects.filter(is_listed=True).order_by('-quantity')))
         products = products.annotate(lowest_price = Min('productvariant__price'))
         
         if price_range:
@@ -150,7 +150,7 @@ def product_view(request, product_id):
         if not product.subcategory.is_listed or not product.subcategory.category.is_listed:
             return redirect('product_app:shop')
 
-        sizes = ProductVariant.objects.filter(product_id=product_id, is_listed=True).order_by('price')
+        sizes = ProductVariant.objects.filter(product_id=product_id, is_listed=True).order_by('-quantity')
         if not sizes.exists():
             return redirect('product_app:shop')
 

@@ -47,10 +47,14 @@ class Order(models.Model):
             if item.offer_price is not None:
                 offer_price += (item.price-item.offer_price) * item.quantity
         return offer_price
-
+    def get_total_price(self):
+        price = 0
+        for item in self.orderitem_set.all():
+            price += item.total_price
+        return price
 
     def get_coupon_discount(self):
-        return self.coupon.discount_amount if self.coupon else 0
+        return abs(self.total_amount-self.get_total_price()-40)
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order,on_delete=models.CASCADE)

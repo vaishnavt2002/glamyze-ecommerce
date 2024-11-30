@@ -5,6 +5,7 @@ from django.urls import reverse
 from wallet_app.models import *
 from decimal import Decimal
 from django.utils import timezone
+from django.db.models import Q
 
 
 def order_view(request):
@@ -31,8 +32,8 @@ def order_view(request):
 def order_detail(request,order_id):
     if request.user.is_superuser:
         order = Order.objects.get(id=order_id)
-        has_pending_return = order.orderitem_set.filter(orderreturn__status='REQUESTED').exists()
-        return render(request,'my_admin/order_detail.html',{'order':order,'has_pending_return':has_pending_return})
+        has_return = order.orderitem_set.filter(Q(orderreturn__status='REQUESTED')|Q(orderreturn__status='APPROVED')|Q(orderreturn__status='REJECTED')).exists()
+        return render(request,'my_admin/order_detail.html',{'order':order,'has_return':has_return})
     elif request.user.is_authenticated:
         if request.user.is_block:
             return redirect('auth_app:logout')

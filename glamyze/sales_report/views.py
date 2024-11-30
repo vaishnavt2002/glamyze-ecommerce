@@ -45,11 +45,11 @@ def sales_view(request):
     print(values)
     total_discounts = Decimal('0.0')
     for order in orders:
+        offer_discount = 0
         for item in order.orderitem_set.all():
-            offer_discount = 0
             if item.offer_price is not None:
                 offer_discount += (item.price - item.offer_price)*item.quantity
-        coupon_discount = order.coupon.discount_amount if order.coupon else Decimal('0.0')
+        coupon_discount = abs(order.total_amount-order.get_total_price()-40) if order.coupon else Decimal('0.0')
         total_discounts += offer_discount + coupon_discount
 
     #Excel export

@@ -13,11 +13,12 @@
            margin-bottom: 40px;
        }
        .details, .summary {
-           width: 100%;
+           width: 110%;
            margin-bottom: 30px;
        }
        .details td, .summary td {
-           padding: 5px;
+           padding-top: 5px;
+           padding-bottom: 5px;
        }
        .items {
            width: 100%;
@@ -52,6 +53,14 @@
        <tr>
            <td colspan="2"><strong>Address:</strong> {{ order_address.address_data }}, {{ order_address.city }}, {{ order_address.state }}</td>
        </tr>
+       <tr>
+        <td><strong>Payment Method:</strong> {{ order.payment_method }}</td>
+        
+        </tr>
+        <tr>
+            <td>{% if order.razorpay_order_id %}<strong>Order Id:</strong>{{ order.razorpay_order_id }}{% endif %}</td>
+            <td>{% if order.razorpay_payment_id %}<strong>Payment Id:</strong>{{ order.razorpay_payment_id }}{% endif %}</td>
+        </tr>
    </table>
 
 
@@ -61,6 +70,7 @@
                <th>Product</th>
                <th>Quantity</th>
                <th>Price</th>
+               <th>Offer Price</th>
                <th>Total</th>
            </tr>
        </thead>
@@ -69,8 +79,9 @@
            <tr>
                <td>{{ item.product_variant.product.product_name }}</td>
                <td>{{ item.quantity }}</td>
-               <td>${{ item.price }}</td>
-               <td>${{ item.total_price }}</td>
+               <td>₹{{ item.price }}</td>
+               <td>{% if item.offer_price %}₹{{ item.offer_price }} --{{item.offer_applied.offer_name}}{% else %}No offer{% endif %}</td>
+               <td>₹{{ item.total_price }}</td>
            </tr>
            {% endfor %}
        </tbody>
@@ -80,19 +91,23 @@
    <table class="summary">
        <tr>
            <td class="total"><strong>Subtotal:</strong></td>
-           <td>${{ subtotal }}</td>
+           <td>₹{{ subtotal }}</td>
        </tr>
        <tr>
            <td class="total"><strong>Offer Discount:</strong></td>
-           <td>${{ offer_discount }}</td>
+           <td>-₹{{ offer_discount }}</td>
        </tr>
        <tr>
            <td class="total"><strong>Coupon Discount:</strong></td>
-           <td>${{ coupon_discount }}</td>
+           <td>{% if order.coupon %}-₹{{ order.get_coupon_discount }}{% else %}No coupon {% endif %}</td>
+       </tr>
+       <tr>
+        <td class="total"><strong>Delivery Charge:</strong></td>
+        <td>+₹40</td>
        </tr>
        <tr>
            <td class="total"><strong>Total Amount:</strong></td>
-           <td><strong>${{ total_amount }}</strong></td>
+           <td><strong>₹{{ total_amount }}</strong></td>
        </tr>
    </table>
 </body>

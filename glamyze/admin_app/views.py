@@ -12,35 +12,34 @@ from django.utils import timezone
 
 
 def admin_home(request):
-   if request.user.is_superuser:
-       filter_type = request.GET.get('filter', 'yearly')
-       current_year = timezone.now().year  # Current year
-       current_date = timezone.now().date()
-       labels = []
-       sales = []
+    if request.user.is_superuser:
+        filter_type = request.GET.get('filter', 'yearly')
+        current_year = timezone.now().year
+        current_date = timezone.now().date()
+        labels = []
+        sales = []
+        if filter_type == 'monthly':
+            sales_data = (Order.objects.filter(created_at__year=current_year).exclude(Q(order_status='PENDING')|Q(order_status='FAILED')).values('created_at__month').annotate(total_sales=Count('id')).order_by('created_at__month'))
+            months = list(range(1, timezone.now().month+1))
+            monthly_sales = {month: 0 for month in months}
 
-
-       if filter_type == 'monthly':
-           sales_data = (Order.objects.filter(created_at__year=current_year).exclude(Q(order_status='PENDING')|Q(order_status='FAILED')).values('created_at__month').annotate(total_sales=Count('id')).order_by('created_at__month'))
-           months = list(range(1, 13))
-           monthly_sales = {month: 0 for month in months}
-
-
-           for sale in sales_data:
+            for sale in sales_data:
                monthly_sales[sale['created_at__month']] = sale['total_sales']
 
 
-           labels = [calendar.month_name[month] for month in months]
-           sales = [monthly_sales[month] for month in months]
+            labels = [calendar.month_name[month] for month in months]
+            sales = [monthly_sales[month] for month in months]
 
 
-       elif filter_type == 'daily':
+        elif filter_type == 'daily':
             dates = [(current_date - timezone.timedelta(days=i)) for i in range(7)]  # List of last 7 days
             sales_data = (Order.objects.filter(created_at__date__gte=current_date - timezone.timedelta(days=7)).exclude(Q(order_status='PENDING')|Q(order_status='FAILED'))
-                         .values('created_at__date')
-                         .annotate(total_sales=Count('id'))
-                         .order_by('created_at__date'))
+                          .values('created_at__date')
+                          .annotate(total_sales=Count('id'))
+                          .order_by('created_at__date'))
             daily_sales = {date: 0 for date in dates}
+            print(sales_data)
+
 
 
            # Fill actual sales data
@@ -52,56 +51,56 @@ def admin_home(request):
             sales = [daily_sales[date] for date in dates]
 
 
-       else:
-           sales_data = (Order.objects.filter(created_at__year__gte=current_year - 4).exclude(Q(order_status='PENDING')|Q(order_status='FAILED'))
+        else:
+            sales_data = (Order.objects.filter(created_at__year__gte=current_year - 4).exclude(Q(order_status='PENDING')|Q(order_status='FAILED'))
                          .values('created_at__year')
                          .annotate(total_sales=Count('id'))
                          .order_by('created_at__year'))
 
 
            # Prepare years and sales data
-           years = list(range(current_year - 4, current_year + 1))
-           yearly_sales = {year: 0 for year in years}  # Initialize sales to 0 for each year
+            years = list(range(current_year - 4, current_year + 1))
+            yearly_sales = {year: 0 for year in years}  # Initialize sales to 0 for each year
 
 
            # Fill actual sales data
-           for sale in sales_data:
+            for sale in sales_data:
                yearly_sales[sale['created_at__year']] = sale['total_sales']
 
 
-           labels = [str(year) for year in years]
-           sales = [yearly_sales[year] for year in years]
+            labels = [str(year) for year in years]
+            sales = [yearly_sales[year] for year in years]
 
 
        # Get top products and subcategories
-       top_products = (OrderItem.objects.exclude(order__order_status__in=['PENDING', 'FAILED']).values('product_variant__product__product_name')
-                       .annotate(total_quantity=Sum('quantity'))
-                       .order_by('-total_quantity')[:10])
+        top_products = (OrderItem.objects.exclude(order__order_status__in=['PENDING', 'FAILED']).values('product_variant__product__product_name').annotate(total_quantity=Sum('quantity'))
+                        .order_by('-total_quantity')[:10])
+        print(top_products)
 
 
-       top_subcategories = (
+        top_subcategories = (
                            OrderItem.objects.exclude(order__order_status__in=['PENDING', 'FAILED'])
                            .values(
                                category_and_subcategory=Concat(
                                    F('product_variant__product__subcategory__category__category_name'),
                                    Value('--'),
                                    F('product_variant__product__subcategory__subcategory_name')
-                               )
-                           )
+                                )
+                            )
                            .annotate(total_quantity=Sum('quantity'))
                            .order_by('-total_quantity')[:10]
-                       )
-       context = {
+                        )
+        context = {
            'labels': labels,
            'sales': sales,
            'top_products': top_products,
            'top_subcategories': top_subcategories,
            'filter_type': filter_type,
-       }
-       return render(request, 'my_admin/dashboard.html', context)
-   elif request.user.is_authenticated:
-       if request.user.is_block:
+        }
+        return render(request, 'my_admin/dashboard.html', context)
+    elif request.user.is_authenticated:
+        if request.user.is_block:
            return redirect('auth_app:logout')
-       return redirect('auth_app:home')
-   else:
-       return redirect('auth_app:login')
+        return redirect('auth_app:home')
+    else:
+        return redirect('auth_app:login')
