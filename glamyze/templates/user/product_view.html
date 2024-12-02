@@ -227,7 +227,7 @@
 
                     <div class="flex-w flex-m p-l-100 p-t-40 respon7">
                         <div class="flex-m bor9 p-r-10 m-r-11">
-                            <a href="{% if not wishlisted %}{% url 'wishlist_app:add_to_wishlist' product.id %}{% endif %}"
+                            <a href="{% if not wishlisted %}{% url 'wishlist_app:add_to_wishlist' selected_size.id %}{% endif %}"
                                class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100
                                       {% if wishlisted %}active-wishlisted disabled{% endif %}"
                                data-tooltip="{% if wishlisted %}Added to Wishlist{% else %}Add to Wishlist{% endif %}"
@@ -563,8 +563,8 @@
     document.addEventListener("DOMContentLoaded", function() {
         {% for message in messages %}
             Swal.fire({
-                icon: '{{ message.tags }}',  // Use message tags for icon type (e.g., 'success' or 'error')
-                title: '{{ message|escapejs }}',  // Ensure escaping for JavaScript safety
+                icon: '{{ message.tags }}',  
+                title: '{{ message|escapejs }}',  
                 showConfirmButton: false,
                 timer: 2000  // Optional: auto-close after 2 seconds
             });

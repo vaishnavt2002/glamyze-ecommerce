@@ -64,7 +64,7 @@ def add_to_cart(request):
             except Exception:
                 cart_item = CartItem(cart=cart, productvariant_id=variant_id,quantity=num_product)
                 cart_item.save()
-        return render(request,'user/product_view.html',{'product':product,'success':True})
+        return render(request,'user/product_view.html',{'product':product,'selected_size':variant,'success':True})
     else:
         return redirect('auth_app:login')
     
@@ -78,11 +78,8 @@ def cart_view(request):
             return redirect('auth_app:logout')
         if request.session.get('coupon_code'):
             del request.session['coupon_code']
-            
-
+    
         context={}
-       
-        
         user_id = request.user.id
         cart, created = Cart.objects.get_or_create(user_id=user_id)
         cart_items = CartItem.objects.filter(cart=cart).order_by('id')

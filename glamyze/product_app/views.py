@@ -10,6 +10,7 @@ from cart_app.models import *
 from wishlist_app.models import *
 from order_app.models import *
 from django.contrib import messages
+from django.db.models.functions import Coalesce
 
 
 
@@ -59,7 +60,7 @@ def shop(request):
                 print('worked')
                 products = products.order_by('-id')
             elif sort == 'rating':
-                pass
+                products = products.annotate(avg_rating=Coalesce(Avg('productreview__rating'), 0.0)).order_by('-avg_rating')
             elif sort == 'popularity':
                 products = products.annotate(popularity=Count('productvariant__orderitem')).order_by('-popularity')
             elif sort =='low':
@@ -228,7 +229,7 @@ def product_view(request, product_id):
         wishlisted = False
         if Wishlist.objects.filter(user=request.user).exists():
             wishlist = Wishlist.objects.get(user=request.user)
-            if WishlistItem.objects.filter(wishlist=wishlist,product=product).exists():
+            if WishlistItem.objects.filter(wishlist=wishlist,productvariant=selected_size).exists():
                 wishlisted = True
         if ProductReview.objects.filter(user=request.user,product=product).exists():
             review_added = True
@@ -242,6 +243,7 @@ def product_view(request, product_id):
         reviews = ProductReview.objects.filter(product=product).order_by('-created_at')[:5]
         avg_rating = ProductReview.objects.filter(product=product).aggregate(avg_rating=Avg('rating'))['avg_rating']
         avg_rating = round(avg_rating,1) if avg_rating else 0.0
+        print(selected_size)
         return render(request, 'user/product_view.html', {
             'product': product,
             'sizes': sizes,

@@ -105,6 +105,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart_app.context_processor.cart_total',
+                'wishlist_app.context_processor.wishlist_total',
             ],
         },
     },

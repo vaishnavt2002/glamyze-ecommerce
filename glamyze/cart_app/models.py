@@ -12,8 +12,8 @@ class Cart(models.Model):
         return f"Cart of user.email"
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')  # Related to Cart
-    productvariant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE)  # The actual product in the cart
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')  
+    productvariant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE)  
     quantity = models.PositiveIntegerField(default=1)
     
     def __str__(self) -> str:

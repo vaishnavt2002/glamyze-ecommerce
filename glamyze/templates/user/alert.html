@@ -100,22 +100,7 @@
     
 </script>
 {% endif %}
-{% if wallet_failed %}
-<script>    
-    document.addEventListener("DOMContentLoaded", function() {
-        Swal.fire({
-            title: 'Failed',
-            text: 'Payment failed. Try again!',
-            icon: 'error',
-            showconfirmButtonText: false
-        });
-        setTimeout(() => {
-            window.location.href = "{% url 'wallet_app:wallet_view' %}";
-        },3000);
-    });
-    
-</script>
-{% endif %}
+
 {% if quantity_issue %}
 <script>    
     document.addEventListener("DOMContentLoaded", function() {
@@ -143,6 +128,55 @@
         });
         setTimeout(() => {
             window.location.href = "{% url 'auth_app:home' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+{% if notsuccess %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'This product is not available now.',
+            icon: 'error',
+            showConfirmButton: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'wishlist_app:wishlist_view' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+
+{% if noquantity %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Failed',
+            text: 'This product is not available now.',
+            icon: 'error',
+            showConfirmButton: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'wishlist_app:wishlist_view' %}";
+        },3000);
+    });
+    
+</script>
+{% endif %}
+{% if wishlist_success %}
+<script>    
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Success',
+            text: 'This product is added to cart.',
+            icon: 'success',
+            showConfirmButton: false
+        });
+        setTimeout(() => {
+            window.location.href = "{% url 'wishlist_app:wishlist_view' %}";
         },3000);
     });
     

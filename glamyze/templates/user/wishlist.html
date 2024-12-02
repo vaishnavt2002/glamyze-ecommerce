@@ -35,12 +35,12 @@
                             <tr class="table_row">
                                 <td class="column-1">
                                     <div class="how-itemcart1">
-                                        <img src="{{ item.product.image1.url }}" alt="IMG">
+                                        <img src="{{ item.productvariant.product.image1.url }}" alt="IMG">
                                     </div>
                                 </td>
                                 <td class="column-2">
-                                    <a style="color: black;" href="{% url 'product_app:product_view' item.product.id %}">
-                                        {{ item.product.product_name }}
+                                    <a style="color: black;" href="{% url 'product_app:product_view' item.productvariant.product.id %}?size={{item.productvariant.size.id}}">
+                                        {{ item.productvariant.product.product_name }}--{{ item.productvariant.size.size_code}}
                                     </a>
                                 </td>
                                 <td class="column-3">
@@ -48,15 +48,16 @@
                                             <!-- <span style="text-decoration: line-through; color: #999;"></span> -->
                                             
                                         </div>
-                                        ₹{{ item.product.price }}
+                                        ₹{{ item.productvariant.price }}
                                 </td>
                                 <td class="column-4">
                                     <div class="d-flex">
-                                        <a href="{% url 'product_app:product_view' item.product.id %}" 
+                                        <a href="{% url 'wishlist_app:add_to_cart' item.id %}" class="btn btn-dark mx-2">Add to Cart</a>
+                                        <a href="{% url 'product_app:product_view' item.productvariant.product_id %}?size={{item.productvariant.size.id}}" 
                                            class="btn btn-outline-dark" style="margin-right: 5px;">
                                             View
                                         </a>
-                                            <a href="{% url 'wishlist_app:delete_from_wishlist' item.id %}" class="btn btn-dark">Delete</a>
+                                            <a href="{% url 'wishlist_app:delete_from_wishlist' item.id %}" class="btn btn-danger">Delete</a>
                                     </div>
                                 </td>
                             </tr>
@@ -77,5 +78,7 @@
         </a>
     </div>
 {% endif %}
+
+
 
 {% endblock %}
