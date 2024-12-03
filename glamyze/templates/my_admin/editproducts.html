@@ -45,13 +45,10 @@
           <label for="subcategory" class="form-label">Select an offer for product if any</label>
           <select class="form-select" id="offer" name="offer_id">
               <option value="null">-- Remove Selection --</option>
-              {% if product.offer %}
-              <option value="{{ product.offer.id }}" selected>{{product.offer.offer_name}}</option>
-              {% endif %}
               {% for offer in offers %}
-              <option value="{{ offer.id }}">
+                <option value="{{ offer.id }}" {% if product.offer and offer.id == product.offer.id %}selected{% endif %}>
                   {{ offer.offer_name }}
-              </option>
+                </option>
               {% endfor %}
           </select>
       </div>

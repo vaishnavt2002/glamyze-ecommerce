@@ -614,6 +614,21 @@ def apply_coupon(request):
     else:
         return redirect('auth_app:login')
     
+@never_cache
+def remove_coupon(request):
+    if request.user.is_superuser:
+        return redirect('admin_app:admin_dashboard') 
+    
+    if request.user.is_authenticated:
+        if request.user.is_block:
+            return redirect('auth_app:logout')
+        if request.session.get('coupon_code'):
+            del request.session['coupon_code']
+        return redirect('order_app:checkout_view')
+        
+    else:
+        return redirect('auth_app:login')
+    
 def cancel_order(request,order_id):
     if request.user.is_superuser:
         return redirect('admin_app:admin_dashboard') 

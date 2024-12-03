@@ -13,7 +13,7 @@ from django.utils import timezone
 
 def admin_home(request):
     if request.user.is_superuser:
-        filter_type = request.GET.get('filter', 'yearly')
+        filter_type = request.GET.get('filter', 'daily')
         current_year = timezone.now().year
         current_date = timezone.now().date()
         labels = []
@@ -56,14 +56,8 @@ def admin_home(request):
                          .values('created_at__year')
                          .annotate(total_sales=Count('id'))
                          .order_by('created_at__year'))
-
-
-           # Prepare years and sales data
             years = list(range(current_year - 4, current_year + 1))
-            yearly_sales = {year: 0 for year in years}  # Initialize sales to 0 for each year
-
-
-           # Fill actual sales data
+            yearly_sales = {year: 0 for year in years}
             for sale in sales_data:
                yearly_sales[sale['created_at__year']] = sale['total_sales']
 
@@ -72,7 +66,7 @@ def admin_home(request):
             sales = [yearly_sales[year] for year in years]
 
 
-       # Get top products and subcategories
+       
         top_products = (OrderItem.objects.exclude(order__order_status__in=['PENDING', 'FAILED']).values('product_variant__product__product_name').annotate(total_quantity=Sum('quantity'))
                         .order_by('-total_quantity')[:10])
         print(top_products)

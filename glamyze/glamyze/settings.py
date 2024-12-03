@@ -33,7 +33,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://4312-103-175-136-73.ngrok-free.app'
+    'https://974f-103-70-36-63.ngrok-free.app'
 ]
 
 # Application definition
@@ -107,6 +107,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'cart_app.context_processor.cart_total',
                 'wishlist_app.context_processor.wishlist_total',
+                'auth_app.context_processor.category_load'
             ],
         },
     },

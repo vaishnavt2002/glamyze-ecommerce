@@ -45,7 +45,7 @@
 
                 <!-- Add New Address Button -->
                 <div class="m-b-30">
-                    <a href="{% url 'address_app:address_view' %}" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04" style="width: 200px;">
+                    <a href="{% url 'address_app:address_view' %}?checkout=True" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04" style="width: 200px;">
                         + Add New Address
                     </a>
                 </div>
@@ -74,7 +74,7 @@
                                 </p>
                             </div>
                             <div class="address-actions">
-                                <a href="{% url 'address_app:update_address' address.id %}" class="btn-edit-address" 
+                                <a href="{% url 'address_app:update_address' address.id %}?checkout=True" class="btn-edit-address" 
                                         >
                                     Edit
                                 </a>
@@ -140,12 +140,17 @@
                                 <span class="badge badge-success">
                                     {{ coupon_applied.code }}
                                 </span>
+                                <span class="mtext-110 cl2">
+                                    <a href="{% url 'order_app:remove_coupon' %}" class="btn-sm">Remove</a>
+                                </span>
                             </div>
+                            
                             <div class="size-150">
                                 <span class="mtext-110 cl2">
                                     Discount: ₹{{ coupon_applied.discount_amount }}
                                 </span>
                             </div>
+                            
                         </div>
                     {% endif %}
                     <div class="d-flex justify-content-between align-items-center">

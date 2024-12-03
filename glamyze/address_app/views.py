@@ -29,6 +29,7 @@ def address_view(request):
         if request.user.is_block:
             return redirect('auth_app:logout') 
         addresses = Address.objects.filter(user=request.user).order_by('id')
+        context={'addresses':addresses}
         if request.POST:
             name = request.POST.get('name')
             phone = request.POST.get('phone')
@@ -57,8 +58,7 @@ def address_view(request):
             if not pincode.isdigit() or len(pincode) != 6 or  pincode.startswith('0'):
                 errors.append('Pincode is wrong')
             if errors:
-                context = {
-                    'addresses':addresses,
+                context.update({
                     'name':name,
                     'phone':phone,
                     'pincode':pincode,
@@ -70,7 +70,7 @@ def address_view(request):
                     'address_type':address_type,
                     'alternate_phone':alternate_phone,
                     'errors':errors
-                }
+                })
                 return render(request,'user/address.html',context)
             
             address_obj =                                                                                                                                                                                                                                                           Address(
@@ -86,7 +86,9 @@ def address_view(request):
                     office_home=address_type
                     )
             address_obj.save()
-        return render(request,'user/address.html',{'addresses':addresses})
+            if request.GET.get('checkout'):
+                return redirect('order_app:checkout_view')
+        return render(request,'user/address.html',context)
     else:
         return redirect('auth_app:login')
     
@@ -102,6 +104,7 @@ def update_address(request, address_id):
         address = get_object_or_404(Address, id=address_id)
         if request.user != address.user:
             return redirect('auth_app:logout')
+        context = {'address':address}
 
         if request.method == 'POST':
             name = request.POST.get('name')
@@ -134,7 +137,8 @@ def update_address(request, address_id):
             if not pincode.isdigit() or len(pincode) != 6 or  pincode.startswith('0'):
                 errors.append('Pincode is wrong')
             if errors:
-                return render(request, 'user/edit_address.html', {'address': address,'errors':errors})
+                context.update({'errors':errors})
+                return render(request, 'user/edit_address.html', context)
 
             address.name = name.strip()
             address.phone = phone.strip()
@@ -149,8 +153,10 @@ def update_address(request, address_id):
             address.alternate_phone = alternate_phone.strip() if alternate_phone else None
             address.office_home = address_type
             address.save()
+            if request.GET.get('checkout'):
+                return redirect('order_app:checkout_view')
             return redirect('address_app:address_view') 
-        return render(request, 'user/edit_address.html', {'address': address})
+        return render(request, 'user/edit_address.html', context)
 
     else:
         return redirect('auth_app:login')

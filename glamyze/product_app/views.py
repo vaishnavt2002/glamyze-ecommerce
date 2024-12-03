@@ -26,7 +26,7 @@ def shop(request):
         subcategory_id = request.GET.get('subcategory_id')
         sort = request.GET.get('sort')
         price_range =request.GET.get('price_range')
-        categories = Category.objects.exclude(is_listed=False)
+        categories = Category.objects.exclude(is_listed=False).order_by('id')
         categories = categories.prefetch_related(Prefetch('subcategory_set',queryset=SubCategory.objects.filter(is_listed=True)))
         products = Product.objects.filter(
             is_active=True,
