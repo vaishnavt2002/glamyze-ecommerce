@@ -33,21 +33,21 @@ def add_to_cart(request):
             except Exception:
                 variant = ProductVariant.objects.get(id=variant_id)
                 product = Product.objects.get(id=variant.product.id)
-                return render(request,'user/product_view.html',{'product':product,'notsuccess':True})
+                return render(request,'user/product_view.html',{'product':product,'notsuccess':True,'selected_size':variant})
 
             if variant.quantity < int(num_product):
                 variant = ProductVariant.objects.get(id=variant_id)
                 product = Product.objects.get(id=variant.product.id)
                 print(variant.size.id)
-                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'noquantity':True})
+                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'noquantity':True,'selected_size':variant})
             if  5 < int(num_product):
                 variant = ProductVariant.objects.get(id=variant_id)
                 product = Product.objects.get(id=variant.product.id)
-                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'maxquantity':True})
+                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'maxquantity':True,'selected_size':variant})
             if  0 == int(num_product):
                 variant = ProductVariant.objects.get(id=variant_id)
                 product = Product.objects.get(id=variant.product.id)
-                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'minquantity':True})   
+                return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'minquantity':True,'selected_size':variant})   
             product = variant.product 
             try:
                 cart = Cart.objects.get(user_id=request.user.id)

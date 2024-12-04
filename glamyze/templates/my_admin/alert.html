@@ -49,7 +49,7 @@
             text: 'Order Updated Successfully.',
             confirmButtonText: 'OK',
             icon: 'success',
-            showconfirmButtonText: false
+            showConfirmButton: false
         });
         setTimeout(() => {
             window.location.href = "{% url 'order_management:order_detail' order_id %}";

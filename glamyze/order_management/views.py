@@ -121,14 +121,27 @@ def order_return_approve(request,orderitem_id):
                         refund_amount -= order.coupon.discount_amount
                     if refund_amount < 0:
                         refund_amount = 0
-
+        orderreturn.status = 'APPROVED'
+        orderreturn.save()
+        order_items = OrderItem.objects.filter(order=order)
+        delivery_refund = True
+        for item in order_items:
+            try:
+                if item.orderreturn.status == 'REJECTED' or item.orderreturn.status == 'REQUESTED':
+                    delivery_refund = False
+                    break
+            except:
+                delivery_refund = False
+                break
+        if delivery_refund:
+            refund_amount += 40
+                
         wallet, created = Wallet.objects.get_or_create(user=order.user)
         if refund_amount > 0:
             wallet.balance += refund_amount
             wallet.save() 
         WalletTransaction.objects.create(wallet=wallet,transaction_type='REFUND',amount=refund_amount)
-        orderreturn.status = 'APPROVED'
-        orderreturn.save()
+        
         return redirect('order_management:order_detail', order_id = order_item.order_id)
     elif request.user.is_authenticated:
         if request.user.is_block:

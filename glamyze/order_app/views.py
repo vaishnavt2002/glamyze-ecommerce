@@ -262,8 +262,7 @@ def order_summary(request):
             selected_address = request.POST.get('selected_address')
             payment_method = request.POST.get('payment_method')
             summary_total = request.POST.get('summary_total')
-            print('summery_total',summary_total)
-            print('total',total_price)
+            
             if summary_total != str(total_price):
                 context['offer_change'] = True
                 return render(request,'user/summary.html',context)
@@ -473,7 +472,6 @@ def confirm_order(request):
             if payment_method == 'razorpay':
                 client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
                 payment = client.order.create({'amount' : int(float(summary_total)*100), 'currency':'INR','payment_capture':1})
-                print(payment)
                 context = {'payment':payment,'key':settings.RAZOR_PAY_KEY_ID}
                 order.razorpay_order_id=payment['id']
                 cart_items.delete()
@@ -512,7 +510,9 @@ def order_details(request,order_id):
             return redirect('auth_app:logout')
         return_enabled = False
         if order.order_status == 'DELIVERED':
-            return_enabled = True        
+            if order.delivery_date:
+                if timezone.now()<=order.delivery_date + datetime.timedelta(days=15):
+                    return_enabled = True        
         address = OrderAddress.objects.filter(order_id=order_id)
         order_items = order.orderitem_set.all()
         show_continue_payment = False
@@ -543,6 +543,18 @@ def payment_success(request):
             payment_id= request.GET.get('payment_id')
             order_id = request.GET.get('order_id')
             signature = request.GET.get('signature')
+            client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID, settings.KEY_SECRET))
+            
+            try:
+                params_dict = {
+                    'razorpay_order_id': order_id,
+                    'razorpay_payment_id': payment_id,
+                    'razorpay_signature': signature
+                }
+                client.utility.verify_payment_signature(params_dict)
+                
+            except razorpay.errors.SignatureVerificationError:
+                return render(request, 'user/alert.html', {'failed': True})
             try:
                 order = Order.objects.get(Q(razorpay_order_id=order_id)&(Q(payment_status='PENDING')|Q(payment_status='FAILED')))
             except:
@@ -715,7 +727,7 @@ def generate_invoice_pdf(request, order_id):
        'offer_discount': order.get_offer_discount(),
        'coupon_discount': order.get_coupon_discount(),
        'total_amount': order.total_amount,
-       'date': datetime.datetime.now().strftime('%Y-%m-%d'),
+       'date': order.created_at.strftime('%B %d, %Y'),
    }
 
 

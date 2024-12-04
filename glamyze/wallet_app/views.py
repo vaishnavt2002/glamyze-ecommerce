@@ -52,6 +52,18 @@ def payment_success(request):
             payment_id= request.GET.get('payment_id')
             order_id = request.GET.get('order_id')
             signature = request.GET.get('signature')
+            client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID, settings.KEY_SECRET))
+            
+            try:
+                params_dict = {
+                    'razorpay_order_id': order_id,
+                    'razorpay_payment_id': payment_id,
+                    'razorpay_signature': signature
+                }
+                client.utility.verify_payment_signature(params_dict)
+                
+            except razorpay.errors.SignatureVerificationError:
+                return render(request, 'user/alert.html', {'wallet_failed': True})
             try:
                 transacion = WalletRazrorPay.objects.get(razorpay_order_id=order_id,status='PENDING')
             except:

@@ -58,10 +58,10 @@
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Redirect if 'OK' is clicked
+               
                 window.location.href = "{% url 'profile_app:email_otp'%}";
             }
-            // No action needed if 'Cancel' is clicked
+           
         });
     });
 </script>

@@ -234,7 +234,7 @@
             title: 'Successfull',
             text: 'Order Placed Successfully.',
             icon: 'success',
-            showconfirmButtonText: false
+            showConfirmButton: false
         });
         setTimeout(() => {
             window.location.href = "{% url 'auth_app:home' %}";
@@ -250,7 +250,7 @@
             title: 'Failed',
             text: 'Order Failed. Your wallet balance is low.',
             icon: 'error',
-            showconfirmButtonText: false
+            showConfirmButton: false
         });
         setTimeout(() => {
             window.location.href = "{% url 'auth_app:home' %}";

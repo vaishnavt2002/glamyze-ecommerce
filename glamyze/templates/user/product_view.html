@@ -237,8 +237,8 @@
 
                         </div>	
                     </div>
-
-                    <div class="flex-w flex-m p-l-100 p-t-40 respon7">
+                    <div style="display: flex;justify-content: center; width: 100%;" >
+                    <div class="">
                         <div class="flex-m bor9 p-r-10 m-r-11">
                             <a href="{% if not wishlisted %}{% url 'wishlist_app:add_to_wishlist' selected_size.id %}{% endif %}"
                                class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100
@@ -252,17 +252,15 @@
 
                     <div class="flex-m m-l-20"> 
                         <div class="avg-rating-display">
-                            {% with avg_rating|floatformat:1 as rating %}
-                                {% for i in "12345" %}
-                                    {% if i <= rating %}
-                                        <i class="zmdi zmdi-star cl11 star-size"></i> 
-                                    {% elif i|add:"-0.5" < rating %}
-                                        <i class="zmdi zmdi-star-half cl11 star-size"></i> 
-                                    {% else %}
-                                        <i class="zmdi zmdi-star-outline cl11 star-size"></i> 
-                                    {% endif %}
-                                {% endfor %}
-                            {% endwith %}
+                            {% for i in "12345" %}
+                            {% if i <= avg_rating|floatformat:1 %}
+                                <i class="zmdi zmdi-star cl11 star-size"></i> 
+                            {% elif i|add:"-0.5" < avg_rating|floatformat:1 %}
+                                <i class="zmdi zmdi-star-half cl11 star-size"></i> 
+                            {% else %}
+                                <i class="zmdi zmdi-star-outline cl11 star-size"></i> 
+                            {% endif %}
+                            {% endfor %}
                             
                             <!-- Display the numeric average rating -->
                             <span class="mtext-107 cl2 p-l-10">
@@ -270,6 +268,7 @@
                             </span>
                         </div>
                     </div>
+                </div>
 
                 </div>
             </div>
@@ -339,7 +338,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="tab-pane fade" id="reviews" role="tabpanel">
                         <div class="row">
                             <div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">

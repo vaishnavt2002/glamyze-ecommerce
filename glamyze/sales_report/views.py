@@ -9,10 +9,10 @@ from django.http import HttpResponse
 from io import BytesIO
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
 from django.http import HttpResponse
 from datetime import datetime
+from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 # Create your views here.
 def sales_view(request):
     date_filter = request.GET.get('date_filter', 'today')
@@ -42,7 +42,6 @@ def sales_view(request):
         total_orders=Count('id'),
         avg_order_value=Avg('total_amount')
     )
-    print(values)
     total_discounts = Decimal('0.0')
     for order in orders:
         offer_discount = 0
@@ -103,15 +102,39 @@ def sales_view(request):
                 order.order_status
             ])
         return response
+
+
+
     if request.GET.get('export') == 'pdf':
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
 
         buffer = BytesIO()
         pdf = SimpleDocTemplate(buffer, pagesize=landscape(A4), leftMargin=20, rightMargin=20, topMargin=30, bottomMargin=30)
-        data = [['Order ID', 'Date', 'Customer', 'Items', 'Subtotal', 'Offer Discount', 'Coupon Discount', 'Final Amount']]
+        
+        # Define data and styles
+        data = [['Order ID', 'Date', 'Customer', 'Items', 'Subtotal', 'Offer Discount', 'Coupon Discount','Delivery', 'Final Amount']]
         styles = getSampleStyleSheet()
-        normal_style = styles['BodyText']
+        
+        # Custom style for table cells
+        item_style = ParagraphStyle(
+            name='ItemStyle',
+            parent=styles['BodyText'],
+            fontSize=9,
+            leading=12, 
+            wordWrap='CJK', 
+            spaceAfter=5 
+        )
+
+        email_style = ParagraphStyle(
+            name='EmailStyle',
+            parent=styles['BodyText'],
+            fontSize=9,
+            leading=12, 
+            wordWrap='CJK',
+        )
+
+
 
         for order in orders:
             items = ', '.join([
@@ -128,28 +151,31 @@ def sales_view(request):
             data.append([
                 order.id,
                 order.created_at.strftime('%Y-%m-%d'),
-                order.user.email,
-                Paragraph(items, normal_style), 
-                f"Rs.{sum(item.price * item.quantity for item in order.orderitem_set.all()):.2f}",
-                f"Rs.{offer_discount:.2f}",
-                f"Rs.{coupon_discount:.2f}",
-                f"Rs.{order.total_amount:.2f}"
+                Paragraph(order.user.email, email_style), 
+                Paragraph(items, item_style), 
+                f"Rs.{sum(item.price * item.quantity for item in order.orderitem_set.all())}",
+                f"Rs.{offer_discount}",
+                f"Rs.{coupon_discount}", 
+                "Rs.40.00",
+                f"Rs.{order.total_amount}"
             ])
-
-        col_widths = [60, 80, 120, 200, 80, 80, 80, 80]
-        table = Table(data, colWidths=col_widths)
-
+        
+        col_widths = [50, 60, 135, 190, 80, 80, 100,60, 80]
+        table = Table(data, colWidths=col_widths, repeatRows=1)
+        
         style = TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey), 
+            ('WORDWRAP', (3, 1), (3, -1)), 
+            ('WORDWRAP', (2, 1), (2, -1)), 
+            ('WORDWRAP', (0, 0), (-1, 0))
         ])
         table.setStyle(style)
-
+        
         pdf.build([table])
         buffer.seek(0)
         response.write(buffer.read())
