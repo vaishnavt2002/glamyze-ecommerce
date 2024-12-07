@@ -73,16 +73,21 @@ def product_add(request):
             error1 = validate_image_format(image1,'Image1')
             error2 = validate_image_format(image2,'Image2')
             error3 = validate_image_format(image3,'Image3')
+            if Product.objects.filter(product_name__iexact = product_name).exists():
+                errors.append("Product with same name already exists")
             if not re.match(r"^[A-Za-z\s']+$", product_name):
                 errors.append("Product Name must contain only letters and spaces.")
-            if len(product_name)<3:
-                errors.append("Product name should be atleast 3 characters")
-            if len(color)<2 or not re.match(r'^[A-Za-z\s]+$', color):
-                errors.append("Color name should be at least 2 characters and only contain letters.")
-            if len(material)<2 or not re.match(r'^[A-Za-z\s]+$', material):
-                errors.append("Material name should be at least 2 characters and only contain letters.")
-            if len(description)<10:
-                errors.append("Description should be at least 10 characters.")
+            if len(product_name)<3 :
+                errors.append("Product name should be atleast 3 characters.")
+            if len(product_name)>100:
+                errors.append("Product name should be atmost 100 characters.")
+            
+            if len(color)<2 or not re.match(r'^[A-Za-z\s]+$', color) or len(color)>50:
+                errors.append("Color name should be at least 2 characters, at most 50 characters and only contain letters.")
+            if len(material)<2 or not re.match(r'^[A-Za-z\s]+$', material) or len(material)>50:
+                errors.append("Material name should be at least 2 characters, at most 50 characters and only contain letters.")
+            if len(description)<10 or len(description) > 500:
+                errors.append("Description should be at least 10 characters and at most 500 characters.")
             if error1:
                 errors.append(error1)
             if error2:
@@ -266,16 +271,20 @@ def product_edit(request,product_id):
             material = request.POST.get('material')
             color = request.POST.get('color')
             description = request.POST.get('description')
+            if Product.objects.filter(product_name__iexact = product_name).exists():
+                errors.append("Product with same name already exists")
             if not re.match(r"^[A-Za-z\s']+$", product_name):
                 errors.append("Product Name must contain only letters and spaces.")
             if len(product_name)<3:
-                errors.append("Product name should be atleast 3 characters")
-            if len(color)<2 or not re.match(r'^[A-Za-z\s]+$', color):
-                errors.append("Color name should be at least 2 characters and only contain letters.")
+                errors.append("Product name should be at least 3 characters")
+            if len(product_name)>100:
+                errors.append("Product name should be at most 100 characters.")
+            if len(color)<2 or not re.match(r'^[A-Za-z\s]+$', color) or len(color)>50:
+                errors.append("Color name should be at least 2 characters, at most 50 characters and only contain letters.")
             if len(material)<2 or not re.match(r'^[A-Za-z\s]+$', material):
                 errors.append("Material name should be at least 2 characters and only contain letters.")
-            if len(description)<10:
-                errors.append("Description should be at least 10 characters and less than  characters")
+            if len(description)<10 or len(description)>500:
+                errors.append("Description should be at least 10 characters and at most 500  characters")
             
             if errors:
                 print(errors)

@@ -48,10 +48,12 @@ def add_offer(request):
                 errors.append('Name must contain only letters,digits and spaces')
             if len(offer_name)<3:
                 errors.append('Name should atleast contain 2 letters')
+            if len(offer_name)>50:
+                errors.append('At most 50 characters only in name')
             if  not re.match(r'^[A-Za-z0-9\s.]+$',description):
                 errors.append('Description must contain only letters and spaces')
-            if len(description)<5:
-                errors.append('Description should atleast contain 5 letters')
+            if len(description)<5 or len(description)>500:
+                errors.append('Description should at least contain 5 letters and at most 500 characters')
             
             if errors:
                  context ={
@@ -108,10 +110,14 @@ def edit_offer(request,offer_id):
                 errors.append('Name must contain only letters,digits and spaces')
             if len(offer_name)<3:
                 errors.append('Name should atleast contain 2 letters')
+            if len(offer_name)>50:
+                errors.append('At most 50 characters only in name')
             if  not re.match(r'^[A-Za-z0-9\s.]+$',description):
                 errors.append('Description must contain only letters and spaces')
             if len(description)<5:
                 errors.append('Description should atleast contain 5 letters')
+            if len(description)<5 or len(description)>500:
+                errors.append('Description should at least contain 5 letters and at most 500 characters')
             if errors:
                  context ={
                       'offer_name':offer_name,
@@ -198,7 +204,9 @@ def add_coupon(request):
             if  not re.match(r'^[A-Za-z0-9]+$',coupon_code):
                 errors.append('Code must contain only letters and number only')
             if len(coupon_code)<3:
-                errors.append('Coupon should atleast contain 2 letters')
+                errors.append('Coupon should at least contain 2 letters')
+            if len(coupon_code)>20:
+                errors.append('Coupon should at most contain 20 letters')
 
             if not usage_limit.isdigit:
                 errors.append('Usage limit must be a number')
@@ -254,11 +262,13 @@ def edit_coupon(request,coupon_id):
             except ValueError:
                 return redirect('promotion_management:add_coupon')
             if Coupon.objects.filter(code__iexact=code).exclude(id=coupon_id).exists():
-                errors.append("Offer with same name already exists")
+                errors.append("Coupon with same name already exists")
             if  not re.match(r'^[A-Za-z0-9]+$',code):
                 errors.append('Code must contain only letters and number only')
             if len(code)<3:
                 errors.append('Coupon should atleast contain 2 letters')
+            if len(code)>20:
+                errors.append('Coupon should at most contain 20 letters')
 
             if not usage_limit.isdigit:
                 errors.append('Usage limit must be a number')
