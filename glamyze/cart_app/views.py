@@ -38,7 +38,6 @@ def add_to_cart(request):
             if variant.quantity < int(num_product):
                 variant = ProductVariant.objects.get(id=variant_id)
                 product = Product.objects.get(id=variant.product.id)
-                print(variant.size.id)
                 return render(request,'user/product_view.html',{'product':product,'size_id':variant.size.id,'noquantity':True,'selected_size':variant})
             if  5 < int(num_product):
                 variant = ProductVariant.objects.get(id=variant_id)
@@ -158,13 +157,10 @@ def cart_update(request,item_id):
     if request.method == 'POST':
         data = json.loads(request.body)
         action = data.get('action')
-        print(action)
         price = data.get('price')
-        print(price)
         price=float(price)
         total_price =data.get('total_price')
         total_price=float(total_price)
-        print(total_price)
         try:
             cart_item = CartItem.objects.get(id=item_id)
             variant = ProductVariant.objects.get(id=cart_item.productvariant_id)

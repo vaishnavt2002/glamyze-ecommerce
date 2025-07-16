@@ -38,7 +38,6 @@ def admin_home(request):
                           .annotate(total_sales=Count('id'))
                           .order_by('created_at__date'))
             daily_sales = {date: 0 for date in dates}
-            print(sales_data)
 
 
 
@@ -69,7 +68,6 @@ def admin_home(request):
        
         top_products = (OrderItem.objects.exclude(order__order_status__in=['PENDING', 'FAILED']).values('product_variant__product__product_name').annotate(total_quantity=Sum('quantity'))
                         .order_by('-total_quantity')[:10])
-        print(top_products)
 
 
         top_subcategories = (

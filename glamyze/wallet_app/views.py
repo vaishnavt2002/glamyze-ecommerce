@@ -35,7 +35,6 @@ def add_amount(request):
             amount = request.POST.get('amount')
             client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
             payment = client.order.create({'amount' : int(float(amount)*100), 'currency':'INR','payment_capture':1})
-            print(payment)
             context = {'payment':payment,'key':settings.RAZOR_PAY_KEY_ID}
             WalletRazrorPay.objects.create(wallet=wallet,amount=amount,razorpay_order_id=payment['id'],status='PENDING')
             return render(request,'user/wallet_payment.html',context)      

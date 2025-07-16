@@ -50,7 +50,6 @@ def email_otp(request):
             send_otp(request,email)
         except Exception:
             return redirect('profile_app:profile_view')
-        print('working')
         return redirect('profile_app:email_otp_verification')
         
     else:
@@ -83,7 +82,6 @@ def email_otp_verification(request):
             if 'otp' in request.session and 'otp_expiry' in request.session:
                 expiry = request.session['otp_expiry']
                 otp = request.POST['otp']
-                print(timezone.now().timestamp())
                 if timezone.now().timestamp() > expiry:
                     return render(request, 'user/email_otp.html', {"errors": ["OTP has expired. Please request a new one."]})
 

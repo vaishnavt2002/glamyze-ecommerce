@@ -57,7 +57,6 @@ def shop(request):
             if sort == 'id':
                 products.order_by('id')
             elif sort == 'newness':
-                print('worked')
                 products = products.order_by('-id')
             elif sort == 'rating':
                 products = products.annotate(avg_rating=Coalesce(Avg('productreview__rating'), 0.0)).order_by('-avg_rating')
@@ -243,7 +242,6 @@ def product_view(request, product_id):
         reviews = ProductReview.objects.filter(product=product).order_by('-created_at')[:5]
         avg_rating = ProductReview.objects.filter(product=product).aggregate(avg_rating=Avg('rating'))['avg_rating']
         avg_rating = round(avg_rating,1) if avg_rating else 0.0
-        print(selected_size)
         return render(request, 'user/product_view.html', {
             'product': product,
             'sizes': sizes,

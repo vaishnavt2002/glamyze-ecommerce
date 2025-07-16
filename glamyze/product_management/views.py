@@ -287,7 +287,6 @@ def product_edit(request,product_id):
                 errors.append("Description should be at least 10 characters and at most 500  characters")
             
             if errors:
-                print(errors)
                 context['errors'] = errors
                 return render(request, 'my_admin/editproducts.html',context)
             offer_id = request.POST.get('offer_id')

@@ -83,7 +83,6 @@ def user_signup(request):
             except Exception:
                 return render(request,'auth_app/signup.html',{"errors":['Email sending failed. Try again later']})
             request.session['email'] = email
-            print(request.session['otp_expiry'])
             return redirect('auth_app:otp')
     return render(request,'auth_app/signup.html')
 
@@ -100,7 +99,6 @@ def user_otp_verification(request):
         if 'otp' in request.session and 'otp_expiry' in request.session:
             expiry = request.session['otp_expiry']
             otp = request.POST['otp']
-            print(timezone.now().timestamp())
             if timezone.now().timestamp() > expiry:
                 return render(request, 'auth_app/otp.html', {"errors": ["OTP has expired. Please request a new one."]})
 
@@ -179,7 +177,6 @@ def user_login(request):
         if  not user_data.is_active:
             return render(request,'auth_app/login.html',{'error':'Your Sign up is incomplete'})
         user=authenticate(request,email=email,password=password)
-        print(user)
         if user is not None:
             login(request,user)
             if request.user.is_superuser:
@@ -225,7 +222,6 @@ def user_otp_verification_forgotpassword(request):
             otp = request.POST['otp']
             password = request.POST.get('password')
             confirm_password = request.POST.get('confirm_password')
-            print(timezone.now().timestamp())
             if timezone.now().timestamp() > expiry:
                 return render(request, 'auth_app/forgotpassword_otp.html', {"errors": ["OTP has expired. Please request a new one."]})
 

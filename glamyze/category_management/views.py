@@ -76,7 +76,6 @@ def subcategory_add(request):
 @never_cache
 def categories_list_unlist(request,id):
     if request.user.is_superuser:
-        print(id)
         category_obj = Category.objects.get(id=id)
         category_obj.is_listed = not category_obj.is_listed
         category_obj.save()
